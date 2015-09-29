@@ -1,0 +1,153 @@
+<ion-view view-title="Online Resume">
+	<ion-content class="padding">
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Resume Visibility</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-access-level" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				<span data-ng-model="js.access">{{js.access}}</span>
+			</div>
+		</div>
+		
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Jobseeking Information</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-jobseeking-information" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				<ion-list>
+					<ion-item>Status: {{jobseekingStatus[jsJobseekingStatus]}}</ion-item>
+					<ion-item>Currently stay in: {{currentlyStayIn}}</ion-item>
+					<ion-item>Availability period: {{availability+' '+selectedavailabilityUnit.name}}</ion-item>
+					<ion-item>Driving license: {{drivingLicense?'Yes':'No'}}</ion-item>
+					<ion-item>Own transport: {{ownTransport?'Yes':'No'}}</ion-item>
+				</ion-list>
+
+<!--
+Status					Satisfied with current job
+Currently stay in		Malaysia > Penang > Kuala Langat
+Availability period		4 Week(s)
+Driving license			Yes
+Own transport			Yes
+-->
+			</div>
+		</div>
+		
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Job Preferences</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-job-preferences" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				u
+			</div>
+		</div>
+		
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Work Experience</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-work-experience" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				v
+			</div>
+		</div>
+		
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Highest Education</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-education" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				w
+			</div>
+		</div>
+		
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Skills &amp; Languages</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-skill" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				x
+			</div>
+		</div>
+		
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Attached Resume</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-attached-resume" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				y
+			</div>
+		</div>
+		
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">Additional Info</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/resume-update-additional-info" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				z
+			</div>
+		</div>
+	</ion-content>
+</ion-view>

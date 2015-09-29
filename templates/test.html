@@ -1,0 +1,33 @@
+<ion-view view-title="Test">
+	<ion-nav-buttons side="primary">
+		<button class="button" ng-click="go('/login')">Primary</button>
+	</ion-nav-buttons>
+	
+	<ion-content class="padding">
+		<button type="button" class="button button-block button-positive" ng-click="test()">
+			<i class="ion-log-in"></i>
+			Test
+		</button>
+		
+		<button type="button" class="button button-block button-positive" ng-click="test2()">
+			<i class="ion-log-in"></i>
+			Test2 add work
+		</button>
+		
+		<button type="button" class="button button-block button-positive" ng-click="test3()">
+			<i class="ion-log-in"></i>
+			Test3 Get Token
+		</button>
+				
+		<div class="list card" ng-repeat="job in jobs">
+			<div class="item item-body">
+				<div><h1 class="positive mt-0">{{job.title}}</h1></div>
+				<div>{{job.company}}</div>
+				<div><span class="balanced">{{job.salary_min|currency:'MYR '}} - {{job.salary_max|currency:'MYR '}}</span></div>
+				<div><strong>Company: </strong> {{job.company}}</div>
+				<div><strong>Company: </strong> {{job.company}}</div>
+			</div>
+		</div>
+		
+	</ion-content>
+</ion-view>

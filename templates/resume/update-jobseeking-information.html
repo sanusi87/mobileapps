@@ -1,0 +1,62 @@
+<ion-view view-title="Update Resume Jobseeking Information">
+	<ion-content class="padding">
+		<form name="jobseekingInformation" ng-submit="saveJobseekingInformation()" novalidate>
+			<div class="list list-inset">
+				<div class="item">
+					<h2>Current jobseeking status</h2>
+					
+					<div class="list list-inset">
+						<ion-radio ng-repeat="(id,status) in jobseekingStatus" ng-model="$parent.jsJobseekingStatus" ng-value="{{id}}" ng-change="jsJobseekingStatusUpdate()">{{status}}</ion-radio>
+					</div>
+				</div>
+				
+				<div class="item">
+					<h2>Currently stay in</h2>
+					<div class="list list-inset">
+						<div class="item item-input item-select">
+							<label for="country" class="input-label">Country</label>
+							<select data-ng-options="o.name for o in countries track by o.id" data-ng-model="selectedCountry" ng-change="countryChanged()"></select>
+						</div>
+						
+						<div ng-class="{'item':true, 'item-input':true, 'item-select':selectedCountry.id == 127}">
+							<label for="state" class="input-label">State</label>
+							<select data-ng-options="o.name for o in states track by o.id" data-ng-model="selectedState" ng-change="stateChanged()" ng-show="selectedCountry.id == 127"></select>
+							<input type="text" data-ng-model="insertedState" ng-show="selectedCountry.id != 127" placeholder="State" />
+						</div>
+						
+						<div class="item item-input" ng-show="selectedCountry.id != null">
+							<label for="city" class="input-label">City</label>
+							<input type="text" data-ng-model="city" placeholder="City" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="item">
+					<h2>I can start new job after notice of</h2>
+					<div class="list list-inset">
+						<div class="item item-input item-select">
+							<div class="row">
+								<div class="col col-50">
+									<input type="text" data-ng-model="$parent.availability" placeholder="Availability" ng-disabled="$parent.selectedavailabilityUnit.id == 'I'" ng-value="{{availability}}" />
+								</div>
+								<div class="col col-50">
+									<select data-ng-options="o.name for o in availabilityUnit track by o.id" data-ng-model="$parent.selectedavailabilityUnit"></select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<ion-toggle ng-model="$parent.drivingLicense" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0">Have a valid license to drive in Malaysia</ion-toggle>
+				
+				<ion-toggle ng-model="$parent.ownTransport" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0">Possess own transport</ion-toggle>
+				
+				<div class="item">
+					<button class="button button-positive" type="submit">
+						<i class="ion-ion-checkmark-empty"></i> Save
+					</button>
+				</div>
+			</div>
+		</form>
+	</ion-content>
+</ion-view>

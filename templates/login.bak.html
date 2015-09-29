@@ -1,0 +1,39 @@
+<ion-view view-title="Login">
+	
+	<ion-nav-buttons side="primary">
+		<button class="button">Primary</button>
+	</ion-nav-buttons>
+	
+	<ion-nav-buttons side="secondary">
+		<button class="button">Secondary</button>
+	</ion-nav-buttons>
+	
+	<ion-nav-buttons side="left">
+		<button class="button">Left</button>
+	</ion-nav-buttons>
+	
+	<ion-nav-buttons side="right">
+		<button class="button">Right</button>
+	</ion-nav-buttons>
+	
+	<ion-content class="padding">
+		<form name="loginForm" ng-submit="submit()" novalidate>
+			<div class="list list-inset">
+				<label class="item item-input">
+					<input type="email" name="username" id="username" placeholder="Email Address" ng-required="true" ng-model="user.username" />
+				</label>
+				
+				<label class="item item-input">
+					<input type="password" id="password" placeholder="Password" ng-model="user.password" ng-required="true" />
+				</label>
+				
+				
+			</div>
+			
+			<button type="submit" class="button button-block button-positive" ng-disabled="loginForm.$invalid">
+				<i class="ion-log-in"></i>
+				Submit
+			</button>
+		</form>
+	</ion-content>
+</ion-view>

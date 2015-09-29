@@ -1,0 +1,10 @@
+<ion-modal-view>
+	<ion-header-bar>
+		<h1 class="title">Countries</h1>
+	</ion-header-bar>
+	<ion-content>
+		<div class="list list-inset">
+			<ion-toggle ng-repeat="country in countries track by country.id" ng-model="selectedCountry[country.id]" ng-value="{{country.id}}">{{country.name}}</ion-toggle>
+		</div>
+	</ion-content>
+</ion-modal-view>

@@ -1,0 +1,27 @@
+<ion-view view-title="Login">
+	<ion-content class="padding">
+		<form name="loginForm" ng-submit="submit()" novalidate>
+			<div class="card">
+				<div class="item item-text-wrap">
+					<img src="/img/jenjobs_logo_big.png" alt="JenJOBS" class="fill-width" />
+				</div>
+			</div>
+			
+			<div class="list list-inset">
+				<label class="item item-input">
+					<input type="email" name="username" id="username" placeholder="Email Address" ng-required="true" ng-model="user.username" />
+				</label>
+				
+				<label class="item item-input">
+					<input type="password" id="password" placeholder="Password" ng-model="user.password" ng-required="true" />
+				</label>
+				
+				
+			</div>
+			
+			<button type="submit" class="button button-block button-positive" ng-disabled="loginForm.$invalid">
+				Submit
+			</button>
+		</form>
+	</ion-content>
+</ion-view>

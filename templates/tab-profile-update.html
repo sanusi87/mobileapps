@@ -1,0 +1,52 @@
+<ion-view view-title="Update Profile">
+	<ion-content class="padding">
+		<form name="profileUpdateForm" ng-submit="updateForm()" novalidate>
+			<input type="hidden" value="{{js.id}}" />
+			<div class="list list-inset">
+				<div class="item">
+					<div ng-if="js.photo_file" class="text-center">
+						<img ng-src="{{js.photo_file}}" alt="" class="fill-width" />
+					</div>
+					<div ng-if="!js.photo_file" class="text-center">
+						<img src="/img/profile_default.jpg" alt="Profile Picture" class="full-width" />
+					</div>
+					<input onchange="angular.element(this).scope().file_changed(this)" type="file" accept="image/*" />
+				</div>
+				
+				<div class="item item-input">
+					<input type="text" placeholder="Full name" data-ng-model="js.name" />
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="" class="input-label">Nationality</label>
+					<select data-ng-options="o.name for o in countries track by o.id" data-ng-model="selectedCountry" ng-change="countryChanged()"></select>
+				</div>
+				
+				<div class="item item-input">
+					<input type="date" placeholder="Date of birthday" data-ng-model="js.dob" />
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="" class="input-label">Gender</label>
+					<select data-ng-options="o.name for o in gender track by o.id" data-ng-model="selectedGender" ng-change="genderChanged()"></select>
+				</div>
+				
+				<div class="item item-input">
+					<input type="text" placeholder="Mobile" data-ng-model="js.mobile_no" />
+				</div>
+				
+				<div class="item item-input" ng-show="js.country_id == 127">
+					<input type="text" placeholder="I/C" data-ng-model="js.ic_no" />
+				</div>
+				
+				<div class="item item-input" ng-show="js.country_id != 127">
+					<input type="text" placeholder="Passport" data-ng-model="js.passport_no" />
+				</div>
+				
+				<button type="submit" id="submit" class="button button-block button-positive">
+					<i class="ion-edit"></i> Save
+				</button>
+			</div>
+		</form>
+	</ion-content>
+</ion-view>

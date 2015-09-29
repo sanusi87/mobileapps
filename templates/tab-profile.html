@@ -1,0 +1,32 @@
+<ion-view view-title="Profile">
+	<ion-nav-buttons side="right">
+		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/resume')">Resume</button>
+	</ion-nav-buttons>
+	
+	<ion-content class="padding">
+		<div class="list card">
+			<div class="item item-divider">
+				<div class="row">
+					<div class="col col-75">{{js.name}}</div>
+					<div class="col col-25 text-right item-icon-right">
+						<a href="#/tab/profile-update" class="positive">
+							<i class="icon ion-compose"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+				
+			<div class="item item-body">
+				<img ng-show="js.photo_file != null" ng-src="{{js.photo_file}}" alt="" />
+				<div>Username :<b>{{js.username}}</b></div>
+				<div>Email :<b>{{js.email}}</b></div>
+				<div>Mobile :<b>{{js.mobile_no}}</b></div>
+				<div>I/C :<b>{{js.ic_no}}</b></div>
+				<div>Passport :<b>{{js.passport_no}}</b></div>
+				<div>Gender :<b>{{js.gender}}</b></div>
+				<div>DoB :<b>{{js.dob|date:'dd/MM/yyyy'}}</b></div>
+				<div>Country :<b>{{js.country}}</b></div>
+			</div>
+		</div>
+	</ion-content>
+</ion-view>
