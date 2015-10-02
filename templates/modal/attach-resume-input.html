@@ -1,0 +1,21 @@
+<ion-modal-view>
+	<ion-header-bar>
+		<h1 class="title">Attach Resume</h1>
+	</ion-header-bar>
+	<ion-content>
+		<div class="list list-inset">
+			<div class="item item-input">
+				<input type="file" onchange="angular.element(this).scope().file_changed(this)" />
+			</div>
+			
+			<div class="item">
+				<button type="button" ng-click="saveAndCloseResumeModal()" class="button button-positive">
+					Save
+				</button>
+				<button type="button" ng-click="closeResumeModal()" class="button button-light">
+					Cancel
+				</button>
+			</div>
+		</div>
+	</ion-content>
+</ion-modal-view>

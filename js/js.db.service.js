@@ -29,6 +29,7 @@ angular.module('jenjobs.db', [])
 		addWork: addWork,
 		updateWork: updateWork,
 		deleteWork: deleteWork,
+		getWorkById: getWorkById,
 		
 		getProfile: getProfile,
 		addProfile: addProfile,
@@ -36,11 +37,13 @@ angular.module('jenjobs.db', [])
 		deleteProfile: deleteProfile,
 		
 		getEducation: getEducation,
+		getEducationById: getEducationById,
 		addEducation: addEducation,
 		updateEducation: updateEducation,
 		deleteEducation: deleteEducation,
 		
 		getSkill: getSkill,
+		getSkillById: getSkillById,
 		addSkill: addSkill,
 		updateSkill: updateSkill,
 		deleteSkill: deleteSkill,
@@ -77,7 +80,6 @@ angular.module('jenjobs.db', [])
 		_work_db = new PouchDB('work', {adapter: 'websql'});
 		_profile_db = new PouchDB('profile', {adapter: 'websql'});
 		_education_db = new PouchDB('education', {adapter: 'websql'});
-		_education_db = new PouchDB('skill', {adapter: 'websql'});
 		_parameter_db = new PouchDB('parameter', {adapter: 'websql'});
 		_token_db = new PouchDB('token', {adapter: 'websql'});
 		_skill_db = new PouchDB('skill', {adapter: 'websql'});
@@ -89,7 +91,8 @@ angular.module('jenjobs.db', [])
 		$q.when( _settings_db.bulkDocs([
 			{_id: 'sms_job_alert', value:0},
 			{_id: 'email_alert', value:0},
-			{_id: 'notification', value:0}
+			{_id: 'notification', value:0},
+			{_id: 'attachedResume', value:0}
 		]) );
 	};
 	
@@ -128,8 +131,18 @@ angular.module('jenjobs.db', [])
 		}
 	}
 	
-	function addWork(dbItem){
-		return $q.when( _work_db.post( dbItem ) );
+	function getWorkById( workId ){
+		return $q.when(_work_db.get(workId)).then(function(work){
+			return work;
+		});
+	}
+	
+	function addWork(dbItem, id, rev){
+		if( id && rev ){
+			return $q.when( _work_db.put( dbItem, id, rev ) );
+		}else{
+			return $q.when( _work_db.post( dbItem ) );
+		}
 	};
 	
 	function updateWork(dbItem){
@@ -183,7 +196,16 @@ angular.module('jenjobs.db', [])
 	};
 	
 	function updateProfile(dbItem){
-		return $q.when( _profile_db.put( dbItem, 'profile', dbItem._rev ) );
+		var rev = dbItem._rev;
+		var id = dbItem._id;
+		
+		return $q.when(_profile_db.put( dbItem, id, rev ))
+		.then(function(){
+			// update revision after updating record with custom ID
+			$q.when(_profile_db.get('profile')).then(function(profile){
+				dbItem._rev = profile._rev;
+			});
+		});
 	};
 
 	function deleteProfile(dbItem){
@@ -234,8 +256,18 @@ angular.module('jenjobs.db', [])
 		}
 	}
 	
-	function addEducation(dbItem){
-		return $q.when( _education_db.post( dbItem ) );
+	function getEducationById( eduId ){
+		return $q.when(_education_db.get(eduId)).then(function(edu){
+			return edu;
+		});
+	}
+	
+	function addEducation(dbItem, id, rev){
+		if( id && rev ){
+			return $q.when( _education_db.put( dbItem, id, rev ) );
+		}else{
+			return $q.when( _education_db.post( dbItem ) );
+		}
 	};
 	
 	function updateEducation(dbItem){
@@ -286,12 +318,16 @@ angular.module('jenjobs.db', [])
 		}
 	}
 	
+	function getSkillById( skillId ){
+		return $q.when(_skill_db.get( skillId ));
+	}
+	
 	function addSkill(dbItem){
 		return $q.when( _skill_db.post( dbItem ) );
 	};
 	
 	function updateSkill(dbItem){
-		return $q.when( _skill_db.put( dbItem ) );
+		return $q.when( _skill_db.put( dbItem, dbItem._id, dbItem._rev ) );
 	};
 
 	function deleteSkill(dbItem){
@@ -345,12 +381,12 @@ angular.module('jenjobs.db', [])
 		
 	}
 	
-	function addParameter(dbItem, key){
-		return $q.when( _parameter_db.put( dbItem, key ) );
+	function addParameter(dbItem, id){
+		return $q.when( _parameter_db.put( dbItem, id ) );
 	};
 	
 	function updateParameter(dbItem){
-		return $q.when( _parameter_db.put( dbItem ) );
+		return $q.when( _parameter_db.put( dbItem, dbItem._id, dbItem._rev ) );
 	};
 
 	function deleteParameter(dbItem){

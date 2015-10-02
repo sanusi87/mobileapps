@@ -1,0 +1,77 @@
+<ion-view view-title="Update Work Experience">
+	<ion-content class="padding">
+		<form name="workExp" ng-submit="saveWorkExp(workExp)" novalidate>
+			<div class="list list-inset">
+				<div class="item item-input">
+					<label for="position-title" ng-class="{'input-label':true,assertive: positionTitle ? false : true}">Position Title</label>
+					<input type="text" ng-model="$parent.positionTitle" id="position-title" placeholder="Position Title" required />
+				</div>
+				
+				<div class="item item-input">
+					<label for="company-name" ng-class="{'input-label':true,assertive:companyName ? false : true}">Company Name</label>
+					<input type="text" ng-model="$parent.companyName" id="company-name" placeholder="Company Name" required />
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="employment-type" ng-class="{'input-label':true,assertive:selectedEmploymentType ? false : true}">Employment Type</label>
+					<select data-ng-options="o.name for o in jobTypes track by o.id" data-ng-model="$parent.selectedEmploymentType" id="employment-type" required></select>
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="job-level" ng-class="{'input-label':true,assertive:selectedJobLevel ? false : true}">Job Level</label>
+					<select data-ng-options="o.name for o in jobLevels track by o.id" data-ng-model="$parent.selectedJobLevel" id="job-level" required></select>
+				</div>
+				
+				<div class="item">
+					<h2>Monthly Salary (optional)</h2>
+					<div class="list">
+						<div class="item item-input item-select">
+							<input type="number" ng-model="$parent.monthlySalary" id="monthly-salary" placeholder="0.00" />
+							<select data-ng-options="o.name for o in currencies track by o.id" data-ng-model="$parent.selectedCurrency" id="currency"></select>
+						</div>
+					</div>
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="job-specialisation" ng-class="{'input-label':true,assertive: selectedJobSpecialisation ? false : true}">Specialisation</label>
+					<select data-ng-options="o.name for o in jobSpecialisations track by o.id" data-ng-model="selectedJobSpecialisation" id="job-specialisation" ng-change="updateJobRole()" required></select>
+				</div>
+				
+				<div class="item item-input item-select" ng-show="selectedJobSpecialisation">
+					<label for="job-role" ng-class="{'input-label':true,assertive : selectedJobRole ? false : true}">Sub Specialisation</label>
+					<select data-ng-options="o.name for o in jobRoles track by o.id" data-ng-model="$parent.selectedJobRole" id="job-role" required></select>
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="industry" ng-class="{'input-label':true, assertive: selectedIndustry ? false: true}">Company Industry</label>
+					<select data-ng-options="o.name for o in industries track by o.id" data-ng-model="$parent.selectedIndustry" id="industry" required></select>
+				</div>
+				
+				<div class="item item-input">
+					<label for="start-month" ng-class="{'input-label':true,assertive:startMonth ? false : true}">Start Date</label>
+					<input type="month" ng-model="$parent.startMonth" id="start-month" required />
+				</div>
+				
+				<div class="item item-input">
+					<label for="end-month" class="input-label">End Date</label>
+					<input type="month" ng-model="$parent.endMonth" id="end-month" />
+				</div>
+				
+				<div class="item">
+					<h2>Experience</h2>
+					<div class="list">
+						<div class="item item-input">
+							<textarea cols="30" rows="10" ng-model="$parent.experience" placeholder="experience"></textarea>
+						</div>
+					</div>
+				</div>
+				
+				<div class="item">
+					<button class="button button-positive" type="submit">
+						<i class="ion-ion-checkmark-empty"></i> Save
+					</button>
+				</div>
+			</div>
+		</form>
+	</ion-content>
+</ion-view>

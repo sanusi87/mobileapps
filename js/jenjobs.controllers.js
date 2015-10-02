@@ -264,14 +264,16 @@ angular.module('jenjobs.controllers', [])
 		});
 	}
 	
-	JsDatabase.getToken().then(function(token){
-		// console.log(token);
-		// if already got token, then redirect to profile
-		if( token.length > 0 ){
-			// console.log('got token');
-			$location.path('/tab/profile');
-		}
-	});
+	$scope.$on('$ionicView.enter', function() {
+		JsDatabase.getToken().then(function(token){
+			// console.log(token);
+			// if already got token, then redirect to profile
+			if( token.length > 0 ){
+				// console.log('got token');
+				$location.path('/tab/profile');
+			}
+		});
+    });
 })
 .controller('WorkCtrl', function($scope, $http, $location, $ionicPopup, JsDatabase){
 	// $scope.go = function ( path ) {

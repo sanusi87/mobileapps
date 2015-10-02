@@ -96,7 +96,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 		views: {
 			'tab-profile': {
 				templateUrl: 'templates/resume/update-access-level.html',
-				controller: 'ResumeCtrl'
+				controller: 'AccessLevelCtrl'
 			}
 		}
 	})
@@ -105,7 +105,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 		views: {
 			'tab-profile': {
 				templateUrl: 'templates/resume/update-jobseeking-information.html',
-				controller: 'ResumeCtrl'
+				controller: 'JobseekStatusCtrl'
 			}
 		}
 	})
@@ -118,33 +118,26 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 			}
 		}
 	})
-	.state('tab.resume-update-work-experience', {
-		url: '/resume-update-work-experience',
+	
+	.state('tab.resume-update-selected-work-experience', {
+		url: '/resume-update-selected-work-experience/:workid',
 		views: {
 			'tab-profile': {
-				templateUrl: 'templates/resume/update-work-experience.html',
+				templateUrl: 'templates/resume/update-selected-work-experience.html',
 				controller: 'WorkExpCtrl'
 			}
 		}
 	})
-	.state('tab.resume-update-education', {
-		url: '/resume-update-education',
+	.state('tab.resume-update-selected-education', {
+		url: '/resume-update-selected-education/:eduid',
 		views: {
 			'tab-profile': {
-				templateUrl: 'templates/resume/update-education.html',
-				controller: 'EduCtrl'
+				templateUrl: 'templates/resume/update-selected-education.html',
+				controller: 'EduSelectedCtrl'
 			}
 		}
 	})
-	.state('tab.resume-update-skill', {
-		url: '/resume-update-skill',
-		views: {
-			'tab-profile': {
-				templateUrl: 'templates/resume/update-skill.html',
-				controller: 'SkillCtrl'
-			}
-		}
-	})
+	
 	.state('tab.resume-update-attached-resume', {
 		url: '/resume-update-attached-resume',
 		views: {

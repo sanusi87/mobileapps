@@ -38,13 +38,13 @@
 					<ion-item>Own transport: {{ownTransport?'Yes':'No'}}</ion-item>
 				</ion-list>
 
-<!--
-Status					Satisfied with current job
-Currently stay in		Malaysia > Penang > Kuala Langat
-Availability period		4 Week(s)
-Driving license			Yes
-Own transport			Yes
--->
+				<!--
+				Status					Satisfied with current job
+				Currently stay in		Malaysia > Penang > Kuala Langat
+				Availability period		4 Week(s)
+				Driving license			Yes
+				Own transport			Yes
+				-->
 			</div>
 		</div>
 		
@@ -70,49 +70,64 @@ Own transport			Yes
 				<div class="row">
 					<div class="col col-75">Work Experience</div>
 					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-work-experience" class="positive">
-							<i class="icon ion-compose"></i>
+						<a href="#/tab/resume-update-selected-work-experience/0" class="positive">
+							<i class="icon ion-ios-plus-empty"></i>
 						</a>
 					</div>
 				</div>
 			</div>
-				
-			<div class="item item-body">
-				v
+			
+			<div class="item" ng-repeat="work in works">
+				<a href="#/tab/resume-update-selected-work-experience/{{work._id}}">
+					<h2 class="positive">{{work.position}}</h2>
+				</a>
+				<p>{{work.company}}</p>
+				<p>{{work.date_from}}</p>
+				<p>{{work.date_to}}</p>
 			</div>
 		</div>
 		
 		<div class="list card">
 			<div class="item item-divider">
+			
 				<div class="row">
 					<div class="col col-75">Highest Education</div>
 					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-education" class="positive">
-							<i class="icon ion-compose"></i>
+						<a href="#/tab/resume-update-selected-education/0" class="positive">
+							<i class="icon ion-ios-plus-empty"></i>
 						</a>
 					</div>
 				</div>
 			</div>
 				
-			<div class="item item-body">
-				w
+			<div class="item" ng-repeat="edu in educations">
+				<a href="#/tab/resume-update-selected-education/{{edu._id}}">
+					<h2 class="positive">{{edu.school}}</h2>
+				</a>
+				<p>{{educationLevel[edu.edu_level_id]}}</p>
+				<p>Graduated On: {{edu.date_graduated}}</p>
+				<p ng-show="edu.edu_field_id">{{educationField[edu.edu_field_id]}}</p>
+				
 			</div>
 		</div>
 		
 		<div class="list card">
 			<div class="item item-divider">
 				<div class="row">
-					<div class="col col-75">Skills &amp; Languages</div>
+					<div class="col col-75">Skills</div>
 					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-skill" class="positive">
-							<i class="icon ion-compose"></i>
+						<a ng-href="#/tab/resume" class="positive" ng-click="addNewSkillModal()">
+							<i class="icon ion-ios-plus-empty"></i>
 						</a>
 					</div>
 				</div>
 			</div>
 				
-			<div class="item item-body">
-				x
+			<div class="item item-button-right" ng-repeat="skill in skills">
+				{{skill.value}}
+				<button class="button button-assertive" ng-click="removeSkill(skill)">
+					<i class="icon ion-ios-close-empty"></i>
+				</button>
 			</div>
 		</div>
 		
@@ -121,16 +136,14 @@ Own transport			Yes
 				<div class="row">
 					<div class="col col-75">Attached Resume</div>
 					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-attached-resume" class="positive">
-							<i class="icon ion-compose"></i>
+						<a href="#/tab/resume" class="positive" ng-click="openResumeUploadModal()">
+							<i class="icon ion-android-attach"></i>
 						</a>
 					</div>
 				</div>
 			</div>
 				
-			<div class="item item-body">
-				y
-			</div>
+			<div class="item item-body" ng-show="attachedResume">{{attachedResume}}</div>
 		</div>
 		
 		<div class="list card">

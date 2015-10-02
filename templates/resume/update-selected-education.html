@@ -1,0 +1,53 @@
+<ion-view view-title="Update Education">
+	<ion-content class="padding">
+		<form name="education" ng-submit="saveEducation(education)" novalidate>
+			<div class="list list-inset">
+				
+				<div class="item item-input item-select">
+					<label for="education-level" ng-class="{'input-label':true,assertive:selectedEducationLevel ? false : true}">Education Level</label>
+					<select data-ng-options="o.name for o in EducationLevel track by o.id" data-ng-model="$parent.selectedEducationLevel" id="education-level" required></select>
+				</div>
+				
+				<div class="item item-input">
+					<label for="position-title" ng-class="{'input-label':true,assertive: school ? false : true}">School/University</label>
+					<input type="text" ng-model="$parent.school" id="school" placeholder="School" required />
+				</div>
+				
+				<div class="item item-input">
+					<label for="education-major" ng-class="{'input-label':true}">Education Major</label>
+					<input type="text" ng-model="$parent.educationMajor" id="education-major" placeholder="Major" />
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="field-of-study" ng-class="{'input-label':true,assertive:selectedEducationField ? false : true}">Field of Study</label>
+					<select data-ng-options="o.name for o in EducationField track by o.id" data-ng-model="$parent.selectedEducationField" id="field-of-study" required></select>
+				</div>
+				
+				<div class="item item-input">
+					<label for="grade" ng-class="{'input-label':true}">Grade</label>
+					<input type="text" ng-model="$parent.grade" id="grade" placeholder="Grade" />
+				</div>
+				
+				<div class="item item-input item-select">
+					<label for="year-graduated" ng-class="{'input-label':true,assertive: yearGraduated ? false : true}">Year Graduated</label>
+					<select data-ng-options="o.name for o in years track by o.id" data-ng-model="$parent.yearGraduated" id="year-graduated" required></select>
+				</div>
+				
+				<div class="item">
+					<h2><label for="education-info" class="input-label">Education Info</label></h2>
+					<div class="list">
+						<div class="item item-input">
+							<textarea name="education-info" id="education-info" ng-model="$parent.educationInfo" cols="30" placeholder="Education Info" rows="10"></textarea>
+						</div>
+					</div>
+				</div>
+				
+				<div class="item">
+					<button class="button button-positive" type="submit">
+						<i class="ion-ion-checkmark-empty"></i> Save
+					</button>
+				</div>
+			</div>
+		</form>
+	</ion-content>
+</ion-view>
