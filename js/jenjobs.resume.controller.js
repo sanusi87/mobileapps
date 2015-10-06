@@ -1,7 +1,8 @@
 ﻿angular.module('jenjobs.resume', [])
-.controller('ResumeCtrl', function($scope, $http, $ionicPopup, $ionicModal, JsDatabase){
+.controller('ResumeCtrl', function($scope, $http, $ionicPopup, $ionicLoading, $ionicModal, JsDatabase){
 	$scope.countries = [];
 	$scope.states = [];
+	$scope.info = {value: ''};
 	
 	JsDatabase.getToken().then(function(token){
 		if( token.length > 0 ){
@@ -19,7 +20,7 @@
 		$scope.jsJobseekingStatus = profile.js_jobseek_status_id;
 		$scope.availability = profile.availability;
 		$scope.selectedavailabilityUnit = {};
-		
+		console.log(profile);
 		if(profile.availability_unit == 'D'){
 			$scope.selectedavailabilityUnit.name = 'Day(s)';
 		}else if(profile.availability_unit == 'W'){
@@ -100,6 +101,51 @@
 	JsDatabase.getWork().then(function(works){
 		$scope.works = works;
 	});
+	
+	$scope.removeWork = function( work ){
+		var confirmPopup = $ionicPopup.confirm({
+			title: 'Confirmation',
+			template: 'Remove this work experience?'
+		});
+		
+		confirmPopup.then(function(res) {
+			if(res) {
+				JsDatabase.deleteWork( work ).then(function(){
+					if( work.id ){
+						$http({
+							method: 'DELETE',
+							url: 'http://api.jenjobs.local/jobseekers/work-experience/'+work.id+'?access-token='+$scope.access_token,
+							headers: {
+								'Accept': 'application/json',
+								'Content-Type': 'application/json'
+							},
+							data: ''
+						}).then(function(response){
+							$ionicLoading.show({
+								template: response.data.status_text,
+								noBackdrop: true,
+								duration: 1500
+							});
+						}).catch(function(e){
+							console.log(e);
+							$ionicLoading.show({
+								template: 'Data synchronization failed!',
+								noBackdrop: true,
+								duration: 1500
+							});
+						});
+					}else{
+						$ionicLoading.show({
+							template: 'Your work experience was successfully deleted.',
+							noBackdrop: true,
+							duration: 1500
+						});
+					}
+				});
+			}
+		});
+		return false;
+	}
 	// work
 	
 	// education
@@ -114,6 +160,54 @@
 			$scope.educationField = educationField;
 		});
 	});
+	
+	$scope.removeEdu = function( school ){
+		var confirmPopup = $ionicPopup.confirm({
+			title: 'Confirmation',
+			template: 'Remove this work experience?'
+		});
+		
+		confirmPopup.then(function(res) {
+			if(res){
+				var status = JsDatabase.deleteEducation( school )
+				.then(function(stat){
+					// console.log(stat);
+					//Object {ok: true, id: "BE672A6F-5D6C-F49A-978E-0EAD04755813", rev: "2-ef3a3735b6fe48adf416b2a40476493f"}
+					
+					if( school.id ){
+						$http({
+							method: 'DELETE',
+							url: 'http://api.jenjobs.local/jobseekers/qualification/'+school.id+'?access-token='+$scope.access_token,
+							headers: {
+								'Accept': 'application/json',
+								'Content-Type': 'application/json'
+							},
+							data: ''
+						}).then(function(response){
+							$ionicLoading.show({
+								template: response.data.status_text,
+								noBackdrop: true,
+								duration: 1500
+							});
+						}).catch(function(e){
+							console.log(e);
+							$ionicLoading.show({
+								template: 'Data synchronization failed!',
+								noBackdrop: true,
+								duration: 1500
+							});
+						});
+					}else{
+						$ionicLoading.show({
+							template: 'Your work experience was successfully deleted.',
+							noBackdrop: true,
+							duration: 1500
+						});
+					}
+				});
+			}
+		});
+	}
 	// education
 	
 	// skill
@@ -180,16 +274,24 @@
 					},
 					data: param
 				}).then(function(response){
-					JsDatabase.getSkill().then(function(skills){
-						$scope.skills = skills;
+					$ionicLoading.show({
+						template: response.data.status_text,
+						noBackdrop: true,
+						duration: 1500
+					});
+				}).catch(function(e){
+					$ionicLoading.show({
+						template: 'Data synchronization failed!',
+						noBackdrop: true,
+						duration: 1500
 					});
 				});
 			}else{
-				setTimeout(function(){
-					JsDatabase.getSkill().then(function(skills){
-						$scope.skills = skills;
-					});
-				}, 500);
+				$ionicLoading.show({
+					template: 'Your work experience was successfully deleted.',
+					noBackdrop: true,
+					duration: 1500
+				});
 			}
 		});
 	}
@@ -212,14 +314,16 @@
 		$scope.resumeInput.hide();
 	}
 	
-	// setInterval(function(){
-		// console.log( $scope.attachedResume );
-	// }, 2000);
-	
-	JsDatabase.getParameter('attachedResume').then(function(attachedResume){
-		$scope.attachedResume = attachedResume.name;
+	var tempResume = {};
+	JsDatabase.getSettings('attachedResume').then(function(attachedResume){
+		tempResume = attachedResume;
+		$scope.attachedResume = attachedResume.value;
 	}).catch(function(err){
-		JsDatabase.addParameter({value:0}, 'attachedResume');
+		tempResume.value = 0;
+		JsDatabase.addSettings(tempResume, 'attachedResume').then(function(a){
+			tempResume._id = a.id;
+			tempResume._rev = a.rev;
+		});
 	});
 	
 	$scope.saveAndCloseResumeModal = function(){
@@ -239,10 +343,19 @@
 			},
 			data: param
 		}).then(function(response){
-			JsDatabase.getParameter('attachedResume').then(function(attachedResume){
-				attachedResume.name = response.data.resume;
-				JsDatabase.updateParameter(attachedResume);
+			$scope.attachedResume = response.data.resume;
+			tempResume.value = response.data.resume;
+			JsDatabase.updateSettings(tempResume);
+			
+			$ionicLoading.show({
+				template: response.data.status_text,
+				noBackdrop: true,
+				duration: 1500
 			});
+			
+			setTimeout(function(){
+				$scope.closeResumeModal();
+			}, 2000);
 		});
 	}
 	
@@ -258,10 +371,73 @@
 	}
 	// attached resume
 	
+	// additional info
+	$ionicModal.fromTemplateUrl('/templates/modal/additional-info.html', {
+		scope: $scope,
+		animation: 'slide-in-up'
+	}).then(function(modal) {
+		$scope.additionalInfoInput = modal;
+	});
+	
+	
+	$scope.additionalInfo = {value:null};
+	$scope.saveAdditionalInfo = function(){
+		console.log($scope.additionalInfo);
+		JsDatabase.updateSettings($scope.additionalInfo).then(function(a){
+			$scope.additionalInfo._rev = a.rev;
+			
+			var param = {info: $scope.additionalInfo.value};
+			
+			$http({
+				method: 'POST',
+				url: 'http://api.jenjobs.local/jobseekers/additional-info?access-token='+$scope.access_token,
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				data: param
+			}).then(function(response){
+				$ionicLoading.show({
+					template: response.data.status_text,
+					noBackdrop: true,
+					duration: 1500
+				});
+				
+				setTimeout(function(){
+					$scope.openAdditionalInfoModal();
+				}, 2000);
+			});
+		});
+	}
+	
+	JsDatabase.getSettings('info').then(function(info){
+		$scope.additionalInfo = info;
+	}).catch(function(e){
+		JsDatabase.addSettings($scope.additionalInfo, 'info').then(function(a){
+			$scope.additionalInfo._id = a.id;
+			$scope.additionalInfo._rev = a.rev;
+		});
+	});
+	
+	$scope.openAdditionalInfoModal = function(){
+		$scope.additionalInfoInput.show();
+	}
+	
+	$scope.closeInfoModal = function(){
+		$scope.additionalInfoInput.hide();
+	}
+	// additional info
 })
 
 .controller('JobPrefCtrl', function($scope, $http, $ionicModal, JsDatabase){
 	$scope.access_token = null;
+	$scope.tempPref = {};
+	$scope.selectedJobType = [];
+	$scope.states = [];
+	$scope.selectedState = [];
+	$scope.selectedCountry = [];
+	$scope.countries = [];
+	
 	JsDatabase.getToken().then(function(token){
 		if( token.length > 0 ){
 			$scope.access_token = token[0].access_token;
@@ -273,11 +449,14 @@
 		}
 	});
 	
-	$scope.selectedJobType = [];
-	$scope.states = [];
-	$scope.selectedState = [];
-	$scope.selectedCountry = [];
-	$scope.countries = [];
+	JsDatabase.getSettings('jobPref').then(function(jobPref){
+		$scope.tempPref = jobPref;
+	}).catch(function(e){
+		JsDatabase.addSettings($scope.tempPref, 'jobPref').then(function(a){
+			$scope.tempPref._id = a.id;
+			$scope.tempPref._rev = a.rev;
+		});
+	});
 	
 	JsDatabase.getParameter('jobType').then(function(jobTypes){
 		delete(jobTypes._id);
@@ -317,16 +496,15 @@
 					id: id
 				});
 			});
-			
-			$ionicModal.fromTemplateUrl('/templates/modal/states.html', {
-				scope: $scope,
-				animation: 'slide-in-up'
-			}).then(function(modal) {
-				$scope.stateModal = modal;
-			});
-			
 			return;
 		})
+	});	
+	
+	$ionicModal.fromTemplateUrl('/templates/modal/states.html', {
+		scope: $scope,
+		animation: 'slide-in-up'
+	}).then(function(modal) {
+		$scope.stateModal = modal;
 	});
 
 	$scope.openStateModal = function(){
@@ -376,17 +554,30 @@
 		
 		console.log(param);
 		
-		$http({
-			method: 'POST',
-			url: 'http://api.jenjobs.local/jobseekers/job-preference?access-token='+$scope.access_token,
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			data: param
-		}).then(function(response){
-			console.log(response);
+		param._id = $scope.tempPref._id;
+		param._rev = $scope.tempPref._rev;
+		
+		JsDatabase.updateSettings(param).then(function(a){
+			console.log(a);
+			$http({
+				method: 'POST',
+				url: 'http://api.jenjobs.local/jobseekers/job-preference?access-token='+$scope.access_token,
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				data: param
+			}).then(function(response){
+				console.log(response);
+				
+				$ionicLoading.show({
+					template: response.data.status_text,
+					noBackdrop: true,
+					duration: 1500
+				});
+			});
 		});
+		
 		return false;
 	}
 })
@@ -608,15 +799,15 @@
 	}
 })
 
-.controller('WorkExpCtrl', function($scope, $stateParams, $filter, $http, $ionicLoading, JsDatabase){
+.controller('WorkExpCtrl', function($scope, $stateParams, $filter, $http, $location, $ionicLoading, JsDatabase){
 	
 	var rev = null;
 	var id = 0;
+	var workId = 0;
 	
 	// console.log($stateParams);
 	if( $stateParams.workid ){
 		JsDatabase.getWorkById($stateParams.workid).then(function(work){
-			console.log(work);
 			$scope.positionTitle = work.position;
 			$scope.companyName = work.company;
 			$scope.selectedEmploymentType = { id: work.job_type_id };
@@ -634,6 +825,11 @@
 			}
 			rev = work._rev;
 			id = work.id;
+			workId = work._id;
+			
+			setTimeout(function(){
+				$scope.updateJobRole();
+			}, 500);
 		});
 	}
 	
@@ -751,19 +947,31 @@
 				param.date_to = $filter('date')($scope.endMonth, 'yyyy-MM-dd');
 			}
 			param.experience = $scope.experience;
-			// param.id = id;
-			
-			console.log(param);
+			param.id = id;
 			
 			// check if there is internet connectivity first before submitting
-			if( $stateParams.workid ){
-				JsDatabase.addWork( param, $stateParams.workid, rev );
+			console.log(id);
+			if( id ){
+				console.log(workId);
+				console.log(rev);
+				JsDatabase.addWork( param, workId, rev ).then(function(a){
+					param._id = a.id;
+					param._rev = a.rev;
+					rev = a.rev;
+					// JsDatabase.updateWork(param);
+				});
 			}else{
-				JsDatabase.addWork(param);
+				JsDatabase.addWork(param).then(function(a){
+					param._id = a.id;
+					param._rev = a.rev;
+					workId = a.id;
+					rev = a.rev;
+					// JsDatabase.updateWork(param);
+				});
 			}
 			
 			var url = 'http://api.jenjobs.local/jobseekers/work-experience';
-			if( Number(id) ){ url = +'/'+id; }
+			if( id ){ url += '/'+id; }
 			url += '?access-token='+$scope.access_token;
 			
 			$http({
@@ -775,14 +983,20 @@
 				},
 				data: param
 			}).then(function(response){
-				console.log(response);
-				
 				$ionicLoading.show({
-					template: 'Please complete the form.',
+					template: response.data.status_text,
 					noBackdrop: true,
-					duration: 2000
+					duration: 1500
 				});
+				
+				id = response.data.id;
+				param.id = response.data.id;
+				JsDatabase.updateWork(param);
+			}).catch(function(e){
+				console.log(e);
+				
 			});
+			/////////////////////
 			
 		}else{
 			$ionicLoading.show({
@@ -794,9 +1008,11 @@
 		
 		return false;
 	}
+	
+	
 })
 
-.controller('EduSelectedCtrl', function($scope, $stateParams, $filter, $http, $ionicLoading, JsDatabase){
+.controller('EduCtrl', function($scope, $stateParams, $filter, $http, $location, $ionicLoading, JsDatabase){
 	var rev = null;
 	var id = 0;
 	var eduId = 0;
@@ -878,14 +1094,20 @@
 			param.grade = $scope.grade;
 			param.date_graduated = $scope.yearGraduated.id;
 			param.info = $scope.educationInfo;
-			
-			// console.log(param);
 			param.id = eduId;
 			
 			if( id && rev ){
 				JsDatabase.addEducation( param, id, rev );
 			}else{
-				JsDatabase.addEducation( param );
+				JsDatabase.addEducation( param ).then(function(a){
+					id = a.id;
+					rev = a.rev;
+					
+					param._id = a.id;
+					param._rev = a.rev;
+					
+					JsDatabase.addEducation(param, a.id, a.rev);
+				});
 			}
 			
 			var url = 'http://api.jenjobs.local/jobseekers/qualification';
@@ -904,16 +1126,30 @@
 				$ionicLoading.show({
 					template: response.data.status_text,
 					noBackdrop: true,
-					duration: 2000
+					duration: 1500
 				});
+				
+				if( response.data.status_code == 1 ){
+					eduId = response.data.id;
+					param.id = eduId;
+					JsDatabase.addEducation(param, param._id, param._rev).then(function(){
+						setTimeout(function(){
+							$location.path('/tab/resume');
+						}, 1500);
+					});
+				}
 			});
 			
 		}else{
 			$ionicLoading.show({
 				template: 'Please complete the form.',
 				noBackdrop: true,
-				duration: 2000
+				duration: 1500
 			});
+			
+			setTimeout(function(){
+				$location.path('/tab/resume');
+			}, 1500);
 		}
 	}
 })

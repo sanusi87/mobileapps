@@ -77,13 +77,17 @@
 				</div>
 			</div>
 			
-			<div class="item" ng-repeat="work in works">
+			<div class="item item-button-right" ng-repeat="work in works">
 				<a href="#/tab/resume-update-selected-work-experience/{{work._id}}">
 					<h2 class="positive">{{work.position}}</h2>
 				</a>
 				<p>{{work.company}}</p>
 				<p>{{work.date_from}}</p>
 				<p>{{work.date_to}}</p>
+				
+				<button class="button button-assertive" ng-click="removeWork(work)" type="button">
+					<i class="icon ion-ios-close-empty"></i>
+				</button>
 			</div>
 		</div>
 		
@@ -100,7 +104,7 @@
 				</div>
 			</div>
 				
-			<div class="item" ng-repeat="edu in educations">
+			<div class="item item-button-right" ng-repeat="edu in educations">
 				<a href="#/tab/resume-update-selected-education/{{edu._id}}">
 					<h2 class="positive">{{edu.school}}</h2>
 				</a>
@@ -108,6 +112,9 @@
 				<p>Graduated On: {{edu.date_graduated}}</p>
 				<p ng-show="edu.edu_field_id">{{educationField[edu.edu_field_id]}}</p>
 				
+				<button class="button button-assertive" ng-click="removeEdu(edu)">
+					<i class="icon ion-ios-close-empty"></i>
+				</button>
 			</div>
 		</div>
 		
@@ -151,16 +158,14 @@
 				<div class="row">
 					<div class="col col-75">Additional Info</div>
 					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-additional-info" class="positive">
+						<a href="#/tab/resume" class="positive" ng-click="openAdditionalInfoModal()">
 							<i class="icon ion-compose"></i>
 						</a>
 					</div>
 				</div>
 			</div>
 				
-			<div class="item item-body">
-				z
-			</div>
+			<div class="item item-body" ng-show="additionalInfo.value">{{additionalInfo.value}}</div>
 		</div>
 	</ion-content>
 </ion-view>

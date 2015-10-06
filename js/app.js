@@ -133,7 +133,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 		views: {
 			'tab-profile': {
 				templateUrl: 'templates/resume/update-selected-education.html',
-				controller: 'EduSelectedCtrl'
+				controller: 'EduCtrl'
 			}
 		}
 	})

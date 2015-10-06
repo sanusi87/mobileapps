@@ -73,7 +73,8 @@ angular.module('jenjobs.db', [])
 		deleteJob: deleteJob,
 		
 		getSettings: getSettings,
-		updateSettings: updateSettings
+		updateSettings: updateSettings,
+		addSettings: addSettings
 	};
 	
 	function initDB(){
@@ -146,7 +147,7 @@ angular.module('jenjobs.db', [])
 	};
 	
 	function updateWork(dbItem){
-		return $q.when( _work_db.put( dbItem ) );
+		return $q.when( _work_db.put( dbItem, dbItem._id, dbItem._rev ) );
 	};
 
 	function deleteWork(dbItem){
@@ -233,6 +234,8 @@ angular.module('jenjobs.db', [])
 		}
 	}
 	/** end profile */
+	
+	
 	
 	/** start education */
 	function getEducation(){
@@ -622,9 +625,13 @@ angular.module('jenjobs.db', [])
 		});
 	}
 	
-	function updateSettings(value, key){
-		return $q.when( _settings_db.put(value, key) );
+	function updateSettings(dbItem){
+		return $q.when( _settings_db.put(dbItem, dbItem._id, dbItem._rev) );
 	}
+	
+	function addSettings(dbItem, id){
+		return $q.when( _settings_db.put( dbItem, id ) );
+	};
 	/** end settings */
 	
 }]);
