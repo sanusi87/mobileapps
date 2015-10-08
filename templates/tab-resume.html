@@ -31,11 +31,11 @@
 				
 			<div class="item item-body">
 				<ion-list>
-					<ion-item>Status: {{jobseekingStatus[jsJobseekingStatus]}}</ion-item>
-					<ion-item>Currently stay in: {{currentlyStayIn}}</ion-item>
-					<ion-item>Availability period: {{availability+' '+selectedavailabilityUnit.name}}</ion-item>
-					<ion-item>Driving license: {{drivingLicense?'Yes':'No'}}</ion-item>
-					<ion-item>Own transport: {{ownTransport?'Yes':'No'}}</ion-item>
+					<ion-item><span class="positive">Status</span>: {{jobseekingStatus[jsJobseekingStatus]}}</ion-item>
+					<ion-item><span class="positive">Currently stay in</span>: {{currentlyStayIn}}</ion-item>
+					<ion-item><span class="positive">Availability period</span>: {{availability+' '+selectedavailabilityUnit.name}}</ion-item>
+					<ion-item><span class="positive">Driving license</span>: {{drivingLicense?'Yes':'No'}}</ion-item>
+					<ion-item><span class="positive">Own transport</span>: {{ownTransport?'Yes':'No'}}</ion-item>
 				</ion-list>
 
 				<!--
@@ -61,7 +61,21 @@
 			</div>
 				
 			<div class="item item-body">
-				u
+				<ion-list>
+					<ion-item><span class="positive">Expected Salary</span>: {{currency}} {{jobPref.salary}}</ion-item>
+					<ion-item>
+						<span class="positive">Preferred Job Type</span>:
+						<br /> {{prefJobTypes}}
+					</ion-item>
+					<ion-item>
+						<span class="positive">Preferred Working Location in Malaysia</span>:
+						<br /> {{prefStates}}
+					</ion-item>
+					<ion-item>
+						<span class="positive">Other Preferred Countries</span>:
+						<br /> {{prefCountries}}
+					</ion-item>
+				</ion-list>
 			</div>
 		</div>
 		
@@ -77,23 +91,24 @@
 				</div>
 			</div>
 			
-			<div class="item item-button-right" ng-repeat="work in works">
-				<a href="#/tab/resume-update-selected-work-experience/{{work._id}}">
-					<h2 class="positive">{{work.position}}</h2>
-				</a>
-				<p>{{work.company}}</p>
-				<p>{{work.date_from}}</p>
-				<p>{{work.date_to}}</p>
-				
-				<button class="button button-assertive" ng-click="removeWork(work)" type="button">
-					<i class="icon ion-ios-close-empty"></i>
-				</button>
+			<div class="item item-body">
+				<div class="list">
+					<div class="item item-button-right" ng-repeat="work in works">
+						<a href="#/tab/resume-update-selected-work-experience/{{work._id}}"><span class="positive">{{work.position}}</span></a>
+						<br />{{work.company}}
+						<br />{{work.date_from}}
+						<br />{{work.date_to}}
+						
+						<button class="button button-assertive" ng-click="removeWork(work)" type="button">
+							<i class="icon ion-ios-close-empty"></i>
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		
 		<div class="list card">
 			<div class="item item-divider">
-			
 				<div class="row">
 					<div class="col col-75">Highest Education</div>
 					<div class="col col-25 text-right item-icon-right">
@@ -103,18 +118,20 @@
 					</div>
 				</div>
 			</div>
-				
-			<div class="item item-button-right" ng-repeat="edu in educations">
-				<a href="#/tab/resume-update-selected-education/{{edu._id}}">
-					<h2 class="positive">{{edu.school}}</h2>
-				</a>
-				<p>{{educationLevel[edu.edu_level_id]}}</p>
-				<p>Graduated On: {{edu.date_graduated}}</p>
-				<p ng-show="edu.edu_field_id">{{educationField[edu.edu_field_id]}}</p>
-				
-				<button class="button button-assertive" ng-click="removeEdu(edu)">
-					<i class="icon ion-ios-close-empty"></i>
-				</button>
+			
+			<div class="item item-body">
+				<div class="list">
+					<div class="item item-button-right" ng-repeat="edu in educations">
+						<a href="#/tab/resume-update-selected-education/{{edu._id}}"><span class="positive">{{edu.school}}</span></a>
+						<br />{{educationLevel[edu.edu_level_id]}}
+						<br />Graduated On: {{edu.date_graduated}}
+						<br /><span ng-show="edu.edu_field_id">{{educationField[edu.edu_field_id]}}</span>
+						
+						<button class="button button-assertive" ng-click="removeEdu(edu)">
+							<i class="icon ion-ios-close-empty"></i>
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		

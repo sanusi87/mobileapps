@@ -1,0 +1,22 @@
+<ion-modal-view>
+	<ion-header-bar>
+		<h1 class="title">Filter Jobs</h1>
+	</ion-header-bar>
+	<ion-content>
+		<div class="list list-inset">
+			
+			<div class="item item-input">
+				<input type="text" data-ng-model="skill.value" placeholder="skill" />
+			</div>
+			
+			<div class="item">
+				<button type="button" ng-click="saveAndCloseModal()" class="button button-positive" ng-disabled="!skill.value">
+					Search
+				</button>
+				<button type="button" ng-click="closeModal()" class="button button-light">
+					Cancel
+				</button>
+			</div>
+		</div>
+	</ion-content>
+</ion-modal-view>

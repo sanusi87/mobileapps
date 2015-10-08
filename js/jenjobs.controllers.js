@@ -253,6 +253,8 @@ angular.module('jenjobs.controllers', [])
 						});
 					}
 				});
+				
+				// download job preferences
 			}else{
 				var alertPopup = $ionicPopup.alert({
 					title: 'Notification',
@@ -393,15 +395,6 @@ angular.module('jenjobs.controllers', [])
 		// });
 	}
 	
-})
-.controller('JobCtrl', function($scope, $location, $ionicSideMenuDelegate){
-	$scope.go = function(path){
-		$location.path(path);
-	}
-	
-	$scope.toggleLeft = function() {
-		$ionicSideMenuDelegate.toggleLeft();
-	};
 })
 .controller('JobFilterCtrl', function($scope){
 	

@@ -3,9 +3,14 @@
 		<form name="jobPreferences" ng-submit="saveJobPref()" novalidate>
 			<div class="list list-inset">
 				
-				<div class="item item-input">
-					<label for="expectedSalary" class="input-label">Expected Salary</label>
-					<input type="number" data-ng-model="$parent.expectedSalary" placeholder="0.00" id="expectedSalary" />
+				<div class="item">
+					<h2><label for="expectedSalary" class="input-label">Expected Salary</label></h2>
+					<div class="list">
+						<div class="item item-input item-select">
+							<input type="number" data-ng-model="$parent.expectedSalary" placeholder="0.00" id="expectedSalary" />
+							<select data-ng-options="o.name for o in currencies track by o.id" data-ng-model="$parent.selectedCurrency" id="currency"></select>
+						</div>
+					</div>
 				</div>
 				
 				<div class="item">

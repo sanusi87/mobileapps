@@ -379,7 +379,6 @@
 		$scope.additionalInfoInput = modal;
 	});
 	
-	
 	$scope.additionalInfo = {value:null};
 	$scope.saveAdditionalInfo = function(){
 		console.log($scope.additionalInfo);
@@ -427,9 +426,62 @@
 		$scope.additionalInfoInput.hide();
 	}
 	// additional info
+	
+	// job preference
+	JsDatabase.getParameter('currency').then(function(currencies){
+		delete(currencies._id);
+		delete(currencies._rev);
+		
+		JsDatabase.getSettings('jobPref').then(function(jobPref){
+			$scope.jobPref = jobPref;
+			$scope.currency = currencies[jobPref.currency_id];
+			
+			if( jobPref.state_id && jobPref.state_id.length > 0 ){
+				JsDatabase.getParameter('states').then(function(states){
+					var prefStates = [];
+					angular.forEach(jobPref.state_id, function(e,i){
+						prefStates.push(states[e].name);
+					});
+					return prefStates;
+				}).then(function(prefStates){
+					$scope.prefStates = prefStates.join(', ');
+				});
+			}
+			
+			if( jobPref.country_id && jobPref.country_id.length > 0 ){
+				JsDatabase.getParameter('countries').then(function(countries){
+					delete(countries._id);
+					delete(countries._rev);
+					delete(countries[127]);
+					
+					var prefCountries = [];
+					angular.forEach(jobPref.country_id, function(e,i){
+						prefCountries.push( countries[e] );
+					});
+					return prefCountries;
+				}).then(function(prefCountries){
+					$scope.prefCountries = prefCountries.join(', ');
+				});
+			}
+			
+			if( jobPref.job_type_id && jobPref.job_type_id.length > 0 ){
+				JsDatabase.getParameter('jobType').then(function(jobTypes){
+					var prefJobTypes = [];
+					angular.forEach(jobPref.job_type_id, function(e,i){
+						prefJobTypes.push( jobTypes[e] );
+					});
+					return prefJobTypes;
+				}).then(function(prefJobTypes){
+					$scope.prefJobTypes = prefJobTypes.join(', ');
+				});
+			}
+		});
+	});
+	// job preference
+	
 })
 
-.controller('JobPrefCtrl', function($scope, $http, $ionicModal, JsDatabase){
+.controller('JobPrefCtrl', function($scope, $http, $ionicModal, $ionicLoading, JsDatabase){
 	$scope.access_token = null;
 	$scope.tempPref = {};
 	$scope.selectedJobType = [];
@@ -437,6 +489,36 @@
 	$scope.selectedState = [];
 	$scope.selectedCountry = [];
 	$scope.countries = [];
+	
+	JsDatabase.getSettings('jobPref').then(function(jp){
+		if( jp.salary ){
+			$scope.expectedSalary = jp.salary;
+		}
+		
+		if( jp.currency_id ){
+			$scope.selectedCurrency = {
+				id: jp.currency_id
+			};
+		}
+		
+		if( jp.job_type_id && jp.job_type_id.length > 0 ){
+			angular.forEach(jp.job_type_id, function(e, i){
+				$scope.selectedJobType[e] = e;
+			});
+		}
+		
+		if( jp.state_id && jp.state_id.length > 0 ){
+			angular.forEach(jp.state_id, function(e, i){
+				$scope.selectedState[e] = true;
+			});
+		}
+		
+		if( jp.country_id && jp.country_id.length > 0 ){
+			angular.forEach(jp.country_id, function(e, i){
+				$scope.selectedCountry[e] = true;
+			});
+		}
+	});
 	
 	JsDatabase.getToken().then(function(token){
 		if( token.length > 0 ){
@@ -462,6 +544,19 @@
 		delete(jobTypes._id);
 		delete(jobTypes._rev);
 		$scope.jobTypes = jobTypes;
+	});
+	
+	JsDatabase.getParameter('currency').then(function(currencies){
+		delete(currencies._id);
+		delete(currencies._rev);
+		
+		$scope.currencies = [];
+		angular.forEach(currencies, function(e,i){
+			$scope.currencies.push({
+				id: i,
+				name: e
+			});
+		});
 	});
 	
 	JsDatabase.getParameter('countries').then(function(countries){
@@ -524,6 +619,11 @@
 		var param = {};
 		
 		param.salary = $scope.expectedSalary;
+		if( $scope.selectedCurrency && $scope.selectedCurrency.id ){
+			param.currency_id = $scope.selectedCurrency.id;
+		}else{
+			param.currency_id = 6;
+		}
 		
 		param.job_type_id = [];
 		if( $scope.selectedJobType && $scope.selectedJobType.length > 0 ){
@@ -558,7 +658,9 @@
 		param._rev = $scope.tempPref._rev;
 		
 		JsDatabase.updateSettings(param).then(function(a){
-			console.log(a);
+			$scope.tempPref._id = a.id;
+			$scope.tempPref._rev = a.rev;
+			
 			$http({
 				method: 'POST',
 				url: 'http://api.jenjobs.local/jobseekers/job-preference?access-token='+$scope.access_token,

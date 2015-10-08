@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.job'])
 .run(function($ionicPlatform, JsDatabase) {
 	$ionicPlatform.ready(function(){
 		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
