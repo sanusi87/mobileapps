@@ -8,7 +8,6 @@ angular.module('jenjobs.db', [])
 	_parameter_db, // jenjobs variables
 	_token_db, // access token
 	_application_db,
-	_job_db,
 	_settings_db,
 	
 	_work,
@@ -19,7 +18,6 @@ angular.module('jenjobs.db', [])
 	_parameter,
 	_token,
 	_application,
-	_job,
 	_settings;
 	
 	return {
@@ -68,10 +66,6 @@ angular.module('jenjobs.db', [])
 		updateApplication: updateApplication,
 		deleteApplication: deleteApplication,
 		
-		getJob: getJob,
-		addJob: addJob,
-		deleteJob: deleteJob,
-		
 		getSettings: getSettings,
 		updateSettings: updateSettings,
 		addSettings: addSettings
@@ -86,7 +80,6 @@ angular.module('jenjobs.db', [])
 		_skill_db = new PouchDB('skill', {adapter: 'websql'});
 		_language_db = new PouchDB('language', {adapter: 'websql'});
 		_application_db = new PouchDB('application', {adapter: 'websql'});
-		_job_db = new PouchDB('job', {adapter: 'websql'});
 		
 		_settings_db = new PouchDB('settings', {adapter: 'websql'});
 		$q.when( _settings_db.bulkDocs([
@@ -569,54 +562,6 @@ angular.module('jenjobs.db', [])
 		}
 	}
 	/** end application */
-	
-	/** start job */
-	function getJob(){
-		if( !_job ){
-			return $q.when(_job_db.allDocs({ include_docs: true}))
-			.then(function(docs) {
-				_job = docs.rows.map(function(row) {
-					return row.doc;
-				});
-				
-				_job_db.changes({
-					live: true,
-					since: 'now',
-					include_docs: true
-				}).on('change', onJobDatabaseChange);
-
-				return _job;
-			});
-		} else {
-			return $q.when(_job);
-		}
-	}
-	
-	function addJob(dbItem, docId){
-		return $q.when( _job_db.put( dbItem, docId ) );
-	};
-	
-	function deleteJob(dbItem){
-		return $q.when( _job_db.remove( dbItem ) );
-	};
-	
-	function onJobDatabaseChange(change) {
-		var index = findIndex(_job, change.id);
-		var p = _job[index];
-
-		if (change.deleted) {
-			if( p ){
-				_job.splice(index, 1); // delete
-			}
-		} else {
-			if (p && p._id === change.id) {
-				_job[index] = change.doc; // update
-			} else {
-				_job.splice(index, 0, change.doc) // insert
-			}
-		}
-	}
-	/** end job */
 	
 	/** start settings */
 	function getSettings( key ){

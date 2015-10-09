@@ -5,8 +5,8 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.job'])
-.run(function($ionicPlatform, JsDatabase) {
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job'])
+.run(function($ionicPlatform, JsDatabase, JobSearch) {
 	$ionicPlatform.ready(function(){
 		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
 		// for form inputs)
@@ -21,6 +21,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 		}
 		
 		JsDatabase.initDB();
+		JobSearch.initDB();
 	});
 })
 .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
@@ -167,12 +168,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 			}
 		}
 	})
-	.state('tab.job-filter', {
-		url: '/job-filter',
+	.state('tab.job-details', {
+		url: '/job-details/:jid',
 		views: {
 			'tab-job': {
-				templateUrl: 'templates/tab-job-filter.html',
-				controller: 'JobFilterCtrl'
+				templateUrl: 'templates/tab-job-detail.html',
+				controller: 'JobDetailCtrl'
 			}
 		}
 	})

@@ -166,7 +166,7 @@ angular.module('jenjobs.controllers', [])
 		return false;
 	}
 })
-.controller('LoginCtrl', function($scope, $http, $location, $ionicPopup, JsDatabase){
+.controller('LoginCtrl', function($scope, $http, $location, $ionicPopup, $ionicHistory, JsDatabase){
 	$scope.user = {
 		grant_type: 'password',
 		username: '',
@@ -271,7 +271,9 @@ angular.module('jenjobs.controllers', [])
 			// console.log(token);
 			// if already got token, then redirect to profile
 			if( token.length > 0 ){
-				// console.log('got token');
+				$ionicHistory.nextViewOptions({
+					disableBack: true
+				});
 				$location.path('/tab/profile');
 			}
 		});

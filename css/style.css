@@ -16,6 +16,21 @@
 .text-left{ text-align:left; }
 .text-right{ text-align:right; }
 
+.text-grey-1{ color: #aaaaaa; }
+.text-grey-2{ color: #dddddd; }
+.text-grey-3{ color: #f3f3f3; }
+
+.bordered-left{
+	border-left: 3px solid #dddddd;
+	padding: 5px;
+	margin: 10px;
+	white-space: normal !important;
+}
+
+.normal-wrapping{
+	white-space: normal;
+}
+
 @media (min-width: 320px) {
 	.fill-width{
 		width: 100%;

@@ -4,18 +4,49 @@
 	</ion-nav-buttons>
 	
 	<ion-content class="padding">
-		<div class="list list-inset">
-			<div class="item">
-				jobs
-			</div>
-			
-			<div class="item">
-				jobs
-			</div>
-			
-			<div class="item">
-				jobs
-			</div>
-		</div>
+		<!--
+		advertiser:		"false"
+		company: 		"One More Profile"
+		company_id: 	110632
+		date_closed: 	"2015-10-12 02:37:02"
+		date_posted: 	"2015-08-13 02:37:02"
+		description: 	"<p>Credit Three</p>"
+		summary:	 	"Credit Three"
+		education: 		"Bachelor's Degree in any field"
+		industry: 		"Human Resource / Recruitment"
+		language: 		null
+		latitude: 		"0.00000000"
+		level: 			"Senior Management"
+		location: 		"Albania"
+		longitude: 		"0.00000000"
+		post_id: 		320197
+		recruitment_agency: "false"
+		salary_max: 	333
+		salary_min: 	3
+		show_salary: 	"true"
+		skills: 		null
+		specialisation: "Agriculture/Forestry/Fisheries/Farming > Forestry"
+		title: 			"Credit Three"
+		type: 			"Permanent"
+		vacancy: 		3
+		year_exp:	 	0
+		-->
+		
+		<ion-list>
+			<ion-item ng-repeat="job in jobs">
+				<h2><strong><a class="positive" ng-href="#/tab/job-details/{{job.post_id}}">{{job.title}}</a></strong></h2>
+				<p><small>{{job.company}}</small></p>
+				<p ng-show="job.show_salary"><small class="balanced">{{job.salary_min|currency:'MYR ':0}} - {{job.salary_max|currency:'MYR ':0}} per month</small></p>
+				<p ng-show="!job.show_salary"><small class="text-grey-1">Salary undisclosed</small></p>
+				
+				
+				<p><i class="ion-ios-location"></i> <small ng-bind-html="job.location"></small></p>
+				<p><i class="ion-ios-box"></i> <small>{{job.type}}</small></p>
+				<p><i class="ion-ios-calendar-outline"></i> <small>Date close: {{job.date_closed|date}}</small></p>
+				
+				<p class="bordered-left"><small ng-bind-html="job.summary"></small></p>
+				<p><small ng-bind-html="job.specialisation" class="text-grey-1"></small></p>
+			</ion-item>
+		</ion-list>
 	</ion-content>
 </ion-view>
