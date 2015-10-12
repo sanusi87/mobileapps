@@ -279,6 +279,11 @@ angular.module('jenjobs.controllers', [])
 		});
     });
 })
+
+.controller('RegisterCtrl', function( $scope, $http, $ionicHistory, $ionicLoading, JsDatabase ){
+	
+})
+
 .controller('WorkCtrl', function($scope, $http, $location, $ionicPopup, JsDatabase){
 	// $scope.go = function ( path ) {
 		// $location.path( path );

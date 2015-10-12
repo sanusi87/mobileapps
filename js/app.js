@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job'])
+angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job'])
 .run(function($ionicPlatform, JsDatabase, JobSearch) {
 	$ionicPlatform.ready(function(){
 		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -42,6 +42,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 		url: '/login',
 		templateUrl: 'templates/login.html',
 		controller: 'LoginCtrl'
+	})
+	
+	.state('register', {
+		url: '/register',
+		templateUrl: 'templates/register.html',
+		controller: 'RegisterCtrl'
 	})
 	
 	.state('tab.settings', {
