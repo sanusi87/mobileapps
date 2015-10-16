@@ -1,81 +1,91 @@
 <ion-view view-title="{{job.title}}">
 	<ion-content class="padding">
-		<div class="row">
-			<div class="col col-50">
-				<div class="button-bar">
-					<!-- not bookmark -->
-					<button type="button" class="button button-light" ng-click="bookmark(job.post_id)">
-						<i class="ion-ios-bookmarks"></i> Bookmark
-					</button>
-					
-					<!-- already bookmarked -->
-					<button type="button" class="button button-positive" ng-click="deleteBookmark(job.post_id, rev)">
-						<i class="ion-ios-bookmarks-outline"></i> Bookmark
+		<div ng-show="job.post_id">
+			<div class="row">
+				<div class="col col-50">
+					<div class="button-bar">
+						<!-- not bookmark -->
+						<button type="button" data-ng-show="!bookmarked" class="button button-positive" ng-click="bookmark(job.post_id)">
+							<i class="ion-ios-bookmarks"></i> Bookmark
+						</button>
+					</div>
+
+					<div class="button-bar">
+						<!-- already bookmarked -->
+						<button type="button" data-ng-show="bookmarked" class="button button-light" ng-click="deleteBookmark(job.post_id, rev)">
+							<i class="ion-ios-bookmarks-outline"></i> Unbookmark
+						</button>
+					</div>
+				</div>
+				<div class="col">
+					<div class="button-bar">
+						<!-- not apply -->
+						<button type="button" ng-class="{button:true, 'button-light':applied,'button-positive':!applied}" ng-disabled="applied" ng-click="submitApplication()">
+							<i class="ion-ios-copy"></i> <span ng-show="applied">Applied</span><span ng-show="!applied">Apply</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<h2 class="positive">Job Details</h2>
+			<div class="list">
+				<div class="item">
+					<span class="positive">Location</span>: <span ng-bind-html="job.location"></span>
+				</div>
+				<div class="item">
+					<span class="positive">Job type</span>: <span>{{job.type}}</span>
+				</div>
+				<div class="item">
+					<span class="positive">Job level</span>: <span>{{job.level}}</span>
+				</div>
+				<div class="item">
+					<span class="positive">Specialisation</span>:
+					<br />
+					<div ng-bind-html="job.specialisation" class="normal-wrapping"></div>
+				</div>
+				<div class="item">
+					<span class="positive">Required qualifications</span>:
+					<br />
+					<div class="normal-wrapping">{{job.education}}</div>
+				</div>
+				<div class="item" ng-show="job.skills">
+					<span class="positive">Required skills</span>:
+					<br />
+					<div class="normal-wrapping" ng-bind-html="job.skills"></div>
+				</div>
+				<div class="item" ng-show="job.languages">
+					<span class="positive">Required languages</span>: <span>{{job.languages}}</span>
+				</div>
+				<div class="item">
+					<span class="positive">Job close</span>: <span>{{job.date_closed|date}}</span>
+				</div>
+			</div>
+
+			<h2 class="positive">About Us</h2>
+			<div class="list">
+				<div class="item">
+					<div class="normal-wrapping" ng-bind-html="job.company_details.overview"></div>
+				</div>
+			</div>
+
+			<h2 class="positive">Requirements</h2>
+			<div class="list">
+				<div class="item">
+					<div class="normal-wrapping" ng-bind-html="job.description"></div>
+				</div>
+			</div>
+		</div>
+
+		<div ng-show="!job.post_id">
+			<div class="card">
+				<div class="item item-text-wrap text-center">
+					Sorry, we were unable to find this job.
+					<br />
+					<button class="button button-full button-positive" ng-click="searchJob()">
+						Search Jobs
 					</button>
 				</div>
 			</div>
-			<div class="col">
-				<div class="button-bar">
-					<!-- not apply -->
-					<button type="button" class="button button-light">
-						<i class="ion-ios-copy"></i> Apply
-					</button>
-					
-					<!-- already applied -->
-					<button type="button" class="button button-positive">
-						<i class="ion-ios-copy"></i> Apply
-					</button>
-				</div>
-			</div>
 		</div>
-		
-		<h2 class="positive">Job Details</h2>
-		<div class="list">
-			<div class="item">
-				<span class="positive">Location</span>: <span ng-bind-html="job.location"></span>
-			</div>
-			<div class="item">
-				<span class="positive">Job type</span>: <span>{{job.type}}</span>
-			</div>
-			<div class="item">
-				<span class="positive">Job level</span>: <span>{{job.level}}</span>
-			</div>
-			<div class="item">
-				<span class="positive">Specialisation</span>:
-				<br />
-				<div ng-bind-html="job.specialisation" class="normal-wrapping"></div>
-			</div>
-			<div class="item">
-				<span class="positive">Required qualifications</span>:
-				<br />
-				<div class="normal-wrapping">{{job.education}}</div>
-			</div>
-			<div class="item" ng-show="job.skills">
-				<span class="positive">Required skills</span>:
-				<br />
-				<div class="normal-wrapping" ng-bind-html="job.skills"></div>
-			</div>
-			<div class="item" ng-show="job.languages">
-				<span class="positive">Required languages</span>: <span>{{job.languages}}</span>
-			</div>
-			<div class="item">
-				<span class="positive">Job close</span>: <span>{{job.date_closed|date}}</span>
-			</div>
-		</div>
-		
-		<h2 class="positive">About Us</h2>
-		<div class="list">
-			<div class="item">
-				<div class="normal-wrapping" ng-bind-html="job.company_details.overview"></div>
-			</div>
-		</div>
-		
-		<h2 class="positive">Requirements</h2>
-		<div class="list">
-			<div class="item">
-				<div class="normal-wrapping" ng-bind-html="job.description"></div>
-			</div>
-		</div>
-		
 	</ion-content>
 </ion-view>

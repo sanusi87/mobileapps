@@ -4,10 +4,10 @@
 	</ion-header-bar>
 	<ion-content>
 		<div class="list list-inset">
-			<div class="item item-input">
-				<textarea name="additional-info" id="additional-info" cols="30" rows="10" data-ng-model="additionalInfo.value" placeholder="additional info"></textarea>
+			<div class="item item-input" id="text-angular-editor">
+				<text-angular ta-toolbar="[]" ng-model="additionalInfo.value"></text-angular>
 			</div>
-			
+
 			<div class="item">
 				<button type="button" ng-click="saveAdditionalInfo()" class="button button-positive" ng-disabled="!additionalInfo.value">
 					Save

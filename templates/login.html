@@ -6,17 +6,17 @@
 				<img src="/img/jenjobs_logo_big.png" alt="JenJOBS" class="fill-width" />
 				<br />
 			</div>
-			
+
 			<div class="list list-inset">
 				<label class="item item-input">
 					<input type="email" name="username" id="username" placeholder="Email Address" ng-required="true" ng-model="user.username" />
 				</label>
-				
+
 				<label class="item item-input">
 					<input type="password" id="password" placeholder="Password" ng-model="user.password" ng-required="true" />
 				</label>
 			</div>
-			
+
 			<div class="button-bar">
 				<button type="submit" class="button button-block button-positive" ng-disabled="loginForm.$invalid">
 					Login
@@ -24,6 +24,9 @@
 				<a href="#/register" class="button button-block button-light">
 					Register
 				</a>
+				<button type="button" name="button" class="button button-assertive" ng-click="logout()">
+					x
+				</button>
 			</div>
 		</form>
 	</ion-content>

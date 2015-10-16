@@ -27,9 +27,53 @@
 	white-space: normal !important;
 }
 
-.normal-wrapping{
+.normal-wrapping,
+.normal-wrapping p,
+.normal-wrapping div{
 	white-space: normal;
 }
+
+/* textAngular editor */
+#text-angular-editor.item{
+	padding: 0;
+}
+.ta-editor {
+	min-height: 200px !important;
+	height: auto;
+	overflow: auto;
+	font-family: inherit;
+	font-size: 100%;
+}
+
+.ta-toolbar {
+	background-color: #F0F0F0;
+	padding: 0px;
+	margin-left: 0px; /* Override bootstrap */
+	border: 0px solid #EEE;
+}
+
+.ta-toolbar .btn-group {
+	margin-bottom: 5px;
+}
+
+.ta-editor, .white-box {
+	padding: 10px;
+	background-color: #FFF;
+	border: 0px solid #EEE;
+}
+
+.ta-scroll-window > .ta-bind{
+	min-height: 200px !important;
+}
+
+textarea.ta-bind {
+	width: 100%;
+}
+
+.item > text-angular{
+	width: 100%;
+}
+/* textAngular editor */
 
 @media (min-width: 320px) {
 	.fill-width{
@@ -38,11 +82,11 @@
 }
 
 @media (min-width: 567px) {
-	
+
 }
 
 @media (min-width: 680px) {
-	
+
 }
 
 
@@ -55,5 +99,5 @@
 }
 
 @media (min-width: 1023px) {
-	
+
 }

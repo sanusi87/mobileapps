@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job'])
+angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job', 'textAngular'])
 .run(function($ionicPlatform, JsDatabase, JobSearch) {
 	$ionicPlatform.ready(function(){
 		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -14,42 +14,36 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
 			cordova.plugins.Keyboard.disableScroll(true);
 		}
-		
+
 		if (window.StatusBar) {
 			// org.apache.cordova.statusbar required
 			StatusBar.styleLightContent();
 		}
-		
+
 		JsDatabase.initDB();
 		JobSearch.initDB();
 	});
 })
 .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
-	// Ionic uses AngularUI Router which uses the concept of states
-	// Learn more here: https://github.com/angular-ui/ui-router
-	// Set up the various states which the app can be in.
-	// Each state's controller can be found in controllers.js
 	$stateProvider
-	
-	// setup an abstract state for the tabs directive
 	.state('tab', {
 		url: '/tab',
 		abstract: true,
 		templateUrl: 'templates/tabs.html'
 	})
-	
+
 	.state('login', {
 		url: '/login',
 		templateUrl: 'templates/login.html',
 		controller: 'LoginCtrl'
 	})
-	
+
 	.state('register', {
 		url: '/register',
 		templateUrl: 'templates/register.html',
 		controller: 'RegisterCtrl'
 	})
-	
+
 	.state('tab.settings', {
 		url: '/settings',
 		views: {
@@ -59,7 +53,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
-	
+
+	// profile overview
 	.state('tab.profile', {
 		url: '/profile',
 		views: {
@@ -69,6 +64,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
+
+	// profile update section
 	.state('tab.profile-update', {
 		url: '/profile-update',
 		views: {
@@ -78,6 +75,7 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
+
 	// resume details
 	.state('tab.resume', {
 		url: '/resume',
@@ -88,7 +86,7 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
-	
+
 	// #/tab/resume-update-access-level
 	// #/tab/resume-update-jobseeking-information
 	// #/tab/resume-update-job-preferences
@@ -97,7 +95,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 	// #/tab/resume-update-skill
 	// #/tab/resume-update-attached-resume
 	// #/tab/resume-update-additional-info
-	
+
+	// access level update section
 	.state('tab.resume-update-access-level', {
 		url: '/resume-update-access-level',
 		views: {
@@ -107,6 +106,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
+
+	// jobseeking info update section
 	.state('tab.resume-update-jobseeking-information', {
 		url: '/resume-update-jobseeking-information',
 		views: {
@@ -116,6 +117,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
+
+	// job preference update section
 	.state('tab.resume-update-job-preferences', {
 		url: '/resume-update-job-preferences',
 		views: {
@@ -125,7 +128,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
-	
+
+	// work experiences add/update section
 	.state('tab.resume-update-selected-work-experience', {
 		url: '/resume-update-selected-work-experience/:workid',
 		views: {
@@ -135,6 +139,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
+
+	// education/qualification add/update section
 	.state('tab.resume-update-selected-education', {
 		url: '/resume-update-selected-education/:eduid',
 		views: {
@@ -144,7 +150,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
-	
+
+	// upload resume attachment
 	.state('tab.resume-update-attached-resume', {
 		url: '/resume-update-attached-resume',
 		views: {
@@ -154,6 +161,8 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
+
+	// update additional information
 	.state('tab.resume-update-additional-info', {
 		url: '/resume-update-additional-info',
 		views: {
@@ -164,7 +173,7 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 		}
 	})
 	// done resume
-	
+
 	.state('tab.job', {
 		url: '/job',
 		views: {
@@ -183,7 +192,16 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
-	
+	.state('tab.bookmarks', {
+		url: '/bookmarks',
+		views: {
+			'tab-job': {
+				templateUrl: 'templates/tab-bookmarks.html',
+				controller: 'BookmarkController'
+			}
+		}
+	})
+
 	.state('tab.application', {
 		url: '/application',
 		views: {
@@ -193,16 +211,16 @@ angular.module('starter', ['ionic', 'starter.services', 'jenjobs.controllers', '
 			}
 		}
 	})
-	
+
 	.state('test', {
 		url: '/test',
 		templateUrl: 'templates/test.html',
 		controller: 'WorkCtrl'
 	});
-	
+
 	// if none of the above states are matched, use this as the fallback
 	$urlRouterProvider.otherwise('/login');
-	
+
 	// configing ajax request
 	$httpProvider.defaults.useXDomain = true;
 	$httpProvider.defaults.headers = {

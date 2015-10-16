@@ -1,0 +1,19 @@
+<ion-view view-title="Bookmarks">
+	<ion-content class="padding">
+        <ul class="list list-inset">
+            <li ng-show="bookmarks.length == 0">No bookmark</li>
+            <li class="item" ng-repeat="(i,bookmark) in bookmarks">
+                <h2>
+                    <strong>
+                        <a ng-href="#/tab/job-details/{{bookmark._id}}">
+                            <span class="positive">{{bookmark.title}}</span>
+                        </a>
+                    </strong>
+                </h2>
+                <small>Closed on {{bookmark.date_closed|date}}</small>
+                <br />
+                <small>Bookmarked on {{bookmark.on|date}}</small>
+            </li>
+        </ul>
+    </ion-content>
+</ion-view>

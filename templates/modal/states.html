@@ -4,7 +4,7 @@
 	</ion-header-bar>
 	<ion-content>
 		<div class="list list-inset">
-			<ion-toggle ng-repeat="state in states track by state.id" ng-model="selectedState[state.id]" ng-value="{{state.id}}">{{state.name}}</ion-toggle>
+			<ion-toggle ng-repeat="state in states track by state.id" ng-model="selectedState[state.id]" ng-value="{{state.id}}" ng-change="checkTotalStateSelected()">{{state.name}}</ion-toggle>
 		</div>
 	</ion-content>
 </ion-modal-view>

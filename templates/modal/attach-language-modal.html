@@ -1,0 +1,40 @@
+<ion-modal-view>
+	<ion-header-bar>
+		<h1 class="title">Language</h1>
+	</ion-header-bar>
+	<ion-content>
+
+		<div class="list list-inset">
+
+            <div class="item item-select">
+                <label for="language-list" ng-class="{assertive:selectedLanguage ? false: true}">Language</label>
+				<select data-ng-options="o.name disable when savedLanguage[o.id] for o in languageList track by o.id" data-ng-model="selectedLanguage" id="language-list" ng-change="updateLanguageChange()" required></select>
+			</div>
+
+            <div class="item item-select">
+                <label for="level-list" ng-class="{assertive:selectedSpokenLevel ? false : true}">Spoken</label>
+				<select data-ng-options="o.name for o in languageLevelList track by o.id" data-ng-model="selectedSpokenLevel" id="level-list" ng-change="updateSelectedSpokenLevel()" required></select>
+			</div>
+
+            <div class="item item-select">
+                <label for="level-list-2" ng-class="{assertive:selectedWrittenLevel ? false : true}">Written</label>
+				<select data-ng-options="o.name for o in languageLevelList track by o.id" data-ng-model="selectedWrittenLevel" id="level-list-2" ng-change="updateSelectedWrittenLevel()" required></select>
+			</div>
+
+            <div class="item item-select">
+                <label for="is-native">Native</label>
+				<select data-ng-options="o.name for o in native track by o.id" data-ng-model="selectedNative" id="is-native" ng-change="updateSelectedNative()" required></select>
+			</div>
+
+			<div class="item">
+				<button type="button" ng-click="saveLanguage()" class="button button-positive" ng-disabled="!((selectedLanguage ? true : false) && (selectedSpokenLevel ? true : false) && (selectedWrittenLevel ? true : false))">
+					Save
+				</button>
+				<button type="button" ng-click="closeLanguageModal()" class="button button-light">
+					Cancel
+				</button>
+			</div>
+		</div>
+
+	</ion-content>
+</ion-modal-view>
