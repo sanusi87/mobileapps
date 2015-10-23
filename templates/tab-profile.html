@@ -17,14 +17,14 @@
 			</div>
 
 			<div class="item" ng-show="js.photo_file && js.photo_file != null">
-				<img ng-src="{{js.photo_file}}" alt="" />
+				<img ng-src="{{js.photo_file}}" alt="" class="fill-width" />
 			</div>
 
 			<div class="item"><div>Username :<b>{{js.username}}</b></div></div>
 			<div class="item"><div>Email :<b>{{js.email}}</b></div></div>
 			<div class="item"><div>Mobile :<b>{{js.mobile_no}}</b></div></div>
-			<div class="item"><div>I/C :<b>{{js.ic_no}}</b></div></div>
-			<div class="item"><div>Passport :<b>{{js.passport_no}}</b></div></div>
+			<div class="item" ng-show="js.country=127"><div>I/C :<b>{{js.ic_no}}</b></div></div>
+			<div class="item" ng-show="js.country!=127"><div>Passport :<b>{{js.passport_no}}</b></div></div>
 			<div class="item"><div>Gender :<b>{{js.gender}}</b></div></div>
 			<div class="item"><div>DoB :<b>{{js.dob|date:'dd/MM/yyyy'}}</b></div></div>
 			<div class="item"><div>Country :<b>{{js.country}}</b></div></div>

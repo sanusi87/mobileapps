@@ -2264,7 +2264,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   border: 0;
   vertical-align: baseline;
   font: inherit;
-  font-size: 100%; }
+  font-size: 90%; }
 
 ol, ul {
   list-style: none; }
@@ -3170,7 +3170,6 @@ a.subdued {
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 17px;
     font-weight: 500;
     line-height: 44px; }
     .bar .title.title-left {
@@ -3202,7 +3201,7 @@ a.subdued {
       padding-right: 2px;
       padding-left: 2px;
       font-weight: 300;
-      font-size: 17px; }
+      font-size: inherit; }
       .bar .button.button-clear .icon:before, .bar .button.button-clear.icon:before, .bar .button.button-clear.icon-left:before, .bar .button.button-clear.icon-right:before {
         font-size: 32px;
         line-height: 32px; }
@@ -3259,7 +3258,7 @@ a.subdued {
     background: none;
     box-shadow: none;
     color: #444;
-    font-size: 17px; }
+}
   .bar-light .button.button-icon {
     border-color: transparent;
     background: none; }
@@ -4663,7 +4662,7 @@ ion-tabs.tabs-color-active-dark .tab-item {
   z-index: 2;
   display: block;
   margin: -1px;
-  padding: 16px;
+  padding: 10px;
   border-width: 1px;
   border-style: solid;
   font-size: 16px; }
@@ -5682,7 +5681,7 @@ input, button, select, textarea {
   align-items: center;
   position: relative;
   overflow: hidden;
-  padding: 6px 0 5px 16px; }
+  padding: 0px 0px 0px 16px; }
   .item-input input {
     -webkit-border-radius: 0;
     border-radius: 0;
@@ -5783,7 +5782,7 @@ input, button, select, textarea {
   max-width: 200px;
   width: 35%;
   color: #444;
-  font-size: 16px; }
+}
 
 .placeholder-icon {
   color: #aaa; }
@@ -6447,7 +6446,9 @@ input[type="radio"][disabled], input[type="checkbox"][disabled], input[type="rad
  * --------------------------------------------------
  */
 .item-select {
-  position: relative; }
+    position: relative;
+    padding: 16px;
+}
   .item-select select {
     -webkit-appearance: none;
     -moz-appearance: none;

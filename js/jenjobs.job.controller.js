@@ -13,7 +13,7 @@
 		// }
 	});
 
-	$ionicModal.fromTemplateUrl('/templates/modal/job-filter.html', {
+	$ionicModal.fromTemplateUrl('templates/modal/job-filter.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
@@ -48,20 +48,24 @@
 	});
 
 })
-.controller('JobDetailCtrl', function($scope, $stateParams, $location, $http, $ionicHistory, JsDatabase, JobSearch){
+.controller('JobDetailCtrl', function($scope, $stateParams, $location, $http, $ionicHistory, $ionicLoading, JsDatabase, JobSearch){
 	$scope.bookmarked = false;
 	$scope.applied = false;
+	// console.log($location.absUrl());
 
-	JobSearch.get($stateParams.jid).then(function(job){
-		console.log(job);
+	var urlParam = {};
+	urlParam.post_id = $stateParams.jid;
+	if( /closed\=1$/g.test( $location.absUrl() ) ){
+		urlParam.closed = 1;
+	}
+
+	JobSearch.get(urlParam).then(function(job){
 		$scope.job = job;
 
 		// get bookmark status
 		JobSearch.getBookmark($stateParams.jid).then(function(bookmark){
 			$scope.bookmark = bookmark;
 			$scope.bookmarked = true; // has bookmarked the job
-		}).then(function(){
-
 		}).catch(function(err){
 			console.log(err);
 		});
@@ -101,11 +105,13 @@
 	});
 
 	$scope.bookmark = function( jid ){
+		console.log('bookmarking 1 '+jid);
 		JobSearch.bookmarkJob({
-			jid: jid,
+			post_id: jid,
 			title: $scope.job.title,
 			date_closed: $scope.job.date_closed
 		}, $scope.access_token).then(function(status){
+			console.log('bookmarked!');
 			$scope.bookmarked = true;
 			$scope.bookmark._rev = status.rev; // update revision to update the object reference
 
@@ -128,26 +134,125 @@
 	}
 
 	$scope.submitApplication = function(){
-		/**
-		check resume completeness
-			attached resume?
-				ok -> can apply
-				not ok -> need to complete online resume
-					name, phone, birthday
-					work exp
-					education
-					jobseeking information
-					job preferences
+		JsDatabase.getProfile().then(function(profile){
+			JsDatabase.getSettings('completeness')
+			.then(function(completeness){
+				console.log(completeness);
 
-		*/
+				/**
+				check resume completeness
+					attached resume?
+						ok -> can apply
+						not ok -> need to complete online resume
+							name, phone, birthday
+							work exp
+							education
+							jobseeking information
+							job preferences
+
+				*/
+
+				// if js uploaded a resume, no need to check for anything else
+				var canApply = false;
+				var alerts = [];
+
+				if( completeness.attachment ){
+					canApply = true;
+				}else{
+					if( completeness.profile ){
+						if( completeness.workExp ){ // got work exp
+							if( completeness.education ){ // got education
+								if( completeness.jobseek ){
+									if( completeness.jobPref ){
+										if( completeness.language ){
+											canApply = true;
+										}else{
+											alerts.push('Please fill in your spoken and written language!');
+										}
+									}else{
+										alerts.push('Please complete your job preferences!');
+									}
+								}else{
+									alerts.push('Please complete your jobseeking information!');
+								}
+							}else{
+								alerts.push('Please add your education record!');
+							}
+						}else{
+							// no work exp... need to check whether js has check the noWorkExp settings
+							if( profile.no_work_exp ){
+								canApply = true;
+							}else{
+								alerts.push('Please add your work experiences!');
+							}
+						}
+					}else{
+						alerts.push('Please complete your profile!');
+					}
+				}
+
+				console.log(canApply);
+				console.log(alerts);
+
+				if( canApply ){
+					JobSearch.apply({
+						closed: false,
+						date_created: new Date(),
+						id: 0,
+						post_id: $stateParams.jid,
+						status: 0,
+						title: $scope.job.title,
+						//_id: $stateParams.jid
+					}, $scope.access_token).then(function(doc){
+						console.log(doc);
+						$ionicLoading.show({
+							template: 'Application submitted',
+							noBackdrop: true,
+							duration: 1000
+						});
+					}).catch(function(e){
+						console.log(e);
+					});
+				}else{
+					$ionicLoading.show({
+						template: alerts.join(' '),
+						noBackdrop: true,
+						duration: 1000
+					});
+				}
+			});
+		});
 	}
+
+	$scope.go = function(path){
+		$location.path(path);
+	}
+
 })
+
+.controller('ApplicationCtrl', function($scope, JobSearch, JsDatabase){
+
+	JobSearch.getApplication().then(function(application){
+		console.log(application);
+		if( application.length > 0 ){
+			angular.forEach(application, function(app, i){
+				console.log(app);
+				app.status_desc = JobSearch.applicationStatus[app.status];
+			});
+		}
+		$scope.application = application;
+	});
+})
+
 .controller('BookmarkController', function($scope, JobSearch){
 	$scope.bookmarks = [];
 	JobSearch.getBookmarks().then(function(bookmarks){
-		// console.log(bookmarks);
-		$scope.bookmarks = bookmarks;
+		if( bookmarks ){
+			$scope.bookmarks = bookmarks;
+		}
 	}).catch(function(e){
 		console.log(e);
 	});
+
+	setTimeout(function(){ $scope.bookmarks }, 2000);
 });

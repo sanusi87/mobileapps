@@ -1,4 +1,10 @@
 <ion-view view-title="{{job.title}}">
+	<ion-nav-buttons side="left">
+		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/job')">
+			<i class="ion-ios-arrow-left"></i> Jobs
+		</button>
+	</ion-nav-buttons>
+
 	<ion-content class="padding">
 		<div ng-show="job.post_id">
 			<div class="row">
@@ -20,8 +26,8 @@
 				<div class="col">
 					<div class="button-bar">
 						<!-- not apply -->
-						<button type="button" ng-class="{button:true, 'button-light':applied,'button-positive':!applied}" ng-disabled="applied" ng-click="submitApplication()">
-							<i class="ion-ios-copy"></i> <span ng-show="applied">Applied</span><span ng-show="!applied">Apply</span>
+						<button type="button" ng-class="{button:true, 'button-light':applied,'button-positive':!applied}" ng-disabled="applied || accessToken" ng-click="submitApplication()">
+							<i class="ion-ios-copy"></i> <span ng-show="applied">Applied</span><span ng-show="!applied">{{access_token ? 'Apply' : 'Login to apply'}}</span>
 						</button>
 					</div>
 				</div>

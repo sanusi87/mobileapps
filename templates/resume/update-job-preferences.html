@@ -6,7 +6,7 @@
 				<div class="item">
 					<h2><label for="expectedSalary" ng-class="{'input-label':true, assertive: $parent.expectedSalary ? false : true}">Expected Salary</label></h2>
 					<div class="list">
-						<div class="item item-input item-select">
+						<div class="item item-select pt-0 pb-0">
 							<input type="number" data-ng-model="$parent.expectedSalary" placeholder="0.00" id="expectedSalary" required />
 							<select data-ng-options="o.name for o in currencies track by o.id" data-ng-model="$parent.selectedCurrency" id="currency"></select>
 						</div>

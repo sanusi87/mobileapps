@@ -2,6 +2,7 @@ angular.module('jenjobs.controllers', [])
 
 .controller('ProfileCtrl', function($scope, $location, JsDatabase){
 	$scope.js = {};
+	$scope.access_token = null;
 
 	JsDatabase.getProfile().then(function(profile){
 		$scope.js = profile;
@@ -11,6 +12,14 @@ angular.module('jenjobs.controllers', [])
 	$scope.go = function(path){
 		$location.path(path);
 	}
+
+	JsDatabase.getToken().then(function(token){
+		if( token.length > 0 ){
+
+		}else{
+			$location.path('/login');
+		}
+	});
 })
 
 .controller('ProfileUpdateCtrl', function($scope, $http, $filter, $ionicPopup, $ionicModal, $ionicLoading, JsDatabase){
@@ -19,10 +28,7 @@ angular.module('jenjobs.controllers', [])
 		if( token.length > 0 ){
 			$scope.access_token = token[0].access_token;
 		}else{
-			var alertPopup = $ionicPopup.alert({
-				title: 'Notification',
-				template: 'Failed to get access token!'
-			});
+			$location.path('/login');
 		}
 	});
 
@@ -134,7 +140,7 @@ angular.module('jenjobs.controllers', [])
 		}
 	};
 
-	$ionicModal.fromTemplateUrl('/templates/modal/country-dial-code.html', {
+	$ionicModal.fromTemplateUrl('templates/modal/country-dial-code.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
@@ -208,17 +214,25 @@ angular.module('jenjobs.controllers', [])
 	}
 })
 
-.controller('LoginCtrl', function($scope, $http, $location, $ionicPopup, $ionicHistory, JsDatabase, JobSearch){
+.controller('LoginCtrl', function($scope, $http, $location, $ionicPopup, $ionicHistory, JsDatabase, JobSearch, JobseekerLogin){
+	$scope.disableButton = false;
+
 	$scope.user = {
 		grant_type: 'password',
 		username: '',
 		password: '',
 		client_id: 'testclient',
 		client_secret: 'testpass'
-	};
+	}
+
+	$scope.button = {
+		text: 'Login'
+	}
 
 	$scope.submit = function(){
-		// $http.post('http://api.jenjobs.local/oauth2/token', $scope.user)
+		$scope.button.text = 'Login...';
+
+		$scope.disableButton = true;
 		$http({
 			method: 'POST',
 			url: 'http://api.jenjobs.local/oauth2/token',
@@ -230,113 +244,231 @@ angular.module('jenjobs.controllers', [])
 		}).then(function(response){
 			// success
 			if( response.data && typeof( response.data.access_token ) != 'undefined' ){
+				$scope.button.text = 'Downloading data...';
+
 				// add token to db
 				JsDatabase.addToken( response.data );
 				var accessToken = response.data.access_token;
 
-				// download all parameters, profile, work, education etc
-
 				// download parameters
 				$http({method: 'GET',url: 'http://api.jenjobs.local/parameters/others'})
-				.then(function(response){
-					angular.forEach(response.data, function(value, i){
+				.then(function(response_param){
+					angular.forEach(response_param.data, function(value, i){
 						JsDatabase.addParameter(value, i);
 					});
-				});
 
-				// download countries, states, cities
-				$http({method: 'GET',url: 'http://api.jenjobs.local/parameters/locations'})
-				.then(function(response){
-					angular.forEach(response.data, function(value, i){
-						JsDatabase.addParameter(value, i);
-					});
-				});
-
-				// download profile
-				$http({
-					method: 'GET',
-					url: 'http://api.jenjobs.local/jobseeker/profile',
-					params: {'access-token': accessToken}
-				}).then(function(response){
-					// remove _links from record, before saving, else it will cause bad special document member error, because _links is a reserved work in PouchDb
-					// only for user profile/account
-					delete(response.data._links);
-					return response;
-				}).then(function(response){
-					JsDatabase.addProfile(response.data).then(function(){
-						if( response.data.mobile_no && response.data.dob ){
-							JsDatabase.updateCompleteness('profile', true);
-						}
-						$location.path('/tab/profile');
-					});
-				});
-
-				// download job applications
-				$http({
-					method: 'GET',
-					url: 'http://api.jenjobs.local/jobseeker/applications',
-					params: {'access-token': accessToken}
-				}).then(function(response){
-					if( response.data.length > 0 ){
-						angular.forEach(response.data, function(value, i){
-							JsDatabase.addApplication(value, value.post_id);
+					// download countries, states, cities
+					$http({method: 'GET',url: 'http://api.jenjobs.local/parameters/locations'})
+					.then(function(response_loc){
+						angular.forEach(response_loc.data, function(value, i){
+							JsDatabase.addParameter(value, i);
 						});
-					}
-				});
 
-				// download work experiences
-				$http({
-					method: 'GET',
-					url: 'http://api.jenjobs.local/jobseeker/work-experience',
-					params: {'access-token': accessToken}
-				}).then(function(response){
-					if( response.data.length > 0 ){
-						angular.forEach(response.data, function(value, i){
-							JsDatabase.addWork(value);
-						});
-						JsDatabase.updateCompleteness('workExp', true);
-					}
-				});
+						var completedItems = [];
 
-				// download qualification/education
-				$http({
-					method: 'GET',
-					url: 'http://api.jenjobs.local/jobseeker/qualification',
-					params: {'access-token':accessToken}
-				}).then(function(response){
-					if( response.data.length > 0 ){
-						angular.forEach(response.data, function(value, i){
-							JsDatabase.addEducation(value);
-						});
-						JsDatabase.updateCompleteness('education', true);
-					}
-				});
+						// download profile
+						$http({
+							method: 'GET',
+							url: 'http://api.jenjobs.local/jobseeker/profile',
+							params: {'access-token': accessToken}
+						}).then(function(response_profile){
+							// remove _links from record, before saving, else it will cause bad special document member error, because _links is a reserved work in PouchDb
+							// only for user profile/account
+							delete(response_profile.data._links);
+							response_profile.data.no_work_exp = response_profile.data.no_work_exp == 0 ? false : true;
 
-				// download job preferences
-				$http({
-					method: 'GET',
-					url: 'http://api.jenjobs.local/jobseeker/job-preference',
-					params: {'access-token':accessToken}
-				}).then(function(response){
-					JsDatabase.addSettings(response.data, 'jobPref');
-					if( response.data.salary && response.job_type_id.length > 0 ){
-						JsDatabase.updateCompleteness('jobPref', true);
-					}
-				});
+							return response_profile;
+						}).then(function(response_profile){
+							JsDatabase.addProfile(response_profile.data).then(function(){
+								if( response_profile.data.mobile_no && response_profile.data.dob ){
+									// JsDatabase.updateCompleteness('profile', true);
+									completedItems.push('profile');
+								}
+
+								if( response_profile.data.resume_file && response_profile.data.resume_file.length > 5 ){
+									completedItems.push('attachment');
+								}
+
+								if( response_profile.data.availability ){
+									completedItems.push('jobseek');
+								}
+							});
+
+
+
+							// download job applications
+							$http({
+								method: 'GET',
+								url: 'http://api.jenjobs.local/jobseeker/application',
+								params: {'access-token': accessToken}
+							}).then(function(response_app){
+								console.log(response_app);
+								if( response_app.data.length > 0 ){
+									angular.forEach(response_app.data, function(value, i){
+										console.log(value);
+										value._id = String(value.post_id);
+
+										JobSearch.apply(value).then(function(doc){
+											console.log(doc);
+										}).catch(function(err){
+											console.log(err);
+										});
+									});
+								}
+
+								// download work experiences
+								$http({
+									method: 'GET',
+									url: 'http://api.jenjobs.local/jobseeker/work-experience',
+									params: {'access-token': accessToken}
+								}).then(function(response_work){
+									if( response_work.data.length > 0 ){
+										angular.forEach(response_work.data, function(value, i){
+											JsDatabase.addWork(value);
+										});
+										// JsDatabase.updateCompleteness('workExp', true);
+										completedItems.push('workExp');
+									}
+
+									// download qualification/education
+									$http({
+										method: 'GET',
+										url: 'http://api.jenjobs.local/jobseeker/qualification',
+										params: {'access-token':accessToken}
+									}).then(function(response_edu){
+										if( response_edu.data.length > 0 ){
+											angular.forEach(response_edu.data, function(value, i){
+												JsDatabase.addEducation(value);
+											});
+											// JsDatabase.updateCompleteness('education', true);
+											completedItems.push('education');
+										}
+
+										// download job preferences
+										$http({
+											method: 'GET',
+											url: 'http://api.jenjobs.local/jobseeker/job-preference',
+											params: {'access-token':accessToken}
+										}).then(function(resp){
+											JsDatabase.addSettings(resp.data, 'jobPref');
+											if( resp.data.salary && resp.data.job_type_id.length > 0 ){
+												// JsDatabase.updateCompleteness('jobPref', true);
+												completedItems.push('jobPref');
+											}
+
+											// download skills
+											$http({
+												method: 'GET',
+												url: 'http://api.jenjobs.local/jobseeker/skill',
+												params: {'access-token':accessToken}
+											}).then(function(respo){
+
+												if( respo.data.length > 0 ){
+													angular.forEach(respo.data, function(skill, i){
+														JsDatabase.addSkill(skill);
+													});
+												}
+
+												// download languages
+												$http({
+													method: 'GET',
+													url: 'http://api.jenjobs.local/jobseeker/language',
+													params: {'access-token':accessToken}
+												}).then(function(respon){
+													if( respon.data.length > 0 ){
+														angular.forEach(respon.data, function(lang, i){
+															JsDatabase.addLanguage(lang);
+														});
+														completedItems.push('language');
+													}
+
+													// download bookmarks
+													$http({
+														method: 'GET',
+														url: 'http://api.jenjobs.local/jobseeker/bookmark',
+														params: {'access-token':accessToken}
+													}).then(function(respon){
+														if( respon.data.length > 0 ){
+															angular.forEach(respon.data, function(bookmark, i){
+																JobSearch.bookmarkJob(bookmark);
+															});
+														}
+
+														console.log(completedItems);
+														if( completedItems.length > 0 ){
+															loopItem();
+
+															function loopItem(){
+																if( completedItems.length > 0 ){
+																	console.log('completeness updated.');
+																	updateCompleteness(completedItems[0]);
+																}else{
+																	$scope.disableButton = false;
+																	console.log('reached');
+																	$location.path('/tab/profile');
+																}
+															}
+
+															function updateCompleteness( key ){
+																JsDatabase.updateCompleteness(key, true)
+																.then(function(){
+																	completedItems.splice(0,1);
+																	loopItem();
+																}).catch(function(e){
+																	console.log(e);
+																});
+															}
+														}else{
+															$scope.disableButton = false;
+															console.log('reached');
+															$location.path('/tab/profile');
+														}
+													}); // download bookmarks
+												}); // done languages
+											}); // done skills
+										}); // done job preferences
+									}); // done qualification
+								}); // done work experience
+							}); // done application
+
+
+
+						}); // done profile
+					}); // done location
+				}); // done parameter
 			}else{
+				$scope.button.text = 'Login';
 				var alertPopup = $ionicPopup.alert({
 					title: 'Notification',
 					template: 'Login failed!'
 				});
 			}
-		}, function(response){
+		}).catch(function(response){
+			$scope.button.text = 'Login';
 			// failed
+			$scope.disableButton = false;
+			var alertPopup = $ionicPopup.alert({
+				title: 'Notification',
+				template: angular.toJson(response, true)
+			});
 		});
 	}
 
+	var enterEventFired = false;
 	$scope.$on('$ionicView.enter', function() {
+		enterEventFired = true;
+		runEnterEvent();
+    });
+
+	// trying to trigger enter event if not yet executed
+	setTimeout(function(){
+		if( !enterEventFired ){
+			runEnterEvent();
+		}
+	}, 2000);
+
+	function runEnterEvent(){
 		JsDatabase.getToken().then(function(token){
-			// console.log(token);
 			// if already got token, then redirect to profile
 			if( token.length > 0 ){
 				$ionicHistory.nextViewOptions({
@@ -345,99 +477,149 @@ angular.module('jenjobs.controllers', [])
 				$location.path('/tab/profile');
 			}
 		});
-    });
-
-	$scope.logout = function(){
-		// JobSearch.getBookmarks().then(function(bookmarks){
-		// 	angular.forEach(bookmarks, function(b,i){
-		// 		JsDatabase.deleteBookmark(i, b._rev, token);
-		// 	});
-		// });
-
-		// JsDatabase.deleteSettings();
-
-		JobSearch.deleteAllJob();
-		JobSearch.deleteAllBookmark();
-		JobSearch.deleteAllApplication();
 	}
 })
 
-.controller('RegisterCtrl', function( $scope, $http, $ionicHistory, $ionicLoading, JsDatabase ){
+.controller('RegisterCtrl', function( $scope, $http, $ionicHistory, $ionicLoading, JsDatabase, JobseekerLogin ){
+	$scope.js = {
+		name: '',
+		email: '',
+		password: '',
+		repeat_password: ''
+	},
+	$scope.button = {
+		text: 'Register'
+	}
 
+	$scope.submit = function(){
+		$scope.button.text = 'Registering...';
+		$http({
+			method: 'POST',
+			url: 'http://api.jenjobs.local/register/jobseeker',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			data: $scope.user
+		}).then(function(response){
+			console.log(response);
+
+			if( response.data.status_code == 1 ){
+				$scope.button.text = 'Registration success.';
+
+			}else{
+				$scope.button.text = 'Register';
+			}
+		});
+	}
 })
 
 .controller('AccountCtrl', function($scope, $location, JsDatabase, JobSearch) {
+	$scope.access_token = null;
+	JsDatabase.getToken().then(function(token){
+		if(token.length > 0){
+			$scope.access_token = token;
+		}else{
+			$location.path('/login');
+		}
+	}).catch(function(){
+		$location.path('/login');
+	});
+
 	// logout
 	$scope.logout = function(){
 		// keep parameter
 		// remove token
-		JsDatabase.getToken().then(function(token){
-			if(token.length > 0){
-				angular.forEach(token, function(t, i){
-					JsDatabase.deleteToken(t).then(function(){
 
-						// remove profile
-						JsDatabase.getProfile().then(function(profile){
-							if( profile ){
-								JsDatabase.deleteProfile(profile);
-							}
-						});
-
-						// remove work
-						JsDatabase.getWork().then(function(work){
-							if( work.length > 0 ){
-								angular.forEach(work, function(w,i){
-									JsDatabase.deleteWork(w);
-								});
-							}
-						});
-
-						// remove education
-						JsDatabase.getEducation().then(function(education){
-							if( education.length > 0 ){
-								angular.forEach(education, function(e,i){
-									JsDatabase.deleteEducation(e);
-								});
-							}
-						});
-
-						// remove skill
-						JsDatabase.getSkill().then(function(skill){
-							if( skill.length ){
-								angular.forEach(skill, function(s,i){
-									JsDatabase.deleteSkill(s);
-								});
-							}
-						});
-
-						// remove language
-						JsDatabase.getLanguage().then(function(language){
-							if( language.length ){
-								angular.forEach(language, function(l,i){
-									JsDatabase.deleteLanguage(l);
-								});
-							}
-						});
-
-						JobSearch.getBookmarks().then(function(bookmarks){
-							angular.forEach(bookmarks, function(b,i){
-								JsDatabase.deleteBookmark(i, b._rev, token);
-							});
-						});
-
-						JsDatabase.deleteSettings();
-						JobSearch.deleteAllJob();
-						JobSearch.deleteAllBookmark();
-						JobSearch.deleteAllApplication();
-
-						setTimeout(function(){
-							$location.path('/login');
-						}, 1000);
-					});
+		angular.forEach($scope.access_token, function(t, i){
+			JsDatabase.deleteToken(t).then(function(){
+				console.log('token removed');
+				// remove profile
+				JsDatabase.getProfile().then(function(profile){
+					if( profile ){
+						JsDatabase.deleteProfile(profile);
+					}
+				}).catch(function(e){
+					console.log(e);
 				});
-			}
-		});
 
+				// remove work
+				JsDatabase.getWork().then(function(work){
+					if( work.length > 0 ){
+						angular.forEach(work, function(w,i){
+							JsDatabase.deleteWork(w);
+						});
+					}
+				}).catch(function(e){
+					console.log(e);
+				});
+
+				// remove education
+				JsDatabase.getEducation().then(function(education){
+					if( education.length > 0 ){
+						angular.forEach(education, function(e,i){
+							JsDatabase.deleteEducation(e);
+						});
+					}
+				}).catch(function(e){
+					console.log(e);
+				});
+
+				// remove skill
+				JsDatabase.getSkill().then(function(skill){
+					if( skill.length ){
+						angular.forEach(skill, function(s,i){
+							JsDatabase.deleteSkill(s);
+						});
+					}
+				}).catch(function(e){
+					console.log(e);
+				});
+
+				// remove language
+				JsDatabase.getLanguage().then(function(language){
+					if( language.length ){
+						angular.forEach(language, function(l,i){
+							JsDatabase.deleteLanguage(l);
+						});
+					}
+				}).catch(function(e){
+					console.log(e);
+				});
+
+				JobSearch.getBookmarks().then(function(bookmarks){
+					angular.forEach(bookmarks, function(b,i){
+						JobSearch.deleteBookmark(i, b._rev, t);
+					});
+				}).catch(function(e){
+					console.log(e);
+				});
+
+				JsDatabase.deleteSettings().then(function(){
+					console.log('settings deleted.');
+					JobSearch.deleteAllJob().then(function(){
+						console.log('jobs deleted');
+						JobSearch.deleteAllBookmark().then(function(){
+							console.log('bookmark deleted');
+							JobSearch.deleteAllApplication().then(function(){
+								console.log('application deleted.');
+								$location.path('/login');
+							}).catch(function(e){
+								console.log(e);
+							});
+						}).catch(function(e){
+							console.log(e);
+						});
+					}).catch(function(e){
+						console.log(e);
+					});
+				}).catch(function(e){
+					console.log(e);
+				});
+			}).catch(function(e){
+				console.log(e);
+			});
+		});
 
 		return false;
 	}

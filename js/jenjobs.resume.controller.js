@@ -14,10 +14,9 @@
 			});
 		}
 	});
-	//JsDatabase.updateCompleteness('language', true);
+
 	JsDatabase.getProfile().then(function(profile){
 		$scope.js = profile;
-		console.log(profile);
 		$scope.jsJobseekingStatus = profile.js_jobseek_status_id;
 		$scope.availability = profile.availability;
 		$scope.selectedavailabilityUnit = {};
@@ -100,7 +99,6 @@
 	// work
 	JsDatabase.getWork().then(function(works){
 		$scope.works = works;
-		console.log(works);
 	});
 
 	$scope.removeWork = function( work ){
@@ -214,7 +212,7 @@
 	// education
 
 	// skill
-	$ionicModal.fromTemplateUrl('/templates/modal/add-skill-input.html', {
+	$ionicModal.fromTemplateUrl('templates/modal/add-skill-input.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
@@ -247,7 +245,7 @@
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
-				data: ''
+				data: param
 			}).then(function(response){
 				// console.log(response);
 				JsDatabase.getSkillById( a.id ).then(function(skill){
@@ -300,7 +298,7 @@
 	// skill
 
 	// language
-	$ionicModal.fromTemplateUrl('/templates/modal/attach-language-modal.html', {
+	$ionicModal.fromTemplateUrl('templates/modal/attach-language-modal.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
@@ -490,7 +488,7 @@
 
 	// attached resume
 	$scope.tmpResumeAttachment;
-	$ionicModal.fromTemplateUrl('/templates/modal/attach-resume-input.html', {
+	$ionicModal.fromTemplateUrl('templates/modal/attach-resume-input.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
@@ -563,7 +561,7 @@
 	// attached resume
 
 	// additional info
-	$ionicModal.fromTemplateUrl('/templates/modal/additional-info.html', {
+	$ionicModal.fromTemplateUrl('templates/modal/additional-info.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
@@ -769,7 +767,7 @@
 			});
 		});
 
-		$ionicModal.fromTemplateUrl('/templates/modal/countries.html', {
+		$ionicModal.fromTemplateUrl('templates/modal/countries.html', {
 			scope: $scope,
 			animation: 'slide-in-up'
 		}).then(function(modal) {
@@ -799,7 +797,7 @@
 	// 	console.log($scope.selectedState);
 	// }, 2000);
 
-	$ionicModal.fromTemplateUrl('/templates/modal/states.html', {
+	$ionicModal.fromTemplateUrl('templates/modal/states.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
@@ -1137,7 +1135,10 @@
 	var id = 0;
 	var workId = 0;
 
-	// console.log($stateParams);
+	$scope.go = function(path){
+		$location.path(path);
+	}
+
 	if( $stateParams.workid ){
 		JsDatabase.getWorkById($stateParams.workid).then(function(work){
 			$scope.positionTitle = work.position;
@@ -1338,6 +1339,10 @@
 	var rev = null;
 	var id = 0;
 	var eduId = 0;
+
+	$scope.go = function(path){
+		$location.path(path);
+	}
 
 	$scope.access_token = null;
 	JsDatabase.getToken().then(function(token){

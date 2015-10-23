@@ -1,7 +1,9 @@
 <ion-view view-title="Bookmarks">
 	<ion-content class="padding">
         <ul class="list list-inset">
-            <li ng-show="bookmarks.length == 0">No bookmark</li>
+            <li class="item" ng-show="bookmarks.length == 0">
+				<i class="ion-android-warning"></i> No bookmark
+			</li>
             <li class="item" ng-repeat="(i,bookmark) in bookmarks">
                 <h2>
                     <strong>

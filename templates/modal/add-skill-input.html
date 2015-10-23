@@ -1,6 +1,6 @@
 <ion-modal-view>
 	<ion-header-bar>
-		<h1 class="title">Add New Skill</h1>
+		<h4 class="title">Add New Skill</h4>
 	</ion-header-bar>
 	<ion-content>
 		<div class="list list-inset">
@@ -8,7 +8,7 @@
 				<input type="text" data-ng-model="skill.value" placeholder="skill" />
 				<input type="hidden" data-ng-model="skill.id" />
 			</div>
-			
+
 			<div class="item">
 				<button type="button" ng-click="saveAndCloseModal()" class="button button-positive" ng-disabled="!skill.value">
 					Save

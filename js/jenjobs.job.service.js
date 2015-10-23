@@ -28,7 +28,9 @@
 
 		apply: apply,
 		checkApplication: checkApplication,
-		deleteAllApplication: deleteAllApplication
+		deleteAllApplication: deleteAllApplication,
+		getApplication: getApplication,
+		applicationStatus: applicationStatus
 	};
 
 	function initDB(){
@@ -87,10 +89,16 @@
 		});
 	}
 
-	function getJobDetails( postId ){
+	function getJobDetails( param ){
+
+		var requestUrl = 'http://api.jenjobs.local/jobs/search/'+param.post_id;
+		if( param.closed == 1 ){
+			requestUrl += '?closed=1';
+		}
+
 		return $http({
 			method: 'GET',
-			url: 'http://api.jenjobs.local/jobs/search/'+postId,
+			url: requestUrl,
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
@@ -108,9 +116,11 @@
 
 	// bookmark
 	function bookmarkJob( items, accessToken ){
+		console.log('bookmarking...');
+		console.log(items);
 		return $q.when( _bookmark_db.put({
-			_id: String(items.jid),
-			on: new Date(),
+			_id: String(items.post_id),
+			on: items.on ? items.on : new Date(),
 			title: items.title,
 			date_closed: items.date_closed
 		})).then(function(doc){
@@ -119,11 +129,11 @@
 				data = {};
 
 				param['access-token'] = accessToken;
-				data.post_id = items.jid;
+				data.post_id = items.post_id;
 
 				$http({
 					method: 'POST',
-					url: 'http://api.jenjobs.local/jobseeker/bookmarks',
+					url: 'http://api.jenjobs.local/jobseeker/bookmark',
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -133,13 +143,16 @@
 				}).then(function(response){
 					console.log(response);
 				}).catch(function(err){
+					console.log('http error');
 					console.log(err);
 				});
 			}
 
 			return doc;
 		}).catch(function(e){
+			console.log('local save error');
 			console.log(e);
+			return {};
 		});
 	}
 
@@ -150,7 +163,7 @@
 				param['access-token'] = accessToken;
 				$http({
 					method: 'DELETE',
-					url: 'http://api.jenjobs.local/jobseeker/bookmarks/'+jid,
+					url: 'http://api.jenjobs.local/jobseeker/bookmark/'+jid,
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -169,13 +182,15 @@
 	function getBookmarks(){
 		return $q.when(_bookmark_db.allDocs({ include_docs: true}))
 		.then(function(docs){
-			console.log(docs);
-			bookmarks = docs.rows.map(function(row) {
-				row.doc.on = new Date(row.doc.on);
-				row.doc.date_closed = new Date(row.doc.date_closed);
-				return row.doc;
-			});
-			return bookmarks;
+			if( docs.rows.length > 0 ){
+				bookmarks = docs.rows.map(function(row) {
+					row.doc.on = new Date(row.doc.on);
+					row.doc.date_closed = new Date(row.doc.date_closed);
+					return row.doc;
+				});
+				return bookmarks;
+			}
+			return;
 		})
 	}
 
@@ -186,32 +201,57 @@
 	}
 	// bookmark
 
-	// application
-	function apply(){
-		$q.when( _application_db.put({
-			on: new Date(),
-			status: 0
-		}, jid));
+	/**
+	application = {
+		id: xxx,
+		post_id: xxx,
+		date_created: xxx,
+		status: xxx
+	}
+	*/
+	function apply( application, accessToken ){
+		console.log(application);
+		return $q.when( _application_db.put( application, application.post_id ) )
+		.then(function(doc){
+			if( accessToken ){
+				return $http({
+					method: 'POST',
+					url: 'http://api.jenjobs.local/jobseeker/application/'+application.post_id,
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					data: {},
+					params: {
+						'access-token': accessToken
+					}
+				}).then(function(response){
+					console.log(response);
+					return response;
+				});
+			}
+			return {};
+		}).catch(function(e){
+			console.log(e);
+		});
 	}
 
 	function withdraw( application ){
-		$q.when( _application_db.put({
-			on: new Date(),
-			status: 10
-		}, application.jid, application.rev));
+		application.status = 10;
+		$q.when( _application_db.put(application, application._id, application._rev));
 	}
 
 	function getApplication( appId ){
 		if( appId ){
 			return $q.when(_application_db.get(appId)).then(function(docs){
 				_application = docs;
-				_application.on = new Date(_application.on);
+				_application.date_created = new Date(_application.date_created);
 
 				_application_db.changes({
 					live: true,
 					since: 'now',
 					include_docs: true
-				}).on('change', onProfileDatabaseChange);
+				}).on('change', function(){});
 
 				return _application;
 			});
@@ -219,8 +259,7 @@
 			return $q.when(_application_db.allDocs({ include_docs: true}))
 			.then(function(docs) {
 				_application = docs.rows.map(function(row) {
-					row.doc.date_closed = new Date(row.doc.date_closed);
-					row.doc.date_posted = new Date(row.doc.date_posted);
+					row.doc.date_created = new Date(row.doc.date_created);
 					return row.doc;
 				});
 
@@ -228,7 +267,7 @@
 					live: true,
 					since: 'now',
 					include_docs: true
-				}).on('change', onProfileDatabaseChange);
+				}).on('change', function(){});
 
 				return _application;
 			});
@@ -266,8 +305,8 @@
 	function deleteAllJob(){
 		return $q.when(_job_db.allDocs({ include_docs: true}))
 		.then(function(docs){
-			if( docs.length > 0 ){
-				angular.forEach(docs, function(e,i){
+			if( docs.rows.length > 0 ){
+				angular.forEach(docs.rows, function(e,i){
 					_job_db.remove(e.doc._id, e.doc._rev);
 				});
 			}
@@ -277,8 +316,8 @@
 	function deleteAllBookmark(){
 		return $q.when(_bookmark_db.allDocs({ include_docs: true}))
 		.then(function(docs){
-			if( docs.length > 0 ){
-				angular.forEach(docs, function(e,i){
+			if( docs.rows.length > 0 ){
+				angular.forEach(docs.rows, function(e,i){
 					_bookmark_db.remove(e.doc._id, e.doc._rev);
 				});
 			}
@@ -288,9 +327,13 @@
 	function deleteAllApplication(){
 		return $q.when(_application_db.allDocs({ include_docs: true}))
 		.then(function(docs){
-			if( docs.length > 0 ){
-				angular.forEach(docs, function(e,i){
-					_application_db.remove(e.doc._id, e.doc._rev);
+			if( docs.rows.length > 0 ){
+				angular.forEach(docs.rows, function(e,i){
+					$q.when(_application_db.remove(e.doc._id, e.doc._rev)).then(function(a){
+						return a;
+					}).catch(function(e){
+						console.log(e);
+					});
 				});
 			}
 		});

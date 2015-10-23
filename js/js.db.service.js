@@ -61,11 +61,6 @@ angular.module('jenjobs.db', [])
 		updateToken: updateToken,
 		deleteToken: deleteToken,
 
-		//getApplication: getApplication,
-		addApplication: addApplication,
-		//updateApplication: updateApplication,
-		//deleteApplication: deleteApplication,
-
 		getSettings: getSettings,
 		updateSettings: updateSettings,
 		addSettings: addSettings,
@@ -222,8 +217,6 @@ angular.module('jenjobs.db', [])
 		return $q.when( _profile_db.remove( 'profile', dbItem._rev ) );
 	};
 	/** end profile */
-
-
 
 	/** start education */
 	function getEducation(){
@@ -509,6 +502,25 @@ angular.module('jenjobs.db', [])
 			angular.forEach(docs.rows, function(e,i){
 				_settings_db.remove( e.doc._id, e.doc._rev );
 			});
+			return;
+		}).then(function(){
+			// restore default
+			_settings_db.bulkDocs([
+				{_id: 'sms_job_alert', value:0},
+				{_id: 'email_alert', value:0},
+				{_id: 'notification', value:0},
+				{_id: 'attachedResume', value:0},
+				{
+					_id: 'completeness',
+					workExp:false,
+					education:false,
+					profile:false,
+					jobseek:false,
+					jobPref:false,
+					attachment:false,
+					language: false
+				}
+			]);
 		});
 	}
 
@@ -518,14 +530,15 @@ angular.module('jenjobs.db', [])
 			d[key] = status;
 
 			_settings_db.put(d, d._id, d._rev)
-			.then(function(a){console.log(a);})
-			.catch(function(e){console.log(e);});
+			.then(function(a){
+				// console.log(key+' completeness updated');
+				// console.log(a);
+			}).catch(function(e){
+				// console.log('failed to update completeness for '+key);
+				// console.log(e);
+			});
 		});
 	}
 	/** end settings */
-
-	function addApplication(dbItem, id){
-		return $q.when( _settings_db.put( dbItem, id ) );
-	}
 
 }]);

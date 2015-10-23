@@ -1,14 +1,19 @@
 <ion-view view-title="Job Application">
 	<ion-content class="padding">
 		<div class="list list-inset">
-			<div class="item">
-				application
+			<div class="item" ng-show="application.length == 0">
+				<i class="ion-android-warning"></i> No application
 			</div>
-			<div class="item">
-				application
-			</div>
-			<div class="item">
-				application
+			<div class="item" ng-repeat="app in application">
+				<h2>
+					<strong ng-show="!app.closed">
+						<a ng-class="{positive:true}" ng-href="#/tab/job-details/{{app.post_id+(app.closed?'?closed=1':'')}}">{{app.title}}</a>
+					</strong>
+					<strong ng-show="app.closed">{{app.title}}</strong>
+					<span ng-show="app.closed" class="badge badge-assertive">Closed</span>
+				</h2>
+				<p>Applied On {{app.date_created|date}}</p>
+				<p><small>{{app.status_desc}}</small></p>
 			</div>
 		</div>
 	</ion-content>

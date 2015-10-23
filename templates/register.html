@@ -1,19 +1,47 @@
 <ion-view view-title="Register">
 	<ion-content class="padding">
-		<form name="loginForm" ng-submit="submit()" novalidate>
+		<form name="registerForm" ng-submit="submit()" novalidate>
 			<div class="list list-inset">
-				<label class="item item-input">
-					<input type="email" name="username" id="username" placeholder="Email Address" ng-required="true" ng-model="user.username" />
-				</label>
-				
-				<label class="item item-input">
-					<input type="password" id="password" placeholder="Password" ng-model="user.password" ng-required="true" />
-				</label>
+				<div class="item">
+					<label for="full-name" ng-class="{'input-label':true,assertive: js.name ? false : true}">Full Name</label>
+					<div class="list">
+						<div class="item item-input">
+							<input type="text" ng-model="js.name" id="full-name" placeholder="Full Name" required />
+						</div>
+					</div>
+				</div>
+
+				<div class="item">
+					<label for="email" ng-class="{'input-label':true,assertive: (js.email && !myForm.$error.email) ? false : true}">Email</label>
+					<div class="list">
+						<div class="item item-input">
+							<input type="email" ng-model="js.email" id="email" placeholder="Email address" required />
+						</div>
+					</div>
+				</div>
+
+				<div class="item">
+					<label for="password" ng-class="{'input-label':true,assertive: (js.password.length >= 6) ? false : true}">Password</label>
+					<div class="list">
+						<div class="item item-input">
+							<input type="password" ng-model="js.password" id="password" required />
+						</div>
+					</div>
+				</div>
+
+				<div class="item">
+					<label for="repeat-password" ng-class="{'input-label':true,assertive: js.password == js.repeat_password ? false : true}">Repeat Password</label>
+					<div class="list">
+						<div class="item item-input">
+							<input type="password" ng-model="js.repeat_password" id="repeat-password" required />
+						</div>
+					</div>
+				</div>
 			</div>
-			
+
 			<div class="button-bar">
-				<button type="submit" class="button button-block button-positive" ng-disabled="loginForm.$invalid">
-					Login
+				<button type="submit" class="button button-block button-positive" ng-disabled="!((js.password == js.repeat_password) && js.name && (js.email && !myForm.$error.email) && js.password)">
+					{{button.text}}
 				</button>
 			</div>
 		</form>
