@@ -16,13 +16,28 @@
 					<input type="password" id="password" placeholder="Password" ng-model="user.password" ng-required="true" />
 				</label>
 			</div>
-
+			<p>{{log}}</p>
 			<div class="button-bar">
 				<button type="submit" class="button button-block button-positive" ng-disabled="loginForm.$invalid || (loginForm.$valid && disableButton)">
 					{{button.text}}
 				</button>
 				<a href="#/register" class="button button-block button-light">
 					Register
+				</a>
+			</div>
+
+			<div class="button-bar">
+				<a href="#/forgotpassword" class="button button-clear button-positive">
+					<i class="ion-ios-help-empty"></i> Forgot Password
+				</a>
+				<a href="#/jobs" class="button button-clear button-positive">
+					<i class="ion-ios-search"></i> Search for jobs
+				</a>
+			</div>
+
+			<div class="button-bar">
+				<a href="#/tab/profile" class="button button-clear button-positive">
+					<i class="ion-ios-help-empty"></i> Profile
 				</a>
 			</div>
 		</form>

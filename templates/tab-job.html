@@ -8,12 +8,26 @@
 	</ion-nav-buttons>
 
 	<ion-content class="padding">
+
+		<div class="button-bar" ng-show="currentState=='jobs'">
+			<a class="button button-positive mb-10" ng-href="#/login">
+				Login to apply
+			</a>
+		</div>
+
 		<ion-list>
+			<ion-item ng-show="jobs.length == 0">
+				<i class="ion-android-warning"></i> No record found.
+			</ion-item>
 			<ion-item ng-repeat="job in jobs">
-				<h2><strong><a class="positive" ng-href="#/tab/job-details/{{job.post_id}}">{{job.title}}</a></strong></h2>
+				<h2>
+					<strong ng-show="currentState!='jobs'"><a class="positive" ng-href="#/tab/job-details/{{job.post_id}}">{{job.title}}</a></strong>
+					<strong ng-show="currentState=='jobs'"><a class="positive" ng-href="#/job-details/{{job.post_id}}">{{job.title}}</a></strong>
+				</h2>
 				<p><small>{{job.company_name}}</small></p>
-				<p ng-show="job.show_salary"><small class="balanced">{{job.salary_min|currency:job.currency+' ':0}} - {{job.salary_max|currency:job.currency+' ':0}} per month</small></p>
-				<p ng-show="!job.show_salary"><small class="text-grey-1">Salary undisclosed</small></p>
+
+				<p ng-show="job.salary_display"><small class="balanced">{{job.salary_min|currency:job.currency+' ':0}} - {{job.salary_max|currency:job.currency+' ':0}} per month</small></p>
+				<p ng-show="!job.salary_display"><small class="text-grey-1">Salary undisclosed</small></p>
 
 
 				<p><i class="ion-ios-location"></i> <small ng-bind-html="job.job_location"></small></p>
@@ -21,8 +35,13 @@
 				<p><i class="ion-ios-calendar-outline"></i> <small>Date close: {{job.date_closed|date}}</small></p>
 
 				<p class="bordered-left"><small ng-bind-html="job.job_desc_brief"></small></p>
-				<p><small ng-bind-html="job.spec" class="text-grey-1"></small></p>
+				<p><small ng-bind-html="job.job_spec" class="text-grey-1"></small></p>
 			</ion-item>
+
 		</ion-list>
+
+		<ion-infinite-scroll on-infinite="loadMore()" distance="5%" ng-show="gotMoreData">
+		</ion-infinite-scroll>
+
 	</ion-content>
 </ion-view>

@@ -4,7 +4,7 @@
             <li class="item" ng-show="bookmarks.length == 0">
 				<i class="ion-android-warning"></i> No bookmark
 			</li>
-            <li class="item" ng-repeat="(i,bookmark) in bookmarks">
+            <li class="item item-button-right" ng-repeat="(i,bookmark) in bookmarks">
                 <h2>
                     <strong>
                         <a ng-href="#/tab/job-details/{{bookmark._id}}">
@@ -15,6 +15,10 @@
                 <small>Closed on {{bookmark.date_closed|date}}</small>
                 <br />
                 <small>Bookmarked on {{bookmark.on|date}}</small>
+				
+				<button type="button" class="button button-assertive" ng-click="deleteBookmark(bookmark)">
+					<i class="ion-ios-close-empty"></i>
+				</button>
             </li>
         </ul>
     </ion-content>

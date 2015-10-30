@@ -1,5 +1,5 @@
 ﻿angular.module('jenjobs.resume', [])
-.controller('ResumeCtrl', function($scope, $http, $ionicPopup, $ionicLoading, $ionicModal, JsDatabase){
+.controller('ResumeCtrl', function($scope, $http, $state, $ionicPopup, $ionicLoading, $ionicModal, JsDatabase){
 	$scope.countries = [];
 	$scope.states = [];
 	$scope.info = {value: ''};
@@ -113,7 +113,7 @@
 					if( work.id ){
 						$http({
 							method: 'DELETE',
-							url: 'http://api.jenjobs.local/jobseeker/work-experience/'+work.id+'?access-token='+$scope.access_token,
+							url: 'http://api.jenjobs.com/jobseeker/work-experience/'+work.id+'?access-token='+$scope.access_token,
 							headers: {
 								'Accept': 'application/json',
 								'Content-Type': 'application/json'
@@ -144,6 +144,23 @@
 			}
 		});
 		return false;
+	}
+
+	$scope.answerWorkExp = function(ans){
+		// have work exp?
+		if( !ans ){ //no
+			// work exp is complete
+			JsDatabase.updateCompleteness('workExp', true);
+			$scope.js.no_work_exp = true;
+			JsDatabase.updateProfile($scope.js);
+		}else{ //yes
+			//navigate to add work exp
+			$state.go('tab.resume-update-selected-work-experience', {}, {
+		        reload: true,
+		        inherit: false,
+		        notify: true
+		    });
+		}
 	}
 	// work
 
@@ -178,7 +195,7 @@
 					if( school.id ){
 						$http({
 							method: 'DELETE',
-							url: 'http://api.jenjobs.local/jobseeker/qualification/'+school.id+'?access-token='+$scope.access_token,
+							url: 'http://api.jenjobs.com/jobseeker/qualification/'+school.id+'?access-token='+$scope.access_token,
 							headers: {
 								'Accept': 'application/json',
 								'Content-Type': 'application/json'
@@ -240,7 +257,7 @@
 
 			$http({
 				method: 'POST',
-				url: 'http://api.jenjobs.local/jobseeker/skill?access-token='+$scope.access_token,
+				url: 'http://api.jenjobs.com/jobseeker/skill?access-token='+$scope.access_token,
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
@@ -267,7 +284,7 @@
 
 				$http({
 					method: 'DELETE',
-					url: 'http://api.jenjobs.local/jobseeker/skill/'+skill.id+'?access-token='+$scope.access_token,
+					url: 'http://api.jenjobs.com/jobseeker/skill/'+skill.id+'?access-token='+$scope.access_token,
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -409,7 +426,7 @@
 				// then try to post to web server
 				$http({
 					method: 'POST',
-					url: 'http://api.jenjobs.local/jobseeker/language?access-token='+$scope.access_token,
+					url: 'http://api.jenjobs.com/jobseeker/language?access-token='+$scope.access_token,
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -458,7 +475,7 @@
 
 			$http({
 				method: 'DELETE',
-				url: 'http://api.jenjobs.local/jobseeker/language/'+language.language_id,
+				url: 'http://api.jenjobs.com/jobseeker/language/'+language.language_id,
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
@@ -525,7 +542,7 @@
 		};
 		$http({
 			method: 'POST',
-			url: 'http://api.jenjobs.local/jobseeker/attachment?access-token='+$scope.access_token,
+			url: 'http://api.jenjobs.com/jobseeker/attachment?access-token='+$scope.access_token,
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
@@ -578,7 +595,7 @@
 
 			$http({
 				method: 'POST',
-				url: 'http://api.jenjobs.local/jobseeker/additional-info?access-token='+$scope.access_token,
+				url: 'http://api.jenjobs.com/jobseeker/additional-info?access-token='+$scope.access_token,
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
@@ -667,7 +684,6 @@
 		});
 	});
 	// job preference
-
 })
 
 .controller('JobPrefCtrl', function($scope, $http, $ionicModal, $ionicLoading, JsDatabase){
@@ -793,10 +809,6 @@
 		})
 	});
 
-	// setInterval(function(){
-	// 	console.log($scope.selectedState);
-	// }, 2000);
-
 	$ionicModal.fromTemplateUrl('templates/modal/states.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
@@ -873,7 +885,7 @@
 
 			$http({
 				method: 'POST',
-				url: 'http://api.jenjobs.local/jobseeker/job-preference',
+				url: 'http://api.jenjobs.com/jobseeker/job-preference',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
@@ -924,7 +936,7 @@
 			console.log($scope.js.access);
 			var stat = JsDatabase.updateProfile($scope.js)
 			.then(function(){
-				var url = 'http://api.jenjobs.local/jobseeker/access-level?access-token='+$scope.access_token;
+				var url = 'http://api.jenjobs.com/jobseeker/access-level?access-token='+$scope.access_token;
 				var param = {
 					access: $scope.js.access
 				};
@@ -986,7 +998,8 @@
 			$scope.js = profile;
 
 			$scope.jsJobseekingStatus = profile.js_jobseek_status_id;
-			$scope.availability = profile.availability;
+			console.log(profile.js_jobseek_status_id);
+			$scope.availability = profile.availability == -1 ? 0 : profile.availability;
 			$scope.selectedavailabilityUnit = {
 				id: profile.availability_unit
 			};
@@ -1022,16 +1035,18 @@
 
 					return;
 				}).then(function(){
-					$scope.selectedCountry = {
-						id: $scope.js.address.country_id,
-						// name: 'xxx'
-					};
+					if( $scope.js.address ){
+						$scope.selectedCountry = {
+							id: $scope.js.address.country_id,
+							// name: 'xxx'
+						};
 
-					$scope.selectedState = {
-						id: $scope.js.address.state_id
-					};
+						$scope.selectedState = {
+							id: $scope.js.address.state_id
+						};
 
-					$scope.city = $scope.js.address.city_name;
+						$scope.city = $scope.js.address.city_name;
+					}
 				});
 			});
 		});
@@ -1047,6 +1062,7 @@
 	// country onChange
 	$scope.countryChanged = function(){
 		$scope.selectedCountry = this.selectedCountry; // update scope
+		console.log($scope.selectedCountry.id);
 	}
 	// end countries
 
@@ -1114,7 +1130,7 @@
 
 		$http({
 			method: 'POST',
-			url: 'http://api.jenjobs.local/jobseeker/jobseeking-info',
+			url: 'http://api.jenjobs.com/jobseeker/jobseeking-info',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
@@ -1298,7 +1314,7 @@
 				});
 			}
 
-			var url = 'http://api.jenjobs.local/jobseeker/work-experience';
+			var url = 'http://api.jenjobs.com/jobseeker/work-experience';
 			if( id ){ url += '/'+id; }
 			url += '?access-token='+$scope.access_token;
 
@@ -1437,7 +1453,7 @@
 				});
 			}
 
-			var url = 'http://api.jenjobs.local/jobseeker/qualification';
+			var url = 'http://api.jenjobs.com/jobseeker/qualification';
 			if( Number(eduId) ){ url += '/'+eduId; }
 			url += '?access-token='+$scope.access_token;
 

@@ -40,7 +40,10 @@
 			</div>
 
 			<div class="button-bar">
-				<button type="submit" class="button button-block button-positive" ng-disabled="!((js.password == js.repeat_password) && js.name && (js.email && !myForm.$error.email) && js.password)">
+				<a href="#/login" class="button button-light">
+					<i class="ion-ios-arrow-left"></i> Login
+				</a>
+				<button type="submit" class="button button-positive" ng-disabled="!((js.password == js.repeat_password) && js.name && (js.email && !myForm.$error.email) && js.password) || disableButton">
 					{{button.text}}
 				</button>
 			</div>

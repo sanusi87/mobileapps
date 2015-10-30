@@ -1,13 +1,17 @@
-<ion-view view-title="{{job.title}}">
+<ion-view view-title="{{jobTitle}}">
+
 	<ion-nav-buttons side="left">
-		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/job')">
+
+		<button ng-show="currentState!='job-details'" type="button" class="button button-clear button-positive" ng-click="go('/tab/job')">
 			<i class="ion-ios-arrow-left"></i> Jobs
 		</button>
+
 	</ion-nav-buttons>
 
 	<ion-content class="padding">
 		<div ng-show="job.post_id">
-			<div class="row">
+
+			<div class="row" ng-show="currentState!='job-details'">
 				<div class="col col-50">
 					<div class="button-bar">
 						<!-- not bookmark -->
@@ -33,44 +37,70 @@
 				</div>
 			</div>
 
+			<div class="button-bar" ng-show="currentState=='job-details'">
+				<a class="button button-positive mb-10" ng-href="#/login">
+					Login to apply
+				</a>
+			</div>
+
+
 			<h2 class="positive">Job Details</h2>
 			<div class="list">
 				<div class="item">
-					<span class="positive">Location</span>: <span ng-bind-html="job.location"></span>
+					<span class="positive">Posted By</span>:
+					<p ng-show="!job.advertiser">
+						<button type="button" ng-click="openCompanyModal()" class="button button-small button-clear button-positive">
+							<i class="ion-ios-browsers-outline"></i> {{job.company}}
+						</button>
+					</p>
+					<p ng-show="job.advertiser">Company Undisclosed</p>
+				</div>
+
+				<div class="item item-button-right">
+					<span class="positive">Location</span>:
+					<a
+						class="button button-icon button-right button-stable"
+						ng-show="job.latitude && job.longitude" ng-href="geo:0,0?q={{job.latitude}},{{job.longitude}}({{job.company}})">
+						<i class="ion-map"></i>
+					</a>
+					<br />
+					<p ng-bind-html="job.location"></p>
+				</div>
+
+				<div class="item">
+					<span class="positive">Job type</span>: <small>{{job.type}}</small>
 				</div>
 				<div class="item">
-					<span class="positive">Job type</span>: <span>{{job.type}}</span>
-				</div>
-				<div class="item">
-					<span class="positive">Job level</span>: <span>{{job.level}}</span>
+					<span class="positive">Job level</span>: <small>{{job.level}}</small> &gt; <small ng-show="job.salary_display"><span class="balanced">{{job.salary_min|currency:job.currency+' ':0}} - {{job.salary_max|currency:job.currency+' ':0}} per month</span></small>
+					<small ng-show="!job.salary_display"><span class="text-grey-1">Salary undisclosed</span></small>
 				</div>
 				<div class="item">
 					<span class="positive">Specialisation</span>:
 					<br />
-					<div ng-bind-html="job.specialisation" class="normal-wrapping"></div>
+					<p ng-bind-html="job.specialisation" class="normal-wrapping"></p>
 				</div>
 				<div class="item">
 					<span class="positive">Required qualifications</span>:
 					<br />
-					<div class="normal-wrapping">{{job.education}}</div>
+					<p class="normal-wrapping">{{job.education}}</p>
 				</div>
 				<div class="item" ng-show="job.skills">
 					<span class="positive">Required skills</span>:
 					<br />
-					<div class="normal-wrapping" ng-bind-html="job.skills"></div>
+					<p class="normal-wrapping" ng-bind-html="job.skills"></p>
 				</div>
 				<div class="item" ng-show="job.languages">
-					<span class="positive">Required languages</span>: <span>{{job.languages}}</span>
+					<span class="positive">Required languages</span>: <small>{{job.languages}}</small>
 				</div>
 				<div class="item">
-					<span class="positive">Job close</span>: <span>{{job.date_closed|date}}</span>
+					<span class="positive">Job close</span>: <small>{{job.date_closed|date}}</small>
 				</div>
 			</div>
 
-			<h2 class="positive">About Us</h2>
-			<div class="list">
+			<h2 class="positive" ng-show="job.company_details.overview.length > 2">About Us</h2>
+			<div class="list" ng-show="job.company_details.overview.length > 2">
 				<div class="item">
-					<div class="normal-wrapping" ng-bind-html="job.company_details.overview"></div>
+					<div class="normal-wrapping text-justify" ng-bind-html="job.company_details.overview"></div>
 				</div>
 			</div>
 
@@ -79,6 +109,42 @@
 				<div class="item">
 					<div class="normal-wrapping" ng-bind-html="job.description"></div>
 				</div>
+			</div>
+
+			<div class="row" ng-show="currentState!='job-details'">
+				<div class="col col-50">
+					<div class="button-bar">
+						<!-- not bookmark -->
+						<button type="button" data-ng-show="!bookmarked" class="button button-positive" ng-click="bookmark(job.post_id)">
+							<i class="ion-ios-bookmarks"></i> Bookmark
+						</button>
+					</div>
+
+					<div class="button-bar">
+						<!-- already bookmarked -->
+						<button type="button" data-ng-show="bookmarked" class="button button-light" ng-click="deleteBookmark(job.post_id, rev)">
+							<i class="ion-ios-bookmarks-outline"></i> Unbookmark
+						</button>
+					</div>
+				</div>
+				<div class="col">
+					<div class="button-bar">
+						<!-- not apply -->
+						<button type="button" ng-class="{button:true, 'button-light':applied,'button-positive':!applied}" ng-disabled="applied || accessToken" ng-click="submitApplication()">
+							<i class="ion-ios-copy"></i> <span ng-show="applied">Applied</span><span ng-show="!applied">{{access_token ? 'Apply' : 'Login to apply'}}</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="button-bar" ng-show="currentState=='job-details'">
+				<a class="button button-positive mb-10" ng-href="#/login">
+					Login to apply
+				</a>
+			</div>
+
+			<div class="mt-15">
+				<p class="text-center text-grey-0">SAFE JOB SEARCH</p>
+				<p class="text-center text-grey-0">There is no need to provide payment or bank account details to any person or organisation when applying for a job.</p>
 			</div>
 		</div>
 

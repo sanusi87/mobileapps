@@ -1,0 +1,23 @@
+<ion-modal-view>
+	<ion-header-bar>
+		<h4 class="title">Job Specialisation</h4>
+		<button type="button" class="button button-right button-icon" ng-click="hideSpecModal(1)">
+			<i class="ion-ios-checkmark-empty"></i> OK
+		</button>
+		<button type="button" class="button button-right button-icon" ng-click="hideSpecModal(0)">
+			<i class="ion-ios-close-empty"></i>
+		</button>
+    </ion-header-bar>
+    <ion-content>
+
+        <div ng-repeat="(id,jobSpec) in jobSpecs">
+            <ion-toggle toggle-class="toggle-calm" class="pt-15 pb-15" ng-true-value="{{id}}" ng-false-value="0" ng-change="toggleSpec(id)" data-ng-model="selectedJobSpec[id]">
+				<strong>{{jobSpec.name}}</strong>
+			</ion-toggle>
+            <div class="list list-inset mt-0 mb-15" ng-show="disableJobRole[id]">
+                <ion-toggle ng-repeat="(roleid, role) in jobSpec.roles" toggle-class="toggle-calm" class="pt-15 pb-15" ng-true-value="{{roleid}}" ng-false-value="0" data-ng-model="selectedJobRole[id][roleid]" ng-change="toggleRole(id, roleid)" ng-disabled="!disableJobRole[id]">{{role}}</ion-toggle>
+            </div>
+        </div>
+
+    </ion-content>
+</ion-modal-view>

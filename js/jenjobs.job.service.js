@@ -30,7 +30,8 @@
 		checkApplication: checkApplication,
 		deleteAllApplication: deleteAllApplication,
 		getApplication: getApplication,
-		applicationStatus: applicationStatus
+		applicationStatus: applicationStatus,
+		getSavedJob: getSavedJob
 	};
 
 	function initDB(){
@@ -40,29 +41,103 @@
 	}
 
 	// search the fetched jobs
-	function searchJob( filter ){
+	function searchJob( filter, callback ){
 		// handle the filter
 		var param = {};
 		param.page = 1;
 		param.o = 'date_posted';
 
 		if( filter ){
+			/*
+			relevance - Sort by relevance
+			date_posted - Sort by date posted
+			job_location - Sort by location
+			company_name - Sort by employers' name
+			title - Sort by job title
+			*/
+			param.o = 'date_posted';
+			// param.b = 'DESC';
+
+			// keyword
 			if( filter.keyword ){
 				param.keyword = filter.keyword;
+				param.o = 'relevance';
 			}
+
+			if( filter.page ){ param.page = filter.page; } // pagination
+
+			// if( filter.o ){ param.o = filter.o; } // order
+			// if( filter.b ){ param.b = filter.b; } // by
+
+			// 1 = Position Title
+			// 2 = Company Name
+			// 3 = Skills
+			// 4 = Job Description
+			if( filter.searchby ){ param.searchby = filter.searchby; }
+
+			if( filter.emid ){ param.emid = filter.emid; }
+
+			if( filter.level ){
+				param['level[]'] = [];
+				angular.forEach(filter.level, function(e,i){
+					param['level[]'].push(e);
+				});
+			}
+
+			if( filter.industry ){ param.industry = filter.industry; }
+
+			// multiple
+			if( filter.spec ){
+				param['spec[]'] = [];
+				angular.forEach(filter.spec, function(e,i){
+					param['spec[]'].push(e);
+				});
+			}
+			if( filter.role ){
+				param['role[]'] = [];
+				angular.forEach(filter.role, function(e,i){
+					param['role[]'].push(e);
+				});
+			}
+
+			if( filter.country ){
+				param['country[]'] = [];
+				angular.forEach(filter.country, function(e,i){
+					param['country[]'].push(e);
+				});
+			}
+
+			if( filter.state ){
+				param['state[]'] = [];
+				angular.forEach(filter.state, function(e,i){
+					param['state[]'].push(e);
+				});
+			}
+
+			if( filter.type ){
+				param['type[]'] = [];
+				angular.forEach(filter.type, function(e,i){
+					param['type[]'].push(e);
+				});
+			}
+
+			if( filter.smin ){ param.smin = filter.smin; }
+			if( filter.smax ){ param.smax = filter.smax; }
+			if( filter.seostate ){ param.seostate = filter.seostate; }
+			if( filter.advertiser ){ param.advertiser = filter.advertiser; }
+			if( filter.da ){ param.da = filter.da; }
 		}
 
 		// fetch jobs from live web server
 		return $http({
 			method: 'GET',
-			url: 'http://api.jenjobs.local/jobs/search',
+			url: 'http://api.jenjobs.com/jobs/search',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
 			params: param
 		}).then(function(response){
-			// console.log(response);
 			if( response.status == 200 ){
 				_jobs = {};
 				angular.forEach(response.data, function(e,i){
@@ -70,15 +145,18 @@
 					// response.data[i].date_posted = new Date(e.date_posted);
 					// response.data[i].advertiser = e.advertiser == "true" ? true : false;
 					// response.data[i].recruitment_agency = e.recruitment_agency == "true" ? true : false;
-					response.data[i].salary_display = e.salary_display == "true" ? true : false;
+					response.data[i].salary_display = e.salary_display == 1 ? true : false;
 
 					// we populate each job into _job object, to simplify our search later
 					_jobs[response.data[i].post_id] = response.data[i];
 				});
-				return _jobs;
-			}else{
-				return [];
 			}
+
+			if( callback ){
+				callback();
+			}
+
+			return _jobs;
 		}).catch(function(e){
 			// display alert if ajax failed
 			$ionicLoading.show({
@@ -86,12 +164,16 @@
 				noBackdrop: true,
 				duration: 1500
 			});
+
+			if( callback ){
+				callback();
+			}
 		});
 	}
 
 	function getJobDetails( param ){
 
-		var requestUrl = 'http://api.jenjobs.local/jobs/search/'+param.post_id;
+		var requestUrl = 'http://api.jenjobs.com/jobs/search/'+param.post_id;
 		if( param.closed == 1 ){
 			requestUrl += '?closed=1';
 		}
@@ -108,6 +190,12 @@
 			if( response.status == 200 ){
 				response.data.date_closed = new Date(response.data.date_closed);
 				response.data.date_posted = new Date(response.data.date_posted);
+				response.data.salary_display = response.data.show_salary == "true" ? true : false;
+				response.data.advertiser = response.data.advertiser == "true" ? true : false;
+
+				response.data.longitude = Number(response.data.longitude);
+				response.data.latitude = Number(response.data.latitude);
+
 				return response.data;
 			}
 			return {};
@@ -133,7 +221,7 @@
 
 				$http({
 					method: 'POST',
-					url: 'http://api.jenjobs.local/jobseeker/bookmark',
+					url: 'http://api.jenjobs.com/jobseeker/bookmark',
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -163,7 +251,7 @@
 				param['access-token'] = accessToken;
 				$http({
 					method: 'DELETE',
-					url: 'http://api.jenjobs.local/jobseeker/bookmark/'+jid,
+					url: 'http://api.jenjobs.com/jobseeker/bookmark/'+jid,
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -216,7 +304,7 @@
 			if( accessToken ){
 				return $http({
 					method: 'POST',
-					url: 'http://api.jenjobs.local/jobseeker/application/'+application.post_id,
+					url: 'http://api.jenjobs.com/jobseeker/application/'+application.post_id,
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -290,6 +378,12 @@
 		.then(function(doc){
 			job._rev = doc.rev;
 			return doc;
+		});
+	}
+
+	function getSavedJob( id ){
+		return $q.when(_job_db.get(id)).then(function(job){
+			return job;
 		});
 	}
 

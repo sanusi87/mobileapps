@@ -1,36 +1,43 @@
 /* Empty. Add your own CSS if you like */
 
 .mt-0{ margin-top:0px !important; }
-.mt-5{ margin-top:5px; }
-.mt-10{ margin-top:10px; }
-.mt-15{ margin-top:15px; }
-.mt-20{ margin-top:20px; }
+.mt-5{ margin-top:5px !important; }
+.mt-10{ margin-top:10px !important; }
+.mt-15{ margin-top:15px !important; }
+.mt-20{ margin-top:20px !important; }
 
-.mb-0{ margin-bottom:0px; }
-.mb-5{ margin-bottom:5px; }
-.mb-10{ margin-bottom:10px; }
-.mb-15{ margin-bottom:15px; }
-.mb-20{ margin-bottom:20px; }
+.mb-0{ margin-bottom:0px !important; }
+.mb-5{ margin-bottom:5px !important; }
+.mb-10{ margin-bottom:10px !important; }
+.mb-15{ margin-bottom:15px !important; }
+.mb-20{ margin-bottom:20px !important; }
 
-.pt-0{ padding-top:0px; }
-.pt-5{ padding-top:5px; }
-.pt-10{ padding-top:10px; }
-.pt-15{ padding-top:15px; }
-.pt-20{ padding-top:20px; }
+.pt-0{ padding-top:0px !important; }
+.pt-5{ padding-top:5px !important; }
+.pt-10{ padding-top:10px !important; }
+.pt-15{ padding-top:15px !important; }
+.pt-20{ padding-top:20px !important; }
 
-.pb-0{ padding-bottom:0px; }
-.pb-5{ padding-bottom:5px; }
-.pb-10{ padding-bottom:10px; }
-.pb-15{ padding-bottom:15px; }
-.pb-20{ padding-bottom:20px; }
+.pb-0{ padding-bottom:0px !important; }
+.pb-5{ padding-bottom:5px !important; }
+.pb-10{ padding-bottom:10px !important; }
+.pb-15{ padding-bottom:15px !important; }
+.pb-20{ padding-bottom:20px !important; }
+
+.pl-0{ padding-left: 0px !important; }
+.pr-0{ padding-right: 0px !important; }
 
 .text-center{ text-align:center; }
 .text-left{ text-align:left; }
 .text-right{ text-align:right; }
+.text-justify{ text-align:justify; }
 
+.text-grey-0{ color: #444444; }
 .text-grey-1{ color: #aaaaaa; }
 .text-grey-2{ color: #dddddd; }
 .text-grey-3{ color: #f3f3f3; }
+
+.item p{ color: #444444 }
 
 .bordered-left{
 	border-left: 3px solid #dddddd;
@@ -42,7 +49,7 @@
 .normal-wrapping,
 .normal-wrapping p,
 .normal-wrapping div{
-	white-space: normal;
+	white-space: normal !important;
 }
 
 input[type="month"]{ background-color: #f3f3f3;}

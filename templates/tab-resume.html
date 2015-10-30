@@ -39,7 +39,9 @@
 				<ion-list>
 					<ion-item><span class="positive">Status</span>: {{jobseekingStatus[jsJobseekingStatus]}}</ion-item>
 					<ion-item><span class="positive">Currently stay in</span>: {{currentlyStayIn}}</ion-item>
-					<ion-item><span class="positive">Availability period</span>: {{availability+' '+selectedavailabilityUnit.name}}</ion-item>
+                    
+                    <ion-item><span class="positive">Availability period</span>: <span ng-show="availability !=-1">{{availability+' '+selectedavailabilityUnit.name}}</span></ion-item>
+
 					<ion-item><span class="positive">Driving license</span>: {{drivingLicense?'Yes':'No'}}</ion-item>
 					<ion-item><span class="positive">Own transport</span>: {{ownTransport?'Yes':'No'}}</ion-item>
 				</ion-list>
@@ -97,7 +99,7 @@
 				</div>
 			</div>
 
-			<div class="item item-body">
+			<div class="item item-body" ng-show="works.length > 0">
 				<div class="list">
 					<div class="item item-button-right" ng-repeat="work in works">
 						<a href="#/tab/resume-update-selected-work-experience/{{work._id}}"><span class="positive">{{work.position}}</span></a>
@@ -113,6 +115,24 @@
 					</div>
 				</div>
 			</div>
+
+            <div class="item item-body" ng-show="works.length == 0 && js.no_work_exp == false">
+                <div class="list">
+                    <div class="item">
+                        Do you have any work experience?
+                        <div>
+                            <button type="button" class="button button-positive" name="button" ng-click="answerWorkExp(1)">
+                                <i class="ion-ios-checkmark-empty"></i> Yes, I do.
+                            </button>
+
+                            <button type="button" class="button button-light" name="button" ng-click="answerWorkExp(0)">
+                                <i class="ion-ios-close-empty"></i> No, I don't.
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 		</div>
 
 		<div class="list card">
@@ -127,7 +147,7 @@
 				</div>
 			</div>
 
-			<div class="item item-body">
+			<div class="item item-body" ng-show="educations.length > 0">
 				<div class="list">
 					<div class="item item-button-right" ng-repeat="edu in educations">
 						<a href="#/tab/resume-update-selected-education/{{edu._id}}"><span class="positive">{{edu.school}}</span></a>

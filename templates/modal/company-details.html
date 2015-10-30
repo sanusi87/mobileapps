@@ -1,0 +1,41 @@
+<ion-modal-view>
+	<ion-header-bar>
+		<h4 class="title">{{job.company}}</h4>
+        <button type="button" class="button button-right button-light button-icon" ng-click="closeCompanyModal()">
+			<i class="ion-ios-close-empty"></i>
+		</button>
+	</ion-header-bar>
+	<ion-content>
+		<div class="list list-inset">
+			<div class="item" ng-show="job.company_details.logo_file">
+			    <img ng-src="{{job.company_details.logo_file}}" class="fill-width" />
+			</div>
+
+            <div class="item">
+                <span class="positive">Reg. number</span>: <small>{{job.company_details.registration_no}}</small>
+            </div>
+
+            <div class="item">
+                <span class="positive">Industry</span>: <small>{{job.company_details.industry}}</small>
+            </div>
+
+            <div class="item">
+                <span class="positive">Working Hours</span>:  <small>{{job.company_details.work_hour}}</small>
+            </div>
+
+            <div class="item">
+                <span class="positive">Benefits</span>:
+                <br />
+                <p>{{job.company_details.benefits}}</p>
+            </div>
+
+            <div class="item" ng-show="job.company_details.website">
+                <span class="positive">Website</span>:
+                <br />
+                <p>
+                    <a ng-click="browse(job.company_details.website)">{{job.company_details.website}}</a>
+                </p>
+            </div>
+		</div>
+	</ion-content>
+</ion-modal-view>

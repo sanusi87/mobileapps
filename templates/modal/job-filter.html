@@ -1,46 +1,133 @@
 <ion-modal-view>
 	<ion-header-bar>
 		<h4 class="title">Filters</h4>
+
+		<button type="button" class="button button-left button-icon" ng-click="filterJobs()">
+			<i class="ion-ios-search"></i> Submit
+		</button>
+
+		<button type="button" class="button button-left button-icon" ng-click="resetFilter()">
+			<i class="ion-ios-reload"></i> Reset
+		</button>
+
+		<button type="button" class="button button-right button-icon" ng-click="closeModal()">
+			<i class="ion-ios-close-empty"></i>
+		</button>
 	</ion-header-bar>
 	<ion-content>
 		<div class="list list-inset">
-			<div class="item item-input">
-				<input type="text" name="name" value="keyword" />
-                <input type="text" name="name" value="searchby" />
-                <input type="text" name="name" value="status" />
-                <input type="text" name="name" value="emid" />
-                <input type="text" name="name" value="level" />
-                <input type="text" name="name" value="industry" />
-                <input type="text" name="name" value="spec" />
-                <input type="text" name="name" value="role" />
-                <input type="text" name="name" value="country" />
-                <input type="text" name="name" value="state" />
-                <input type="text" name="name" value="smin" />
-                <input type="text" name="name" value="smax" />
-                <input type="text" name="name" value="type" />
-                <input type="text" name="name" value="seostate" />
-                <input type="text" name="name" value="o" />
-                <input type="text" name="name" value="b" />
-                <input type="text" name="name" value="advertiser" />
-                <input type="text" name="name" value="da" />
 
-                <input type="text" name="name" value="page" />
+			<div class="item item-select pb-5 pt-5">
+				<label for="search-by" class="input-label">Search keyword by</label>
+				<select data-ng-options="o.name for o in keywordFilter track by o.id" data-ng-model="tmp.searchby" id="search-by"></select>
 			</div>
 
-            <div class="item item-select">
-
-            </div>
-
-
-
+			<div class="item">
+				<label class="input-label"><strong>Keyword</strong></label>
+				<div class="list">
+					<div class="item item-input">
+						<input type="text" data-ng-model="params.keyword" value="" placeholder="Keyword" />
+					</div>
+				</div>
+			</div>
 
 			<div class="item">
-				<button type="button" ng-click="saveAndCloseModal()" class="button button-positive">
-					Save
+				<label class="input-label"><strong>Monthly Salary</strong></label>
+				<div class="list">
+					<div class="item item-input">
+						<div class="row pt-0 pb-0 pl-0 pr-0">
+							<div class="col col-50 pt-0 pb-0">
+								<input type="number" data-ng-model="params.smin" placeholder="Salary Min" />
+							</div>
+							<div class="col col-50 pt-0 pb-0">
+								<input type="number" data-ng-model="params.smax" placeholder="Salary Max" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="item">
+				<label class="input-label"><strong>Job Type</strong></label>
+				<div class="list">
+					<ion-toggle ng-repeat="(id, name) in jobTypes" ng-model="selectedJobType[id]" toggle-class="toggle-calm" ng-true-value="{{id}}" ng-false-value="0" ng-change="checkValue()" class="pt-15 pb-15">{{name}}</ion-toggle>
+				</div>
+			</div>
+
+			<div class="item item-button-right">
+				<label class="input-label"><strong>Specialisation and Role</strong></label>
+				<button type="button" class="button button-small button-light button-icon" ng-click="showSpecModal()">
+					<i class="ion-android-open"></i>
 				</button>
-				<button type="button" ng-click="closeModal()" class="button button-light">
-					Cancel
-				</button>
+				<div ng-bind-html="specString" class="normal-wrapping"></div>
+			</div>
+
+			<div class="item">
+				<label class="input-label"><strong>Location</strong></label>
+				<div class="list">
+					<ion-toggle toggle-class="toggle-calm" class="pt-15 pb-15" ng-click="toggleCountry(127)">Malaysia</ion-toggle>
+
+					<div class="item item-button-right">
+						{{malaysiaStateStatus}}
+						<button type="button" class="button button-small button-right button-light button-icon" ng-click="showStateModal()" ng-disabled="wholeStateIsSelected">
+							<i class="ion-android-open"></i>
+						</button>
+
+						<div>{{stateString}}</div>
+					</div>
+					<!--
+					<div class="item" ng-show="showMalaysiaState">
+						<ion-toggle ng-repeat="state in states" ng-model="selectedState[state.id]" toggle-class="toggle-calm" ng-true-value="{{state.id}}" ng-false-value="0" ng-change="checkStateValue()" class="pt-15 pb-15">{{state.name}}</ion-toggle>
+					</div>
+					-->
+
+					<ion-toggle toggle-class="toggle-calm" class="pt-15 pb-15" ng-click="toggleCountry(187)">Singapore</ion-toggle>
+
+					<div class="item item-button-right">
+						Other
+						<button type="button" class="button button-small button-right button-light button-icon" ng-click="showCountryModal()">
+							<i class="ion-android-open"></i>
+						</button>
+
+						<div>{{countryString}}</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="item">
+				<label class="input-label"><strong>Position Level</strong></label>
+				<div class="list">
+					<ion-toggle ng-repeat="(id, name) in jobLevels" ng-model="selectedJobLevel[id]" toggle-class="toggle-calm" ng-true-value="{{id}}" ng-false-value="0" ng-change="checkJobLevelValue()" class="pt-15 pb-15">{{name}}</ion-toggle>
+				</div>
+			</div>
+
+			<div class="item">
+				<label class="input-label"><strong>Posted By</strong></label>
+				<div class="list">
+					<ion-toggle ng-model="params.da" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0" class="pt-15 pb-15">Direct Employer</ion-toggle>
+					<ion-toggle ng-model="params.advertiser" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0" class="pt-15 pb-15">Company Undisclosed</ion-toggle>
+				</div>
+			</div>
+
+			<!--
+			<div class="item item-input">
+                <input type="text" name="status" value="status" />
+                <input type="text" name="emid" value="emid" />
+                <input type="text" name="industry" value="industry" />
+                <input type="text" name="spec" value="spec" />
+                <input type="text" name="role" value="role" />
+			</div>
+			-->
+
+			<div class="item">
+				<div class="button-bar">
+					<button type="button" ng-click="filterJobs()" class="button button-positive">
+						<i class="ion-ios-search"></i> Search
+					</button>
+					<button type="button" ng-click="closeModal()" class="button button-light">
+						Cancel
+					</button>
+				</div>
 			</div>
 		</div>
 	</ion-content>

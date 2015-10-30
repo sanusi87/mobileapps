@@ -26,6 +26,7 @@ angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'je
 })
 .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 	$stateProvider
+
 	.state('tab', {
 		url: '/tab',
 		abstract: true,
@@ -42,6 +43,24 @@ angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'je
 		url: '/register',
 		templateUrl: 'templates/register.html',
 		controller: 'RegisterCtrl'
+	})
+
+	.state('forgotpassword', {
+		url: '/forgotpassword',
+		templateUrl: 'templates/forgot-password.html',
+		controller: 'ForgotPasswordCtrl'
+	})
+
+	.state('jobs', {
+		url: '/jobs',
+		templateUrl: 'templates/tab-job.html',
+		controller: 'JobCtrl'
+	})
+
+	.state('job-details', {
+		url: '/job-details/:jid',
+		templateUrl: 'templates/tab-job-detail.html',
+		controller: 'JobDetailCtrl'
 	})
 
 	.state('tab.settings', {

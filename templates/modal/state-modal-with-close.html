@@ -1,0 +1,18 @@
+<ion-modal-view>
+	<ion-header-bar>
+		<button type="button" class="button button-left button-light button-icon" ng-click="saveAndCloseStateModal()">
+			<i class="ion-ios-checkmark-empty"></i>
+		</button>
+
+		<h4 class="title">States in Malaysia</h4>
+
+		<button type="button" class="button button-right button-light button-icon" ng-click="closeStateModal()">
+			<i class="ion-ios-close-empty"></i>
+		</button>
+	</ion-header-bar>
+	<ion-content>
+		<div class="list list-inset">
+			<ion-toggle ng-repeat="state in states" ng-model="selectedState[state.id]" toggle-class="toggle-calm" ng-true-value="{{state.id}}" ng-false-value="0" class="pt-15 pb-15">{{state.name}}</ion-toggle>
+		</div>
+	</ion-content>
+</ion-modal-view>

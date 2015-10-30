@@ -26,7 +26,11 @@
 			<div class="item" ng-show="js.country=127"><div>I/C :<b>{{js.ic_no}}</b></div></div>
 			<div class="item" ng-show="js.country!=127"><div>Passport :<b>{{js.passport_no}}</b></div></div>
 			<div class="item"><div>Gender :<b>{{js.gender}}</b></div></div>
-			<div class="item"><div>DoB :<b>{{js.dob|date:'dd/MM/yyyy'}}</b></div></div>
+
+			<div class="item">
+				<div>DoB :<b ng-show="js.dob">{{js.dob|date:'dd/MM/yyyy'}}</b></div>
+			</div>
+
 			<div class="item"><div>Country :<b>{{js.country}}</b></div></div>
 		</div>
 	</ion-content>

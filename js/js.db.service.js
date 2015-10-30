@@ -178,7 +178,7 @@ angular.module('jenjobs.db', [])
 		if (!_profile) {
 			return $q.when(_profile_db.get('profile')).then(function(docs){
 				_profile = docs;
-				_profile.dob = new Date(_profile.dob);
+				_profile.dob = _profile.dob != null ? new Date(_profile.dob) : '';
 
 				_profile_db.changes({
 					live: true,

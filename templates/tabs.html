@@ -3,25 +3,25 @@ Create tabs with an icon and label, using the tabs-positive style.
 Each tab's child <ion-nav-view> directive will have its own
 navigation history that also transitions its views in and out.
 -->
-<ion-tabs class="tabs-icon-top tabs-color-active-positive">
+<ion-tabs class="tabs-icon-top tabs-color-active-positive" ng-controller="TabCtrl">
 
 	<!-- profile -->
-	<ion-tab title="Profile" icon-off="ion-ios-contact-outline" icon-on="ion-ios-contact-outline" href="#/tab/profile">
+	<ion-tab title="Profile" icon-off="ion-ios-contact-outline" icon-on="ion-ios-contact-outline" ng-click="go('tab.profile')">
 		<ion-nav-view name="tab-profile"></ion-nav-view>
 	</ion-tab>
 
 	<!-- jobs -->
-	<ion-tab title="Jobs" icon-off="ion-ios-search" icon-on="ion-ios-search" href="#/tab/job">
+	<ion-tab title="Jobs" icon-off="ion-ios-search" icon-on="ion-ios-search" ng-click="go('tab.job')">
 		<ion-nav-view name="tab-job"></ion-nav-view>
 	</ion-tab>
 
 	<!-- applications -->
-	<ion-tab title="Job Application" icon-off="ion-ios-paper-outline" icon-on="ion-ios-paper-outline" href="#/tab/application">
+	<ion-tab title="Job Application" icon-off="ion-ios-paper-outline" icon-on="ion-ios-paper-outline" ng-click="go('tab.application')">
 		<ion-nav-view name="tab-application"></ion-nav-view>
 	</ion-tab>
 
 	<!-- settings -->
-	<ion-tab title="Settings" icon-off="ion-ios-gear-outline" icon-on="ion-ios-gear-outline" href="#/tab/settings">
+	<ion-tab title="Settings" icon-off="ion-ios-gear-outline" icon-on="ion-ios-gear-outline" ng-click="go('tab.settings')">
 		<ion-nav-view name="tab-settings"></ion-nav-view>
 	</ion-tab>
 

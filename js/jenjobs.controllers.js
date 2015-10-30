@@ -13,13 +13,14 @@ angular.module('jenjobs.controllers', [])
 		$location.path(path);
 	}
 
-	JsDatabase.getToken().then(function(token){
-		if( token.length > 0 ){
-
-		}else{
-			$location.path('/login');
-		}
-	});
+	// JsDatabase.getToken().then(function(token){
+	// 	console.log(token);
+	// 	if( token.length > 0 ){
+	//
+	// 	}else{
+	// 		$location.path('/login');
+	// 	}
+	// });
 })
 
 .controller('ProfileUpdateCtrl', function($scope, $http, $filter, $ionicPopup, $ionicModal, $ionicLoading, JsDatabase){
@@ -37,7 +38,6 @@ angular.module('jenjobs.controllers', [])
 	}).then(function(){
 		$scope.gender = [{name: 'Male',id: 'M'}, {name: 'Female',id: 'F'}, {name: 'Undisclosed',id: 'U'}];
 		if( $scope.js ){
-			// console.log( $scope.js );
 			if( /^m/ig.test( $scope.js.gender ) ){
 				$scope.selectedGender = $scope.gender[0];
 			}else if( /^f/ig.test( $scope.js.gender ) ){
@@ -48,7 +48,6 @@ angular.module('jenjobs.controllers', [])
 		}else{
 			$scope.selectedGender = $scope.gender[0];
 		}
-		// console.log( $scope.selectedGender );
 	}).then(function(){
 		$scope.selectedCountry = {
 			name: $scope.js.country,
@@ -73,7 +72,8 @@ angular.module('jenjobs.controllers', [])
 		angular.forEach(countries, function(name, id){
 			$scope.countries.push({
 				name: name.name,
-				id: id
+				id: id,
+				dial_code: name.dial_code
 			});
 		});
 
@@ -87,6 +87,8 @@ angular.module('jenjobs.controllers', [])
 		$scope.selectedCountry = this.selectedCountry; // update scope
 		$scope.js.country = $scope.selectedCountry.name;
 		$scope.js.country_id = $scope.selectedCountry.id;
+
+		$scope.js.mobile_no = '(+'+$scope.selectedCountry.dial_code+')';
 	}
 	// countries
 
@@ -140,6 +142,7 @@ angular.module('jenjobs.controllers', [])
 		}
 	};
 
+	/*
 	$ionicModal.fromTemplateUrl('templates/modal/country-dial-code.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
@@ -154,16 +157,17 @@ angular.module('jenjobs.controllers', [])
 	$scope.closeCountryDialCode = function(){
 		$scope.dialCodeModal.hide();
 	}
+	*/
 
 	// update profile submit
 	$scope.updateForm = function(){
 		var errors = [];
 
-		if( $scope.js.mobile_no.length == 0 ){
+		if( $scope.js.mobile_no.length < 5 ){
 			errors.push('Mobile number is required');
 		}else{
-			if( /^\(\+/ig.test( $scope.js.mobile_no ) ){
-				errors.push('Mobile number be in this format (+A)B, where A is your country code and B is your mobile number.');
+			if( !/^\(\+/ig.test( $scope.js.mobile_no ) ){
+				errors.push('Mobile number should be in this format (+A)B, where A is your country code and B is your mobile number.');
 			}
 		}
 
@@ -176,12 +180,6 @@ angular.module('jenjobs.controllers', [])
 		}else{
 			JsDatabase.updateProfile( $scope.js )
 			.then(function(){
-				$ionicLoading.show({
-					template: 'Your profile have successfully updated.',
-					noBackdrop: true,
-					duration: 1000
-				});
-
 				var param = {};
 				param.photo_file = $scope.js.photo_file;
 				param.name = $scope.js.name;
@@ -194,7 +192,7 @@ angular.module('jenjobs.controllers', [])
 
 				$http({
 					method: 'POST',
-					url: 'http://api.jenjobs.local/jobseeker/profile',
+					url: 'http://api.jenjobs.com/jobseeker/profile',
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -203,18 +201,35 @@ angular.module('jenjobs.controllers', [])
 					params: {'access-token': $scope.access_token}
 				}).then(function(response){
 					console.log(response);
+					$ionicLoading.show({
+						template: 'Your profile have successfully updated.',
+						noBackdrop: true,
+						duration: 1000
+					});
+
+					JsDatabase.updateCompleteness('profile', true);
 				}).catch(function(e){
 					console.log(e);
+					$ionicLoading.show({
+						template: 'Failed to update your profile.',
+						noBackdrop: true,
+						duration: 1000
+					});
 				});
 			}).catch(function(e){
 				console.log(e);
+				$ionicLoading.show({
+					template: 'Failed to update your profile.',
+					noBackdrop: true,
+					duration: 1000
+				});
 			});
 		}
 		return false;
 	}
 })
 
-.controller('LoginCtrl', function($scope, $http, $location, $ionicPopup, $ionicHistory, JsDatabase, JobSearch, JobseekerLogin){
+.controller('LoginCtrl', function($scope, $state, $location, $http, $ionicPopup, $ionicHistory, JsDatabase, JobSearch, JobseekerLogin){
 	$scope.disableButton = false;
 
 	$scope.user = {
@@ -229,258 +244,269 @@ angular.module('jenjobs.controllers', [])
 		text: 'Login'
 	}
 
+	$scope.log = "";
+
 	$scope.submit = function(){
 		$scope.button.text = 'Login...';
-
 		$scope.disableButton = true;
-		$http({
-			method: 'POST',
-			url: 'http://api.jenjobs.local/oauth2/token',
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			data: $scope.user
-		}).then(function(response){
-			// success
-			if( response.data && typeof( response.data.access_token ) != 'undefined' ){
-				$scope.button.text = 'Downloading data...';
 
-				// add token to db
-				JsDatabase.addToken( response.data );
-				var accessToken = response.data.access_token;
+		JobseekerLogin.setUsername( $scope.user.username );
+		JobseekerLogin.setPassword( $scope.user.password );
 
-				// download parameters
-				$http({method: 'GET',url: 'http://api.jenjobs.local/parameters/others'})
-				.then(function(response_param){
-					angular.forEach(response_param.data, function(value, i){
-						JsDatabase.addParameter(value, i);
-					});
-
-					// download countries, states, cities
-					$http({method: 'GET',url: 'http://api.jenjobs.local/parameters/locations'})
-					.then(function(response_loc){
-						angular.forEach(response_loc.data, function(value, i){
-							JsDatabase.addParameter(value, i);
-						});
-
-						var completedItems = [];
-
-						// download profile
-						$http({
-							method: 'GET',
-							url: 'http://api.jenjobs.local/jobseeker/profile',
-							params: {'access-token': accessToken}
-						}).then(function(response_profile){
-							// remove _links from record, before saving, else it will cause bad special document member error, because _links is a reserved work in PouchDb
-							// only for user profile/account
-							delete(response_profile.data._links);
-							response_profile.data.no_work_exp = response_profile.data.no_work_exp == 0 ? false : true;
-
-							return response_profile;
-						}).then(function(response_profile){
-							JsDatabase.addProfile(response_profile.data).then(function(){
-								if( response_profile.data.mobile_no && response_profile.data.dob ){
-									// JsDatabase.updateCompleteness('profile', true);
-									completedItems.push('profile');
-								}
-
-								if( response_profile.data.resume_file && response_profile.data.resume_file.length > 5 ){
-									completedItems.push('attachment');
-								}
-
-								if( response_profile.data.availability ){
-									completedItems.push('jobseek');
-								}
-							});
-
-
-
-							// download job applications
-							$http({
-								method: 'GET',
-								url: 'http://api.jenjobs.local/jobseeker/application',
-								params: {'access-token': accessToken}
-							}).then(function(response_app){
-								console.log(response_app);
-								if( response_app.data.length > 0 ){
-									angular.forEach(response_app.data, function(value, i){
-										console.log(value);
-										value._id = String(value.post_id);
-
-										JobSearch.apply(value).then(function(doc){
-											console.log(doc);
-										}).catch(function(err){
-											console.log(err);
-										});
-									});
-								}
-
-								// download work experiences
-								$http({
-									method: 'GET',
-									url: 'http://api.jenjobs.local/jobseeker/work-experience',
-									params: {'access-token': accessToken}
-								}).then(function(response_work){
-									if( response_work.data.length > 0 ){
-										angular.forEach(response_work.data, function(value, i){
-											JsDatabase.addWork(value);
-										});
-										// JsDatabase.updateCompleteness('workExp', true);
-										completedItems.push('workExp');
-									}
-
-									// download qualification/education
-									$http({
-										method: 'GET',
-										url: 'http://api.jenjobs.local/jobseeker/qualification',
-										params: {'access-token':accessToken}
-									}).then(function(response_edu){
-										if( response_edu.data.length > 0 ){
-											angular.forEach(response_edu.data, function(value, i){
-												JsDatabase.addEducation(value);
-											});
-											// JsDatabase.updateCompleteness('education', true);
-											completedItems.push('education');
-										}
-
-										// download job preferences
-										$http({
-											method: 'GET',
-											url: 'http://api.jenjobs.local/jobseeker/job-preference',
-											params: {'access-token':accessToken}
-										}).then(function(resp){
-											JsDatabase.addSettings(resp.data, 'jobPref');
-											if( resp.data.salary && resp.data.job_type_id.length > 0 ){
-												// JsDatabase.updateCompleteness('jobPref', true);
-												completedItems.push('jobPref');
-											}
-
-											// download skills
-											$http({
-												method: 'GET',
-												url: 'http://api.jenjobs.local/jobseeker/skill',
-												params: {'access-token':accessToken}
-											}).then(function(respo){
-
-												if( respo.data.length > 0 ){
-													angular.forEach(respo.data, function(skill, i){
-														JsDatabase.addSkill(skill);
-													});
-												}
-
-												// download languages
-												$http({
-													method: 'GET',
-													url: 'http://api.jenjobs.local/jobseeker/language',
-													params: {'access-token':accessToken}
-												}).then(function(respon){
-													if( respon.data.length > 0 ){
-														angular.forEach(respon.data, function(lang, i){
-															JsDatabase.addLanguage(lang);
-														});
-														completedItems.push('language');
-													}
-
-													// download bookmarks
-													$http({
-														method: 'GET',
-														url: 'http://api.jenjobs.local/jobseeker/bookmark',
-														params: {'access-token':accessToken}
-													}).then(function(respon){
-														if( respon.data.length > 0 ){
-															angular.forEach(respon.data, function(bookmark, i){
-																JobSearch.bookmarkJob(bookmark);
-															});
-														}
-
-														console.log(completedItems);
-														if( completedItems.length > 0 ){
-															loopItem();
-
-															function loopItem(){
-																if( completedItems.length > 0 ){
-																	console.log('completeness updated.');
-																	updateCompleteness(completedItems[0]);
-																}else{
-																	$scope.disableButton = false;
-																	console.log('reached');
-																	$location.path('/tab/profile');
-																}
-															}
-
-															function updateCompleteness( key ){
-																JsDatabase.updateCompleteness(key, true)
-																.then(function(){
-																	completedItems.splice(0,1);
-																	loopItem();
-																}).catch(function(e){
-																	console.log(e);
-																});
-															}
-														}else{
-															$scope.disableButton = false;
-															console.log('reached');
-															$location.path('/tab/profile');
-														}
-													}); // download bookmarks
-												}); // done languages
-											}); // done skills
-										}); // done job preferences
-									}); // done qualification
-								}); // done work experience
-							}); // done application
-
-
-
-						}); // done profile
-					}); // done location
-				}); // done parameter
-			}else{
+		JobseekerLogin.login(function(response){
+			if( response.error ){
 				$scope.button.text = 'Login';
+				$scope.disableButton = false;
 				var alertPopup = $ionicPopup.alert({
 					title: 'Notification',
-					template: 'Login failed!'
+					template: response.error
 				});
+			}else{
+				if( response.data && typeof( response.data.access_token ) != 'undefined' ){
+					$scope.button.text = 'Downloading data...';
+
+					JobseekerLogin.setAccessToken( response.data.access_token, function(){
+						JobseekerLogin.downloadProfile(function(response){
+							if( response.error ){
+								$scope.log += "failed to download profile..."+angular.toJson(response.error);
+							}else{
+								// $scope.log += "profile downloaded...";
+								delete(response.data._links);
+								response.data.no_work_exp = response.data.no_work_exp == 0 ? false : true;
+
+								var completedItems = [];
+
+								JsDatabase.addProfile(response.data).then(function(){
+									// $scope.log += "profile saved...";
+									if( response.data.mobile_no && response.data.dob ){
+										completedItems.push('profile');
+									}
+
+									if( response.data.resume_file && response.data.resume_file.length > 5 ){
+										completedItems.push('attachment');
+									}
+
+									if( response.data.availability ){
+										completedItems.push('jobseek');
+									}
+
+									JobseekerLogin.downloadApplication(function(response){
+										if( response.error ){
+											// got error
+											$scope.log += "failed to download application..."+angular.toJson(response.error);
+										}else{
+											// $scope.log += "application downloaded...";
+											if( response.data.length > 0 ){
+												angular.forEach(response.data, function(value, i){
+													// console.log(value);
+													value._id = String(value.post_id);
+
+													JobSearch.apply(value).then(function(doc){
+														// console.log(doc);
+													}).catch(function(err){
+														// console.log(err);
+													});
+												});
+											}
+
+											// $scope.log += "download work exp...";
+											JobseekerLogin.downloadWorkExperience(function(response){
+												if( response.error ){
+													// got error
+													$scope.log += "failed to download work exp..."+angular.toJson(response.error);
+												}else{
+													// $scope.log += "work exp downloaded...";
+													if( response.data.length > 0 ){
+														angular.forEach(response.data, function(value, i){
+															JsDatabase.addWork(value);
+														});
+														completedItems.push('workExp');
+													}
+
+													// $scope.log += "downloading qualification...";
+													JobseekerLogin.downloadQualification(function(response){
+														if( response.error ){
+															// got error
+															$scope.log += "failed to download qualification"+angular.toJson(response.error);
+														}else{
+															// $scope.log += "qualification downloaded.";
+															if( response.data.length > 0 ){
+																angular.forEach(response.data, function(value, i){
+																	JsDatabase.addEducation(value);
+																});
+																completedItems.push('education');
+															}
+
+															// $scope.log += "downloading job preference...";
+															JobseekerLogin.downloadJobPreference(function(response){
+																if( response.error ){
+																	// got error
+																	$scope.log += "failed to download job preferences"+angular.toJson(response.error);
+																}else{
+																	// $scope.log += "job preference downloaded...";
+																	JsDatabase.addSettings(response.data, 'jobPref');
+																	if( response.data.salary && response.data.job_type_id.length > 0 ){
+																		completedItems.push('jobPref');
+																	}
+
+																	// $scope.log += "downloading skills...";
+																	JobseekerLogin.downloadSkill(function(response){
+																		if( response.error ){
+																			// got error
+																			$scope.log += "failed to download skill..."+angular.toJson(response.error);
+																		}else{
+																			// $scope.log += "skills downloaded...";
+																			if( response.data.length > 0 ){
+																				angular.forEach(response.data, function(skill, i){
+																					JsDatabase.addSkill(skill);
+																				});
+																			}
+
+																			// $scope.log += "downloading language...";
+																			JobseekerLogin.downloadLanguage(function(response){
+																				if( response.error ){
+																					// got error
+																					$scope.log += "failed to download language..."+angular.toJson(response.error);
+																				}else{
+																					// $scope.log += "language downloaded...";
+																					if( response.data.length > 0 ){
+																						angular.forEach(response.data, function(lang, i){
+																							JsDatabase.addLanguage(lang);
+																						});
+																						completedItems.push('language');
+																					}
+
+																					// $scope.log += "downloading bookmarks...";
+																					JobseekerLogin.downloadBookmark(function(response){
+																						if( response.error ){
+																							// got error
+																							$scope.log += "failed to download bookmark..."+angular.toJson(response.error);
+																						}else{
+																							$scope.log += "bookmarks downloaded...";
+																							if( response.data.length > 0 ){
+																								angular.forEach(response.data, function(bookmark, i){
+																									JobSearch.bookmarkJob(bookmark);
+																								});
+																							}
+
+																							if( completedItems.length > 0 ){
+																								loopItem();
+
+																								function loopItem(){
+																									if( completedItems.length > 0 ){
+																										updateCompleteness(completedItems[0]);
+																									}else{
+																										$scope.disableButton = false;
+																										$scope.button.text = 'Login';
+
+																										console.log('redirecting...');
+																										// $state.go('tab.profile', {}, {reload: false});
+																										$location.path('/tab/profile');
+																									}
+																								}
+
+																								function updateCompleteness( key ){
+																									JsDatabase.updateCompleteness(key, true)
+																									.then(function(){
+																										completedItems.splice(0,1);
+																										loopItem();
+																									}).catch(function(e){
+																										console.log(e);
+																									});
+																								}
+																							}else{
+																								$scope.disableButton = false;
+																								$scope.button.text = 'Login';
+
+																								console.log('redirecting...');
+																								// $state.go('tab.profile', {}, {reload: false});
+																								$location.path('/tab/profile');
+																							}
+																						}
+																					});
+																				}
+																			});
+																		}
+																	});
+																}
+															});
+														}
+													});
+												}
+											});
+										}
+									});
+								}).catch(function(err){
+									$scope.log += "failed to save profile..."+angular.toJson(err);
+								});
+							}
+						});
+					});
+					// save access token to database
+					JsDatabase.addToken( response.data );
+
+					JobseekerLogin.downloadParameter(function(response){
+						if( response.error ){
+							// got error
+						}else{
+							angular.forEach(response.data, function(value, i){
+								JsDatabase.addParameter(value, i);
+							});
+
+							JobseekerLogin.downloadLocation(function(response){
+								console.log(response);
+								if( response.error ){
+									// got error
+								}else{
+									angular.forEach(response.data, function(value, i){
+										JsDatabase.addParameter(value, i);
+									});
+								}
+							});
+						}
+					});
+				}else{
+					$scope.button.text = 'Login';
+					var alertPopup = $ionicPopup.alert({
+						title: 'Notification',
+						template: 'Login failed! Access token not found.'
+					});
+				}
 			}
-		}).catch(function(response){
-			$scope.button.text = 'Login';
-			// failed
-			$scope.disableButton = false;
-			var alertPopup = $ionicPopup.alert({
-				title: 'Notification',
-				template: angular.toJson(response, true)
-			});
 		});
 	}
 
 	var enterEventFired = false;
-	$scope.$on('$ionicView.enter', function() {
-		enterEventFired = true;
+	$scope.$on('$ionicView.enter', function(scopes, states) {
+		// $scope.log = "ionicView.enter="+typeof(JsDatabase.getToken())+"...";
 		runEnterEvent();
     });
 
-	// trying to trigger enter event if not yet executed
-	setTimeout(function(){
-		if( !enterEventFired ){
-			runEnterEvent();
-		}
-	}, 2000);
+	// setTimeout(function(){
+	// 	console.log('time outted!');
+	// 	$state.go($state.current, {}, {reload: true});
+	// }, 1000);
 
+	// trying to trigger enter event if not yet executed
 	function runEnterEvent(){
-		JsDatabase.getToken().then(function(token){
+		JsDatabase.getToken()
+		.then(function(token){
+			// $scope.log += "found token? "+token
 			// if already got token, then redirect to profile
 			if( token.length > 0 ){
 				$ionicHistory.nextViewOptions({
 					disableBack: true
 				});
+				enterEventFired = true;
 				$location.path('/tab/profile');
 			}
+		}).catch(function(err){
+			$scope.log = err;
 		});
 	}
 })
 
-.controller('RegisterCtrl', function( $scope, $http, $ionicHistory, $ionicLoading, JsDatabase, JobseekerLogin ){
+.controller('RegisterCtrl', function( $scope, $http, $location, $ionicHistory, $ionicPopup, JsDatabase, JobseekerLogin ){
 	$scope.js = {
 		name: '',
 		email: '',
@@ -491,24 +517,77 @@ angular.module('jenjobs.controllers', [])
 		text: 'Register'
 	}
 
+	$scope.disableButton = false;
+
 	$scope.submit = function(){
+		$scope.disableButton = true;
 		$scope.button.text = 'Registering...';
 		$http({
 			method: 'POST',
-			url: 'http://api.jenjobs.local/register/jobseeker',
+			url: 'http://api.jenjobs.com/register/jobseeker',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			data: $scope.user
+			data: $scope.js
 		}).then(function(response){
 			console.log(response);
 
 			if( response.data.status_code == 1 ){
 				$scope.button.text = 'Registration success.';
 
+				// successful registration will return an access token, save them
+				JsDatabase.addToken( response.data.token );
+				JobseekerLogin.setAccessToken( response.data.token.access_token, function(){
+					// then we use that access token to login the jobseeker into app.
+					JobseekerLogin.downloadProfile(function(response){
+						console.log(response);
+						if( response.error ){
+							// got error
+						}else{
+							delete(response.data._links);
+							response.data.no_work_exp = response.data.no_work_exp == 0 ? false : true;
+							JsDatabase.addProfile(response.data)
+							.then(function(){
+								// unlike most of the data doesnt need to be downloaded
+								JobseekerLogin.downloadParameter(function(response){
+									if( response.error ){
+										// got error
+									}else{
+										angular.forEach(response.data, function(value, i){
+											JsDatabase.addParameter(value, i);
+										});
+
+										JobseekerLogin.downloadLocation(function(response){
+											$scope.disableButton = false;
+											$scope.button.text = 'Register';
+
+											console.log(response);
+											if( response.error ){
+												// got error
+											}else{
+												angular.forEach(response.data, function(value, i){
+													JsDatabase.addParameter(value, i);
+												});
+												$location.path('/tab/profile');
+											}
+										});
+									}
+								});
+							}).catch(function(err){
+								console.log(err);
+							});
+						}
+					});
+				});
 			}else{
+				$scope.disableButton = false;
 				$scope.button.text = 'Register';
+
+				$ionicPopup.alert({
+					title: 'Notification',
+					template: response.data.error
+				});
 			}
 		});
 	}
@@ -623,4 +702,58 @@ angular.module('jenjobs.controllers', [])
 
 		return false;
 	}
+})
+
+.controller('TabCtrl', function($scope, $state){
+	$scope.go = function(args){
+		$state.go(args, {}, {
+	        reload: true,
+	        inherit: false,
+	        notify: true
+	    });
+	}
+})
+
+.controller('ForgotPasswordCtrl', function($scope, $http, $location, $ionicPopup){
+	$scope.js = {
+		email: ''
+	};
+	$scope.button = {
+		text: 'Request Password Reset',
+		disabled: false
+	}
+
+	$scope.submit = function(){
+		$scope.button.disabled = true;
+		$scope.button.text = 'Processing request...';
+
+		$http({
+			method: 'POST',
+			url: 'http://api.jenjobs.com/forgot-password/jobseeker',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			data: $scope.js
+		}).then(function(response){
+			console.log(response);
+			// reset form
+			$scope.button.disabled = false;
+			$scope.button.text = 'Request Password Reset';
+			$scope.js.email = '';
+
+			$ionicPopup.alert({
+				title: 'Notification',
+				template: response.data.status_text
+			});
+		});
+	}
+
+	$scope.go = function(path){
+		$location.path(path);
+	}
+})
+
+.controller('JobSearchCtrl', function($scope){
+
 });

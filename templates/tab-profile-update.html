@@ -33,9 +33,6 @@
 
 				<div class="item item-input item-button-right">
 					<input type="text" placeholder="Mobile No.: (+60)123456789" data-ng-model="js.mobile_no" />
-					<button type="button" name="button" class="button button-clear button-right button-dark" ng-click="openCountryDialCode()">
-						<i class="ion-ios-help"></i>
-					</button>
 				</div>
 
 				<div class="item item-input" ng-show="js.country_id == 127">
@@ -46,7 +43,7 @@
 					<input type="text" placeholder="Passport" data-ng-model="js.passport_no" />
 				</div>
 
-				<button type="submit" id="submit" class="button button-block button-positive">
+				<button type="submit" id="submit" class="button button-block button-positive" ng-disabled="!js.dob || !selectedCountry.name || !js.mobile_no || ((!js.ic_no && selectedCountry.id==127) || (!js.passport_no && selectedCountry.id!=127))">
 					<i class="ion-edit"></i> Save
 				</button>
 			</div>
