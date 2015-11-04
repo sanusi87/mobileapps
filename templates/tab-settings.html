@@ -1,42 +1,64 @@
 <ion-view view-title="Settings">
 	<ion-content>
+		<h4 class="mt-10 pl-5">&nbsp;Subscription</h4>
 		<div class="list">
-			<div class="item item-toggle item-icon-left">
+			<div class="item item-toggle item-icon-left pt-15 pb-15">
+				<i class="icon ion-email"></i>
+				Subscribe to Newsletter Email
+				<label class="toggle" ng-click="toggleNewsletterSubscription()">
+					<input type="checkbox" ng-model="parameter.newsletterSubscription" />
+					<div class="track">
+						<div class="handle"></div>
+					</div>
+				</label>
+			</div>
+
+			<div class="item item-toggle item-icon-left pt-15 pb-15">
+				<i class="icon ion-email"></i>
+				Subscribe to Promotional Email
+				<label class="toggle" ng-click="togglePromotionSubscription()">
+					<input type="checkbox" ng-model="parameter.promotionSubscription" />
+					<div class="track">
+						<div class="handle"></div>
+					</div>
+				</label>
+			</div>
+		</div>
+
+		<h4 class="pl-5">&nbsp; Alert</h4>
+		<div class="list">
+			<div class="item item-toggle item-icon-left pt-15 pb-15">
 				<i class="icon ion-chatbubble-working"></i>
 				Subscribe SMS Job Alert
-				<label class="toggle">
-					<input type="checkbox" />
+				<label class="toggle" ng-click="toggleSmsSubscription()">
+					<input type="checkbox" ng-model="parameter.smsSubscription" />
 					<div class="track">
 						<div class="handle"></div>
 					</div>
 				</label>
 			</div>
 
-			<div class="item item-toggle item-icon-left">
-				<i class="icon ion-email"></i>
-				Subscribe Email Alert
-				<label class="toggle">
-					<input type="checkbox" />
-					<div class="track">
-						<div class="handle"></div>
-					</div>
-				</label>
-			</div>
-
-			<div class="item item-toggle item-icon-left">
+			<!--
+			<div class="item item-toggle item-icon-left pt-15 pb-15">
 				<i class="icon ion-android-notifications"></i>
 				Enable Notification
-				<label class="toggle">
-					<input type="checkbox" />
+				<label class="toggle" ng-click="toggleNotification()">
+					<input type="checkbox" value="1" ng-model="parameter.notification" />
 					<div class="track">
 						<div class="handle"></div>
 					</div>
 				</label>
 			</div>
+			-->
 
-			<a class="item item-icon-left" href="#/tab/settings" ng-click="logout()">
+			<a class="item item-icon-left" ng-href="#/tab/settings" ng-click="logout()">
 				<i class="icon ion-log-out"></i>
 				Log Out
+			</a>
+
+			<a class="item item-icon-left" ng-href="#/tab/settings" ng-click="exitApp()">
+				<i class="icon ion-ios-close-empty"></i>
+				Exit
 			</a>
 
 		</div>
