@@ -4,12 +4,12 @@
 	</ion-nav-buttons>
 
 	<ion-nav-buttons side="right">
-		<button type="button" class="button button-clear button-positive" ng-click="openBookmarkSection()"><i class="ion-ios-bookmarks"></i> Bookmarks</button>
+		<button type="button" class="button button-clear button-positive" ng-click="openBookmarkSection()" ng-show="currentState!='jobs'"><i class="ion-ios-bookmarks"></i> Bookmarks</button>
 	</ion-nav-buttons>
 
 	<ion-content class="padding">
 
-		<div class="button-bar" ng-show="currentState=='jobs'">
+		<div class="button-bar" ng-show="currentState == 'jobs'">
 			<a class="button button-positive mb-10" ng-href="#/login">
 				Login to apply
 			</a>
@@ -19,7 +19,7 @@
 			<ion-item ng-show="jobs.length == 0">
 				<i class="ion-android-warning"></i> No record found.
 			</ion-item>
-			<ion-item ng-repeat="job in jobs">
+			<ion-item ng-repeat="job in jobs track by job.post_id">
 				<h2>
 					<strong ng-show="currentState!='jobs'"><a class="positive" ng-href="#/tab/job-details/{{job.post_id}}">{{job.title}}</a></strong>
 					<strong ng-show="currentState=='jobs'"><a class="positive" ng-href="#/job-details/{{job.post_id}}">{{job.title}}</a></strong>

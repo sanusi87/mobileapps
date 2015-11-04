@@ -1,9 +1,9 @@
 <ion-modal-view>
 	<ion-header-bar>
-		<h4 class="title">Filters</h4>
+		<h4 class="title"></h4>
 
 		<button type="button" class="button button-left button-icon" ng-click="filterJobs()">
-			<i class="ion-ios-search"></i> Submit
+			<i class="ion-ios-search"></i> Search
 		</button>
 
 		<button type="button" class="button button-left button-icon" ng-click="resetFilter()">
@@ -19,7 +19,7 @@
 
 			<div class="item item-select pb-5 pt-5">
 				<label for="search-by" class="input-label">Search keyword by</label>
-				<select data-ng-options="o.name for o in keywordFilter track by o.id" data-ng-model="tmp.searchby" id="search-by"></select>
+				<select data-ng-options="o.name for o in keywordFilter track by o.id" data-ng-model="tmp.search_by" id="search-by"></select>
 			</div>
 
 			<div class="item">
@@ -37,10 +37,10 @@
 					<div class="item item-input">
 						<div class="row pt-0 pb-0 pl-0 pr-0">
 							<div class="col col-50 pt-0 pb-0">
-								<input type="number" data-ng-model="params.smin" placeholder="Salary Min" />
+								<input type="number" data-ng-model="params.salary_min" placeholder="Salary Min" />
 							</div>
 							<div class="col col-50 pt-0 pb-0">
-								<input type="number" data-ng-model="params.smax" placeholder="Salary Max" />
+								<input type="number" data-ng-model="params.salary_max" placeholder="Salary Max" />
 							</div>
 						</div>
 					</div>
@@ -104,8 +104,8 @@
 			<div class="item">
 				<label class="input-label"><strong>Posted By</strong></label>
 				<div class="list">
-					<ion-toggle ng-model="params.da" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0" class="pt-15 pb-15">Direct Employer</ion-toggle>
-					<ion-toggle ng-model="params.advertiser" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0" class="pt-15 pb-15">Company Undisclosed</ion-toggle>
+					<ion-toggle ng-model="params.direct_employer" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0" class="pt-15 pb-15">Direct Employer</ion-toggle>
+					<ion-toggle ng-model="params.advertiser" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0" class="pt-15 pb-15">Company Undisclosed / Recruitment Agency</ion-toggle>
 				</div>
 			</div>
 
@@ -113,9 +113,7 @@
 			<div class="item item-input">
                 <input type="text" name="status" value="status" />
                 <input type="text" name="emid" value="emid" />
-                <input type="text" name="industry" value="industry" />
-                <input type="text" name="spec" value="spec" />
-                <input type="text" name="role" value="role" />
+                <input type="text" name="industry_id" value="industry_id" />
 			</div>
 			-->
 

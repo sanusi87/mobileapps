@@ -1,4 +1,4 @@
-angular.module('jenjobs.controllers', [])
+angular.module('jenjobs.controllers', ['ionic'])
 
 .controller('ProfileCtrl', function($scope, $location, JsDatabase){
 	$scope.js = {};
@@ -244,7 +244,7 @@ angular.module('jenjobs.controllers', [])
 		text: 'Login'
 	}
 
-	$scope.log = "";
+	// $scope.log = "";
 
 	$scope.submit = function(){
 		$scope.button.text = 'Login...';
@@ -268,7 +268,7 @@ angular.module('jenjobs.controllers', [])
 					JobseekerLogin.setAccessToken( response.data.access_token, function(){
 						JobseekerLogin.downloadProfile(function(response){
 							if( response.error ){
-								$scope.log += "failed to download profile..."+angular.toJson(response.error);
+								// $scope.log += "failed to download profile..."+angular.toJson(response.error);
 							}else{
 								// $scope.log += "profile downloaded...";
 								delete(response.data._links);
@@ -293,7 +293,7 @@ angular.module('jenjobs.controllers', [])
 									JobseekerLogin.downloadApplication(function(response){
 										if( response.error ){
 											// got error
-											$scope.log += "failed to download application..."+angular.toJson(response.error);
+											// $scope.log += "failed to download application..."+angular.toJson(response.error);
 										}else{
 											// $scope.log += "application downloaded...";
 											if( response.data.length > 0 ){
@@ -313,7 +313,7 @@ angular.module('jenjobs.controllers', [])
 											JobseekerLogin.downloadWorkExperience(function(response){
 												if( response.error ){
 													// got error
-													$scope.log += "failed to download work exp..."+angular.toJson(response.error);
+													// $scope.log += "failed to download work exp..."+angular.toJson(response.error);
 												}else{
 													// $scope.log += "work exp downloaded...";
 													if( response.data.length > 0 ){
@@ -327,7 +327,7 @@ angular.module('jenjobs.controllers', [])
 													JobseekerLogin.downloadQualification(function(response){
 														if( response.error ){
 															// got error
-															$scope.log += "failed to download qualification"+angular.toJson(response.error);
+															// $scope.log += "failed to download qualification"+angular.toJson(response.error);
 														}else{
 															// $scope.log += "qualification downloaded.";
 															if( response.data.length > 0 ){
@@ -341,7 +341,7 @@ angular.module('jenjobs.controllers', [])
 															JobseekerLogin.downloadJobPreference(function(response){
 																if( response.error ){
 																	// got error
-																	$scope.log += "failed to download job preferences"+angular.toJson(response.error);
+																	// $scope.log += "failed to download job preferences"+angular.toJson(response.error);
 																}else{
 																	// $scope.log += "job preference downloaded...";
 																	JsDatabase.addSettings(response.data, 'jobPref');
@@ -353,7 +353,7 @@ angular.module('jenjobs.controllers', [])
 																	JobseekerLogin.downloadSkill(function(response){
 																		if( response.error ){
 																			// got error
-																			$scope.log += "failed to download skill..."+angular.toJson(response.error);
+																			// $scope.log += "failed to download skill..."+angular.toJson(response.error);
 																		}else{
 																			// $scope.log += "skills downloaded...";
 																			if( response.data.length > 0 ){
@@ -366,7 +366,7 @@ angular.module('jenjobs.controllers', [])
 																			JobseekerLogin.downloadLanguage(function(response){
 																				if( response.error ){
 																					// got error
-																					$scope.log += "failed to download language..."+angular.toJson(response.error);
+																					// $scope.log += "failed to download language..."+angular.toJson(response.error);
 																				}else{
 																					// $scope.log += "language downloaded...";
 																					if( response.data.length > 0 ){
@@ -380,9 +380,38 @@ angular.module('jenjobs.controllers', [])
 																					JobseekerLogin.downloadBookmark(function(response){
 																						if( response.error ){
 																							// got error
-																							$scope.log += "failed to download bookmark..."+angular.toJson(response.error);
+																							// $scope.log += "failed to download bookmark..."+angular.toJson(response.error);
 																						}else{
-																							$scope.log += "bookmarks downloaded...";
+																							// download subscription
+																							JobseekerLogin.downloadSubscription(function(response){
+																								console.log(response);
+																								angular.forEach(response.data, function(subscr,i){
+																									var settingName = '';
+																									if( subscr.subscription_id == 1 ){
+																										settingName = 'newsletter_alert';
+																									}else if( subscr.subscription_id == 2 ){
+																										settingName = 'promotion_alert';
+																									}else if( subscr.subscription_id == 3 ){
+																										settingName = 'sms_job_alert';
+																									}
+
+																									JsDatabase.getSettings(settingName)
+																									.then(function(settingValue){
+																										settingValue.value = subscr.subscription_id ? 1 : 0;
+																										JsDatabase.updateSettings(settingValue)
+																										.then(function(updateStatus){
+																											console.log(updateStatus);
+																										}).catch(function(err){
+																											console.log(err);
+																										});
+																									}).catch(function(err){
+																										console.log(err);
+																									});
+																								});
+																							});
+																							// end updating subscription
+
+																							// $scope.log += "bookmarks downloaded...";
 																							if( response.data.length > 0 ){
 																								angular.forEach(response.data, function(bookmark, i){
 																									JobSearch.bookmarkJob(bookmark);
@@ -437,7 +466,7 @@ angular.module('jenjobs.controllers', [])
 										}
 									});
 								}).catch(function(err){
-									$scope.log += "failed to save profile..."+angular.toJson(err);
+									// $scope.log += "failed to save profile..."+angular.toJson(err);
 								});
 							}
 						});
@@ -501,7 +530,7 @@ angular.module('jenjobs.controllers', [])
 				$location.path('/tab/profile');
 			}
 		}).catch(function(err){
-			$scope.log = err;
+			// $scope.log = err;
 		});
 	}
 })
@@ -593,16 +622,49 @@ angular.module('jenjobs.controllers', [])
 	}
 })
 
-.controller('AccountCtrl', function($scope, $location, JsDatabase, JobSearch) {
+.controller('AccountCtrl', function($scope, $location, $ionicLoading, JsDatabase, JobSearch, Sync) {
 	$scope.access_token = null;
+	$scope.parameter = {
+		notification: false,
+		smsSubscription: false,
+		newsletterSubscription: false,
+		promotionSubscription: false
+	};
+
+	var tmp_newsletter_alert,
+	tmp_promotion_alert,
+	tmp_sms_job_alert,
+	tmp_notification;
+
 	JsDatabase.getToken().then(function(token){
 		if(token.length > 0){
 			$scope.access_token = token;
+			Sync.setToken(token[0].access_token);
 		}else{
 			$location.path('/login');
 		}
 	}).catch(function(){
 		$location.path('/login');
+	});
+
+	JsDatabase.getSettings('newsletter_alert').then(function(newsletter_alert){
+		$scope.parameter.newsletterSubscription = newsletter_alert.value == 1 ? true : false;
+		tmp_newsletter_alert = newsletter_alert;
+	});
+
+	JsDatabase.getSettings('promotion_alert').then(function(promotion_alert){
+		$scope.parameter.promotionSubscription = promotion_alert.value == 1 ? true : false;
+		tmp_promotion_alert = promotion_alert;
+	});
+
+	JsDatabase.getSettings('sms_job_alert').then(function(sms_job_alert){
+		$scope.parameter.smsSubscription = sms_job_alert.value == 1 ? true : false;
+		tmp_sms_job_alert = sms_job_alert;
+	});
+
+	JsDatabase.getSettings('notification_alert').then(function(notification){
+		$scope.parameter.notification = notification.value == 1 ? true : false;
+		tmp_notification = notification;
 	});
 
 	// logout
@@ -702,6 +764,99 @@ angular.module('jenjobs.controllers', [])
 
 		return false;
 	}
+
+	$scope.toggleNotification = function(){
+		//console.log($scope.parameter.notification);
+		tmp_notification.value = $scope.parameter.notification ? 1 : 0;
+		JsDatabase.updateSettings(tmp_notification).then(function(updateStatus){
+			console.log(updateStatus);
+			tmp_notification._rev = updateStatus.rev;
+
+			// update server
+
+		});
+	}
+
+	$scope.toggleSmsSubscription = function(){
+		//console.log($scope.parameter.smsSubscription);
+		tmp_sms_job_alert.value = $scope.parameter.smsSubscription ? 1 : 0;
+		JsDatabase.updateSettings(tmp_sms_job_alert).then(function(updateStatus){
+			tmp_sms_job_alert._rev = updateStatus.rev;
+
+			// update server
+			Sync.updateSubscription(3, $scope.parameter.smsSubscription, function(response){
+				if( response.error ){
+					$ionicLoading.show({
+						template: response.error,
+						noBackdrop: true,
+						duration: 1000
+					});
+				}else{
+					$ionicLoading.show({
+						template: response.data.status_text,
+						noBackdrop: true,
+						duration: 1000
+					});
+				}
+			});
+		});
+	}
+
+	$scope.toggleNewsletterSubscription = function(){
+		// console.log($scope.parameter.newsletterSubscription);
+		tmp_newsletter_alert.value = $scope.parameter.newsletterSubscription ? 1 : 0;
+		JsDatabase.updateSettings(tmp_newsletter_alert).then(function(updateStatus){
+			console.log(updateStatus);
+			tmp_newsletter_alert._rev = updateStatus.rev;
+
+			// update server
+			Sync.updateSubscription(1, $scope.parameter.newsletterSubscription, function(response){
+				if( response.error ){
+					$ionicLoading.show({
+						template: response.error,
+						noBackdrop: true,
+						duration: 1000
+					});
+				}else{
+					$ionicLoading.show({
+						template: response.data.status_text,
+						noBackdrop: true,
+						duration: 1000
+					});
+				}
+			});
+		});
+	}
+
+	$scope.togglePromotionSubscription = function(){
+		// console.log($scope.parameter.promotionSubscription);
+		tmp_promotion_alert.value = $scope.parameter.promotionSubscription ? 1 : 0;
+		JsDatabase.updateSettings(tmp_promotion_alert).then(function(updateStatus){
+			console.log(updateStatus);
+			tmp_promotion_alert._rev = updateStatus.rev;
+
+			// update server
+			Sync.updateSubscription(2, $scope.parameter.promotionSubscription, function(response){
+				if( response.error ){
+					$ionicLoading.show({
+						template: response.error,
+						noBackdrop: true,
+						duration: 1000
+					});
+				}else{
+					$ionicLoading.show({
+						template: response.data.status_text,
+						noBackdrop: true,
+						duration: 1000
+					});
+				}
+			});
+		});
+	}
+
+	$scope.exitApp = function(){
+		ionic.Platform.exitApp();
+	}
 })
 
 .controller('TabCtrl', function($scope, $state){
@@ -752,8 +907,4 @@ angular.module('jenjobs.controllers', [])
 	$scope.go = function(path){
 		$location.path(path);
 	}
-})
-
-.controller('JobSearchCtrl', function($scope){
-
 });

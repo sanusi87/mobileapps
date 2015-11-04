@@ -19,11 +19,11 @@
                 <span class="positive">Industry</span>: <small>{{job.company_details.industry}}</small>
             </div>
 
-            <div class="item">
+            <div class="item" ng-show="job.company_details.work_hour">
                 <span class="positive">Working Hours</span>:  <small>{{job.company_details.work_hour}}</small>
             </div>
 
-            <div class="item">
+            <div class="item" ng-show="job.company_details.benefits">
                 <span class="positive">Benefits</span>:
                 <br />
                 <p>{{job.company_details.benefits}}</p>
@@ -34,6 +34,13 @@
                 <br />
                 <p>
                     <a ng-click="browse(job.company_details.website)">{{job.company_details.website}}</a>
+                </p>
+            </div>
+			<div class="item" ng-show="job.company_details.fb_page">
+                <span class="positive">Facebook Page</span>:
+                <br />
+                <p>
+                    <a ng-click="browse(job.company_details.fb_page)">{{job.company_details.fb_page}}</a>
                 </p>
             </div>
 		</div>

@@ -73,62 +73,63 @@
 			// 2 = Company Name
 			// 3 = Skills
 			// 4 = Job Description
-			if( filter.searchby ){ param.searchby = filter.searchby; }
+			if( filter.search_by ){ param.search_by = filter.search_by; }
 
 			if( filter.emid ){ param.emid = filter.emid; }
 
-			if( filter.level ){
-				param['level[]'] = [];
-				angular.forEach(filter.level, function(e,i){
-					param['level[]'].push(e);
+			if( filter.job_level_id ){
+				param['job_level_id[]'] = [];
+				angular.forEach(filter.job_level_id, function(e,i){
+					param['job_level_id[]'].push(e);
 				});
 			}
 
-			if( filter.industry ){ param.industry = filter.industry; }
+			if( filter.industry_id ){ param.industry_id = filter.industry_id; }
 
 			// multiple
-			if( filter.spec ){
-				param['spec[]'] = [];
-				angular.forEach(filter.spec, function(e,i){
-					param['spec[]'].push(e);
+			if( filter.job_spec_id ){
+				param['job_spec_id[]'] = [];
+				angular.forEach(filter.job_spec_id, function(e,i){
+					param['job_spec_id[]'].push(e);
 				});
 			}
-			if( filter.role ){
-				param['role[]'] = [];
-				angular.forEach(filter.role, function(e,i){
-					param['role[]'].push(e);
-				});
-			}
-
-			if( filter.country ){
-				param['country[]'] = [];
-				angular.forEach(filter.country, function(e,i){
-					param['country[]'].push(e);
+			if( filter.job_role_id ){
+				param['job_role_id[]'] = [];
+				angular.forEach(filter.job_role_id, function(e,i){
+					param['job_role_id[]'].push(e);
 				});
 			}
 
-			if( filter.state ){
-				param['state[]'] = [];
-				angular.forEach(filter.state, function(e,i){
-					param['state[]'].push(e);
+			if( filter.country_id ){
+				param['country_id[]'] = [];
+				angular.forEach(filter.country_id, function(e,i){
+					param['country_id[]'].push(e);
 				});
 			}
 
-			if( filter.type ){
-				param['type[]'] = [];
-				angular.forEach(filter.type, function(e,i){
-					param['type[]'].push(e);
+			if( filter.state_id ){
+				param['state_id[]'] = [];
+				angular.forEach(filter.state_id, function(e,i){
+					param['state_id[]'].push(e);
 				});
 			}
 
-			if( filter.smin ){ param.smin = filter.smin; }
-			if( filter.smax ){ param.smax = filter.smax; }
+			if( filter.job_type_id ){
+				param['job_type_id[]'] = [];
+				angular.forEach(filter.job_type_id, function(e,i){
+					param['job_type_id[]'].push(e);
+				});
+			}
+
+			if( filter.salary_min ){ param.salary_min = filter.salary_min; }
+			if( filter.salary_max ){ param.salary_max = filter.salary_max; }
 			if( filter.seostate ){ param.seostate = filter.seostate; }
 			if( filter.advertiser ){ param.advertiser = filter.advertiser; }
-			if( filter.da ){ param.da = filter.da; }
+			if( filter.direct_employer ){ param.direct_employer = filter.direct_employer; }
 		}
 
 		// fetch jobs from live web server
+		_jobs = {};
 		return $http({
 			method: 'GET',
 			url: 'http://api.jenjobs.com/jobs/search',
@@ -139,16 +140,15 @@
 			params: param
 		}).then(function(response){
 			if( response.status == 200 ){
-				_jobs = {};
-				angular.forEach(response.data, function(e,i){
-					response.data[i].date_closed = new Date(e.date_closed);
+				angular.forEach(response.data.data, function(e,i){
+					response.data.data[i].date_closed = new Date(e.date_closed);
 					// response.data[i].date_posted = new Date(e.date_posted);
 					// response.data[i].advertiser = e.advertiser == "true" ? true : false;
 					// response.data[i].recruitment_agency = e.recruitment_agency == "true" ? true : false;
-					response.data[i].salary_display = e.salary_display == 1 ? true : false;
+					response.data.data[i].salary_display = e.salary_display == 1 ? true : false;
 
 					// we populate each job into _job object, to simplify our search later
-					_jobs[response.data[i].post_id] = response.data[i];
+					_jobs[response.data.data[i].post_id] = response.data.data[i];
 				});
 			}
 

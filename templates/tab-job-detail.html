@@ -1,16 +1,13 @@
 <ion-view view-title="{{jobTitle}}">
 
 	<ion-nav-buttons side="left">
-
 		<button ng-show="currentState!='job-details'" type="button" class="button button-clear button-positive" ng-click="go('/tab/job')">
 			<i class="ion-ios-arrow-left"></i> Jobs
 		</button>
-
 	</ion-nav-buttons>
 
 	<ion-content class="padding">
 		<div ng-show="job.post_id">
-
 			<div class="row" ng-show="currentState!='job-details'">
 				<div class="col col-50">
 					<div class="button-bar">
@@ -46,6 +43,10 @@
 
 			<h2 class="positive">Job Details</h2>
 			<div class="list">
+				<div class="item" ng-show="job.company_details.header_file != ''">
+					<img ng-src="{{job.company_details.header_file}}" alt="" class="fill-width" />
+				</div>
+
 				<div class="item">
 					<span class="positive">Posted By</span>:
 					<p ng-show="!job.advertiser">
@@ -149,7 +150,12 @@
 		</div>
 
 		<div ng-show="!job.post_id">
-			<div class="card">
+			<div class="card" ng-show="isLoading">
+				<div class="item item-text-wrap text-center">
+					<i class="ion-ios-loop"></i> loading...
+				</div>
+			</div>
+			<div class="card" ng-show="!isLoading">
 				<div class="item item-text-wrap text-center">
 					Sorry, we were unable to find this job.
 					<br />
