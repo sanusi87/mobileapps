@@ -24,7 +24,7 @@ angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'je
 		JobSearch.initDB();
 	});
 })
-.config(function($stateProvider, $urlRouterProvider, $httpProvider) {
+.config(function($stateProvider, $urlRouterProvider, $httpProvider, $compileProvider) {
 	$stateProvider
 
 	.state('tab', {
@@ -238,11 +238,13 @@ angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'je
 	});
 
 	// if none of the above states are matched, use this as the fallback
-	$urlRouterProvider.otherwise('/login');
+	$urlRouterProvider.otherwise('/profile');
 
 	// configing ajax request
 	$httpProvider.defaults.useXDomain = true;
 	$httpProvider.defaults.headers = {
 		'Content-Type': 'application/json;charset=utf-8'
 	};
+
+	$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|geo):/);
 });
