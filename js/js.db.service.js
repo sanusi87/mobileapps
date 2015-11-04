@@ -82,8 +82,12 @@ angular.module('jenjobs.db', [])
 		_settings_db = new PouchDB('settings', {adapter: 'websql'});
 		$q.when( _settings_db.bulkDocs([
 			{_id: 'sms_job_alert', value:0},
-			{_id: 'email_alert', value:0},
-			{_id: 'notification', value:0},
+			// {_id: 'email_alert', value:0},
+			{_id: 'notification_alert', value:0},
+
+			{_id: 'newsletter_alert', value:0},
+			{_id: 'promotion_alert', value:0},
+
 			{_id: 'attachedResume', value:0},
 			{
 				_id: 'completeness',
