@@ -1,10 +1,7 @@
 ﻿angular.module('jenjobs.job', [])
-.controller('JobCtrl', function($scope, $state, $location, $http, $filter, $ionicModal, JobSearch, JsDatabase){
+.controller('JobCtrl', function($scope, $state, $location, $http, $filter, $ionicModal, $ionicHistory, JobSearch, JsDatabase){
 	$scope.jobs = [];
-
-	$scope.tmp = {
-		search_by: {id:1}
-	};
+	$scope.tmp = {search_by: {id:1}};
 
 	$scope.params = {
 		page: 1,
@@ -55,12 +52,6 @@
 		});
 	});
 
-	// JobSearch.search().then(function(jobs){
-	// 	angular.forEach(jobs, function(e,i){
-	// 		$scope.jobs.push(e);
-	// 	});
-	// });
-
 	$ionicModal.fromTemplateUrl('templates/modal/job-filter.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
@@ -80,15 +71,13 @@
 
 		$scope.jobTypes = jobTypes;
 	});
+
 	$scope.checkValue = function(){
-		console.log(this.id);
-		console.log($scope.selectedJobType);
 		if( !$scope.selectedJobType[this.id] ){
 			$scope.params.job_type_id.splice( $scope.params.job_type_id.indexOf(this.id), 1 );
 		}else{
 			$scope.params.job_type_id.push(this.id);
 		}
-		console.log($scope.params.job_type_id);
 	}
 	// job type
 
@@ -96,7 +85,6 @@
 	JsDatabase.getParameter('jobLevel').then(function(jobLevels){
 		delete(jobLevels._id);
 		delete(jobLevels._rev);
-
 		$scope.jobLevels = jobLevels;
 	});
 
@@ -135,17 +123,6 @@
 		}
 		createCountryString();
 	};
-
-	// $scope.checkStateValue = function(){
-	// 	if( $scope.selectedState[this.state.id] && $scope.selectedState[this.state.id] == 0 ){
-	// 		$scope.params.state_id.splice( $scope.params.state_id.indexOf(this.state.id), 1 );
-	// 	}else{
-	// 		if( this.state.id ){
-	// 			$scope.params.state_id.push(this.state.id);
-	// 		}
-	// 	}
-	// 	createStateString();
-	// }
 
 	JsDatabase.getParameter('states').then(function(states){
 		delete(states._id);
@@ -243,9 +220,11 @@
 	}
 	// country
 
-	// open bookmark section
-	$scope.openBookmarkSection = function(){
-		$location.path('/tab/bookmarks');
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
 	}
 
 	$scope.filterJobs = function(){
@@ -307,10 +286,6 @@
 	var isLoading = false;
 	$scope.gotMoreData = true;
 	$scope.loadMore = function(){
-
-		console.log('more data? '+$scope.gotMoreData);
-		console.log('is loading? '+isLoading);
-
 		if( $scope.gotMoreData ){
 			if( !isLoading ){
 				isLoading = true;
@@ -411,13 +386,11 @@
 	};
 
 	$scope.toggleRole = function(){
-		// console.log(this);
 		if( $scope.params.job_role_id.indexOf( this.roleid ) == -1 ){
 			$scope.params.job_role_id.push( this.roleid );
 		}else{
 			$scope.params.job_role_id.splice( $scope.params.job_role_id.indexOf( this.roleid ),1 );
 		}
-		// console.log($scope.params.job_role_id);
 	};
 
 })
@@ -601,6 +574,9 @@
 	}
 
 	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
 		$location.path(path);
 	}
 
@@ -626,7 +602,7 @@
 	// end company details
 })
 
-.controller('ApplicationCtrl', function($scope, JobSearch, JsDatabase){
+.controller('ApplicationCtrl', function($scope, $ionicHistory, $location, JobSearch, JsDatabase){
 
 	$scope.$on('$ionicView.enter', function(){
 		JobSearch.getApplication().then(function(application){
@@ -641,9 +617,16 @@
 		});
 	});
 
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
+	}
+
 })
 
-.controller('BookmarkController', function($scope, JobSearch, JsDatabase, $ionicPopup){
+.controller('BookmarkController', function($scope, $location, $ionicHistory, JobSearch, JsDatabase, $ionicPopup){
 	$scope.bookmarks = [];
 	JsDatabase.getToken().then(function(token){
 		if( token.length > 0 ){
@@ -688,4 +671,12 @@
 			}
 		});
 	}
+
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
+	}
+
 });
