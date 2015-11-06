@@ -10,10 +10,10 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Resume Visibility</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-access-level" class="positive">
-							<i class="icon ion-compose"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="go('/tab/resume-update-access-level')" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-compose-outline positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
@@ -27,10 +27,10 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Jobseeking Information</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-jobseeking-information" class="positive">
-							<i class="icon ion-compose"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="go('/tab/resume-update-jobseeking-information')" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-compose-outline positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
@@ -39,7 +39,7 @@
 				<ion-list>
 					<ion-item><span class="positive">Status</span>: {{jobseekingStatus[jsJobseekingStatus]}}</ion-item>
 					<ion-item><span class="positive">Currently stay in</span>: {{currentlyStayIn}}</ion-item>
-                    
+
                     <ion-item><span class="positive">Availability period</span>: <span ng-show="availability !=-1">{{availability+' '+selectedavailabilityUnit.name}}</span></ion-item>
 
 					<ion-item><span class="positive">Driving license</span>: {{drivingLicense?'Yes':'No'}}</ion-item>
@@ -60,10 +60,10 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Job Preferences</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-job-preferences" class="positive">
-							<i class="icon ion-compose"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="go('/tab/resume-update-job-preferences')" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-compose-outline positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
@@ -79,7 +79,7 @@
 						<span class="positive">Preferred Working Location in Malaysia</span>:
 						<br /> {{prefStates}}
 					</ion-item>
-					<ion-item>
+					<ion-item ng-show="prefCountries">
 						<span class="positive">Other Preferred Countries</span>:
 						<br /> {{prefCountries}}
 					</ion-item>
@@ -91,10 +91,10 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Work Experience</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-selected-work-experience/0" class="positive">
-							<i class="icon ion-ios-plus-empty"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="go('/tab/resume-update-selected-work-experience/0')" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-plus-empty positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
@@ -102,8 +102,12 @@
 			<div class="item item-body" ng-show="works.length > 0">
 				<div class="list">
 					<div class="item item-button-right" ng-repeat="work in works">
-						<a href="#/tab/resume-update-selected-work-experience/{{work._id}}"><span class="positive">{{work.position}}</span></a>
-						<br />{{work.company}}
+                        <div>
+                            <button type="button" name="button" class="button button-link text-left" ng-click="go('/tab/resume-update-selected-work-experience/{{work._id}}')">
+                                {{work.position}}
+                            </button>
+                        </div>
+						{{work.company}}
 						<br />{{work.started_on}}
 						<div ng-show="work.resigned_on">
                             <br />{{work.resigned_on}}
@@ -139,10 +143,10 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Highest Education</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume-update-selected-education/0" class="positive">
-							<i class="icon ion-ios-plus-empty"></i>
-						</a>
+					<div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="go('/tab/resume-update-selected-education/0')" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-plus-empty positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
@@ -150,11 +154,18 @@
 			<div class="item item-body" ng-show="educations.length > 0">
 				<div class="list">
 					<div class="item item-button-right" ng-repeat="edu in educations">
-						<a href="#/tab/resume-update-selected-education/{{edu._id}}"><span class="positive">{{edu.school}}</span></a>
-						<br />{{edu.level.name}}
-						<br />Graduated On: {{edu.date_graduated}}
-						<br /><span ng-show="edu.edu_field_id">{{educationField[edu.edu_field_id]}}</span>
-
+                        <div>
+                            <button type="button" name="button" class="button button-link text-left" ng-click="go('/tab/resume-update-selected-education/{{edu._id}}')">
+                                {{edu.school}}
+                            </button>
+                        </div>
+                        <span ng-show="edu.level.name">
+                            {{edu.level.name}}
+    						<br />
+                        </span>
+                        Graduated On: {{edu.date_graduated}}
+						<br />
+                        <span ng-show="edu.edu_field_id">{{educationField[edu.edu_field_id]}}</span>
 						<button class="button button-assertive" ng-click="removeEdu(edu)">
 							<i class="icon ion-ios-close-empty"></i>
 						</button>
@@ -167,30 +178,34 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Skills</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a ng-href="#/tab/resume" class="positive" ng-click="addNewSkillModal()">
-							<i class="icon ion-ios-plus-empty"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="addNewSkillModal()" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-plus-empty positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
 
-			<div class="item item-button-right" ng-repeat="skill in skills">
-				{{skill.value}}
-				<button class="button button-assertive" ng-click="removeSkill(skill)">
-					<i class="icon ion-ios-close-empty"></i>
-				</button>
-			</div>
+            <div class="item item-body">
+                <div class="list">
+        			<div class="item item-button-right" ng-repeat="skill in skills">
+                        <div>{{skill.value}}</div>
+        				<button class="button button-assertive" ng-click="removeSkill(skill)">
+        					<i class="icon ion-ios-close-empty"></i>
+        				</button>
+        			</div>
+                </div>
+            </div>
 		</div>
 
 		<div class="list card">
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Languages</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a ng-href="#/tab/resume" class="positive" ng-click="addNewLanguageModal()">
-							<i class="icon ion-ios-plus-empty"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="addNewLanguageModal()" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-plus-empty positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
@@ -207,10 +222,10 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Attached Resume</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume" class="positive" ng-click="openResumeUploadModal()">
-							<i class="icon ion-android-attach"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="openResumeUploadModal()" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-android-attach positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
@@ -222,10 +237,10 @@
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">Additional Info</div>
-					<div class="col col-25 text-right item-icon-right">
-						<a href="#/tab/resume" class="positive" ng-click="openAdditionalInfoModal()">
-							<i class="icon ion-compose"></i>
-						</a>
+                    <div class="col col-25 text-right item-icon-right pt-0 pb-0">
+                        <button type="button" name="button" ng-click="openAdditionalInfoModal()" class="button button-icon button-small button-block mt-0 mb-0">
+                            <i class="icon ion-ios-compose-outline positive"></i>
+                        </button>
 					</div>
 				</div>
 			</div>
