@@ -5,13 +5,13 @@
 				<i class="ion-android-warning"></i> No application
 			</div>
 			<div class="item" ng-repeat="app in application">
-				<h2>
-					<strong ng-show="!app.closed">
-						<a ng-class="{positive:true}" ng-href="#/tab/job-details/{{app.post_id+(app.closed?'?closed=1':'')}}">{{app.title}}</a>
-					</strong>
+				<div>
+					<button type="button" name="button" class="button button-link" ng-click="go('tab/job-details/{{app.post_id+(app.closed?'?closed=1':'')}}')"
+						ng-show="!app.closed">{{app.title}}</button>
 					<strong ng-show="app.closed">{{app.title}}</strong>
 					<span ng-show="app.closed" class="badge badge-assertive">Closed</span>
-				</h2>
+				</div>
+				
 				<p>Applied On {{app.date_created|date}}</p>
 				<p><small>{{app.status_desc}}</small></p>
 			</div>
