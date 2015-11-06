@@ -1,4 +1,10 @@
 <ion-view view-title="Update Resume Jobseeking Information">
+	<ion-nav-buttons side="left">
+		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/resume')">
+			<i class="ion-ios-arrow-left"></i> Resume
+		</button>
+	</ion-nav-buttons>
+	
 	<ion-content class="padding">
 		<form name="jobseekingInformation" ng-submit="saveJobseekingInformation()" novalidate>
 			<div class="list list-inset">
@@ -13,12 +19,12 @@
 				<div class="item">
 					<h2>Currently stay in</h2>
 					<div class="list list-inset">
-						<div class="item item-input item-select">
+						<div class="item item-input item-select pt-0 pb-0">
 							<label for="country" class="input-label" ng-class="{'input-label':true, assertive:selectedCountry.id?false:true}">Country</label>
 							<select data-ng-options="o.name for o in countries track by o.id" data-ng-model="selectedCountry" ng-change="countryChanged()"></select>
 						</div>
 
-						<div ng-class="{'item':true, 'item-input':true, 'item-select':selectedCountry.id == 127}">
+						<div ng-class="{'item':true, 'item-input':true, 'item-select':selectedCountry.id == 127, 'pt-0':true, 'pb-0':true}">
 							<label for="state" class="input-label">State</label>
 							<select data-ng-options="o.name for o in states track by o.id" data-ng-model="selectedState" ng-change="stateChanged()" ng-show="selectedCountry.id == 127"></select>
 							<input type="text" data-ng-model="insertedState" ng-show="selectedCountry.id != 127" placeholder="State" />
