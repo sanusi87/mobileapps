@@ -52,6 +52,17 @@
 	white-space: normal !important;
 }
 
+button.button-link{
+	padding: 0;
+	text-decoration: underline;
+	color: #387ef5;
+	line-height: 18px;
+	min-height: 18px;
+	border: none;
+	background-color: transparent;
+	font-weight: bold;
+}
+
 input[type="month"]{ background-color: #f3f3f3;}
 
 /* textAngular editor */
