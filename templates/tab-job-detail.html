@@ -35,13 +35,13 @@
 			</div>
 
 			<div class="button-bar" ng-show="currentState=='job-details'">
-				<a class="button button-positive mb-10" ng-href="#/login">
+				<button type="button" name="button" class="button button-link mb-10" ng-click="go('login')">
 					Login to apply
-				</a>
+				</button>
 			</div>
 
 
-			<h2 class="positive">Job Details</h2>
+			<h3 class="positive">Job Details</h3>
 			<div class="list">
 				<div class="item" ng-show="job.company_details.header_file != ''">
 					<img ng-src="{{job.company_details.header_file}}" alt="" class="fill-width" />
@@ -59,21 +59,25 @@
 
 				<div class="item item-button-right">
 					<span class="positive">Location</span>:
-					<a
-						class="button button-icon button-right button-stable"
-						ng-show="job.latitude && job.longitude" ng-href="geo:0,0?q={{job.latitude}},{{job.longitude}}({{job.company}})">
+
+					<button type="button" name="button" ng-show="job.latitude && job.longitude" class="button button-icon button-right button-stable" ng-click="window.open('geo:0,0?q={{job.latitude}},{{job.longitude}}({{job.company}})', '_system')">
 						<i class="ion-map"></i>
-					</a>
+					</button>
+
 					<br />
-					<p ng-bind-html="job.location"></p>
+					<p ng-bind-html="job.location" class="normal-wrapping"></p>
 				</div>
 
 				<div class="item">
 					<span class="positive">Job type</span>: <small>{{job.type}}</small>
 				</div>
 				<div class="item">
-					<span class="positive">Job level</span>: <small>{{job.level}}</small> &gt; <small ng-show="job.salary_display"><span class="balanced">{{job.salary_min|currency:job.currency+' ':0}} - {{job.salary_max|currency:job.currency+' ':0}} per month</span></small>
-					<small ng-show="!job.salary_display"><span class="text-grey-1">Salary undisclosed</span></small>
+					<span class="positive">Job level</span>:
+					<br />
+					<p class="normal-wrapping">
+						<small>{{job.level}}</small> &gt; <small ng-show="job.salary_display"><span class="balanced">{{job.salary_min|currency:job.currency+' ':0}} - {{job.salary_max|currency:job.currency+' ':0}} per month</span></small>
+						<small ng-show="!job.salary_display"><span class="text-grey-1">Salary undisclosed</span></small>
+					</p>
 				</div>
 				<div class="item">
 					<span class="positive">Specialisation</span>:
@@ -98,14 +102,14 @@
 				</div>
 			</div>
 
-			<h2 class="positive" ng-show="job.company_details.overview.length > 2">About Us</h2>
+			<h3 class="positive" ng-show="job.company_details.overview.length > 2">About Us</h3>
 			<div class="list" ng-show="job.company_details.overview.length > 2">
 				<div class="item">
 					<div class="normal-wrapping text-justify" ng-bind-html="job.company_details.overview"></div>
 				</div>
 			</div>
 
-			<h2 class="positive">Requirements</h2>
+			<h3 class="positive">Requirements</h3>
 			<div class="list">
 				<div class="item">
 					<div class="normal-wrapping" ng-bind-html="job.description"></div>
