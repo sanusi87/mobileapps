@@ -1,21 +1,22 @@
 <ion-view view-title="Bookmarks">
+	<ion-nav-buttons side="left">
+		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/job')"><i class="ion-ios-arrow-left"></i> Jobs</button>
+	</ion-nav-buttons>
+
 	<ion-content class="padding">
         <ul class="list list-inset">
             <li class="item" ng-show="bookmarks.length == 0">
 				<i class="ion-android-warning"></i> No bookmark
 			</li>
             <li class="item item-button-right" ng-repeat="(i,bookmark) in bookmarks">
-                <h2>
-                    <strong>
-                        <a ng-href="#/tab/job-details/{{bookmark._id}}">
-                            <span class="positive">{{bookmark.title}}</span>
-                        </a>
-                    </strong>
-                </h2>
+				<div class="">
+					<button type="button" name="button" class="button button-link" ng-click="go('tab/job-details/{{bookmark._id}}')">{{bookmark.title}}</button>
+				</div>
+
                 <small>Closed on {{bookmark.date_closed|date}}</small>
                 <br />
                 <small>Bookmarked on {{bookmark.on|date}}</small>
-				
+
 				<button type="button" class="button button-assertive" ng-click="deleteBookmark(bookmark)">
 					<i class="ion-ios-close-empty"></i>
 				</button>
