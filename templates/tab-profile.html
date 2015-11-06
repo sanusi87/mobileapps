@@ -1,10 +1,13 @@
 <ion-view view-title="Profile">
-	<ion-nav-buttons side="right">
-		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/resume')">Resume</button>
-	</ion-nav-buttons>
-
 	<ion-content class="padding">
-		<div class="list card">
+		<div class="list card" ng-show="!isLoading">
+
+			<div class="item">
+				<button type="button" name="button" class="button button-positive button-block" ng-click="go('/tab/resume')">
+					<i class="ion-ios-list-outline"></i> Online Resume
+				</button>
+			</div>
+
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">{{js.name}}</div>
@@ -32,6 +35,12 @@
 			</div>
 
 			<div class="item"><div>Country :<b>{{js.country}}</b></div></div>
+		</div>
+
+		<div class="card" ng-show="isLoading">
+			<div class="item item-text-wrap text-center">
+				<i class="ion-ios-loop"></i> loading...
+			</div>
 		</div>
 	</ion-content>
 </ion-view>
