@@ -1,4 +1,10 @@
 <ion-view view-title="Update Job Preferences">
+	<ion-nav-buttons side="left">
+		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/resume')">
+			<i class="ion-ios-arrow-left"></i> Resume
+		</button>
+	</ion-nav-buttons>
+	
 	<ion-content class="padding">
 		<form name="jobPreferences" ng-submit="saveJobPref(jobPreferences)" novalidate>
 			<div class="list list-inset">
@@ -17,25 +23,29 @@
 					<h2 ng-class="{assertive: $parent.tmpSelectedJobType.length == 0 ? true : false}">Preferred Job Type</h2>
 
 					<div class="list list-inset">
-						<ion-toggle ng-repeat="(id, name) in jobTypes" ng-model="$parent.selectedJobType[id]" toggle-class="toggle-calm" ng-true-value="{{id}}" ng-false-value="0" ng-change="checkValue()">{{name}}</ion-toggle>
+						<ion-toggle ng-repeat="(id, name) in jobTypes" ng-model="$parent.selectedJobType[id]" toggle-class="toggle-calm" ng-true-value="{{id}}" ng-false-value="0" ng-change="checkValue()" class="pt-15 pb-15">{{name}}</ion-toggle>
 					</div>
 				</div>
 
-				<div class="item">
+				<div class="item item-button-right">
 					<h2 ng-class="{assertive: checkedState.length > 0 ? false: true}">Preferred Working Location in Malaysia</h2>
-					<button class="button button-positive" ng-click="openStateModal()" type="button">Select...</button>
+					<button class="button button-small button-light button-icon" ng-click="openStateModal()" type="button">
+						<i class="ion-android-open"></i>
+					</button>
 
 					<div class="list list-inset" ng-show="checkedState.length > 0">
 						<div class="item" ng-repeat="(id, status) in selectedState track by id" ng-show="status == true">{{tempStates[id].name}}</div>
 					</div>
 				</div>
 
-				<div class="item">
+				<div class="item item-button-right">
 					<h2>Other Preferred Countries</h2>
-					<button class="button button-positive" ng-click="openCountryModal()" type="button">Select...</button>
+					<button class="button button-small button-light button-icon" ng-click="openCountryModal()" type="button">
+						<i class="ion-android-open"></i>
+					</button>
 
 					<div class="list list-inset" ng-show="selectedCountry.length > 0">
-						<div class="item" ng-repeat="(id, status) in selectedCountry track by id" ng-show="status == true">{{tempCountries[id]}}</div>
+						<div class="item" ng-repeat="(id, status) in selectedCountry track by id" ng-show="status == true">{{tempCountries[id].name}}</div>
 					</div>
 				</div>
 
