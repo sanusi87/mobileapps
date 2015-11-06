@@ -361,38 +361,46 @@
 	}
 
 	$scope.removeSkill = function(skill){
-		JsDatabase.deleteSkill(skill).then(function(){
+		var confirmPopup = $ionicPopup.confirm({
+			title: 'Confirmation',
+			template: 'Remove this skill record?'
+		});
 
-			// if got ID, then remove from webserver also
-			if( skill.id ){
-				var param = {};
+		confirmPopup.then(function(res) {
+			if(res){
+				JsDatabase.deleteSkill(skill).then(function(){
+					// if got ID, then remove from webserver also
+					if( skill.id ){
+						var param = {};
 
-				$http({
-					method: 'DELETE',
-					url: 'http://api.jenjobs.com/jobseeker/skill/'+skill.id+'?access-token='+$scope.access_token,
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					data: param
-				}).then(function(response){
-					$ionicLoading.show({
-						template: response.data.status_text,
-						noBackdrop: true,
-						duration: 1500
-					});
-				}).catch(function(e){
-					$ionicLoading.show({
-						template: 'Data synchronization failed!',
-						noBackdrop: true,
-						duration: 1500
-					});
-				});
-			}else{
-				$ionicLoading.show({
-					template: 'Your skill was successfully deleted.',
-					noBackdrop: true,
-					duration: 1500
+						$http({
+							method: 'DELETE',
+							url: 'http://api.jenjobs.com/jobseeker/skill/'+skill.id+'?access-token='+$scope.access_token,
+							headers: {
+								'Accept': 'application/json',
+								'Content-Type': 'application/json'
+							},
+							data: param
+						}).then(function(response){
+							$ionicLoading.show({
+								template: response.data.status_text,
+								noBackdrop: true,
+								duration: 1500
+							});
+						}).catch(function(e){
+							$ionicLoading.show({
+								template: 'Data synchronization failed!',
+								noBackdrop: true,
+								duration: 1500
+							});
+						});
+					}else{
+						$ionicLoading.show({
+							template: 'Your skill was successfully deleted.',
+							noBackdrop: true,
+							duration: 1500
+						});
+					}
 				});
 			}
 		});
@@ -835,7 +843,7 @@
 			delete(jobTypes._rev);
 			$scope.jobTypes = jobTypes;
 		});
-		
+
 		JsDatabase.getParameter('currency').then(function(currencies){
 			delete(currencies._id);
 			delete(currencies._rev);
