@@ -62,7 +62,7 @@
 						</div>
 					</div>
 
-					<label for="job-role" ng-class="{'input-label':true,assertive : selectedJobRole ? false : true}">Sub Specialisation</label>
+					<label for="job-role" ng-class="{'input-label':true,assertive : selectedJobRole ? false : true}" ng-show="selectedJobSpecialisation">Sub Specialisation</label>
 					<div class="list">
 						<div class="item item-select" ng-show="selectedJobSpecialisation">
 							<select data-ng-options="o.name for o in jobRoles track by o.id" data-ng-model="$parent.selectedJobRole" id="job-role" required></select>
