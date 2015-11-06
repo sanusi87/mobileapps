@@ -4,7 +4,7 @@
 	</ion-nav-buttons>
 
 	<ion-nav-buttons side="right">
-		<button type="button" class="button button-clear button-positive" ng-click="openBookmarkSection()" ng-show="currentState!='jobs'"><i class="ion-ios-bookmarks"></i> Bookmarks</button>
+		<button type="button" class="button button-clear button-positive" ng-click="go('tab/bookmarks')" ng-show="currentState!='jobs'"><i class="ion-ios-bookmarks"></i> Bookmarks</button>
 	</ion-nav-buttons>
 
 	<ion-content class="padding">
@@ -20,10 +20,10 @@
 				<i class="ion-android-warning"></i> No record found.
 			</ion-item>
 			<ion-item ng-repeat="job in jobs track by job.post_id">
-				<h2>
-					<strong ng-show="currentState!='jobs'"><a class="positive" ng-href="#/tab/job-details/{{job.post_id}}">{{job.title}}</a></strong>
-					<strong ng-show="currentState=='jobs'"><a class="positive" ng-href="#/job-details/{{job.post_id}}">{{job.title}}</a></strong>
-				</h2>
+				<button type="button" name="button" class="button button-link" ng-click="go('tab/job-details/{{job.post_id}}')" ng-show="currentState!='jobs'">{{job.title}}</button>
+
+				<button type="button" name="button" class="button button-link" ng-click="go('job-details/{{job.post_id}}')" ng-show="currentState=='jobs'">{{job.title}}</button>
+
 				<p><small>{{job.company_name}}</small></p>
 
 				<p ng-show="job.salary_display"><small class="balanced">{{job.salary_min|currency:job.currency+' ':0}} - {{job.salary_max|currency:job.currency+' ':0}} per month</small></p>
