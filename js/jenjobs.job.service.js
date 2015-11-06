@@ -432,4 +432,20 @@
 			}
 		});
 	}
-});
+})
+
+.factory('Profile', ['$http', function($http, JsDatabase){
+	var profile;
+
+	return {
+		updateNoWorkExp: updateNoWorkExp
+	};
+
+	function updateNoWorkExp(status){
+		JsDatabase.getProfile().then(function(profile){
+			profile = profile;
+
+			profile.no_work_exp
+		});
+	}
+}])
