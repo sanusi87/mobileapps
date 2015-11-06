@@ -1,4 +1,10 @@
 <ion-view view-title="Update Resume Access Level">
+	<ion-nav-buttons side="left">
+		<button type="button" class="button button-clear button-positive" ng-click="go('/tab/resume')">
+			<i class="ion-ios-arrow-left"></i> Resume
+		</button>
+	</ion-nav-buttons>
+	
 	<ion-content class="padding">
 		<form name="accessLevel" ng-submit="saveAccessLevel(accessLevel)" novalidate>
 			<div class="list list-inset">
@@ -8,7 +14,7 @@
 							<input type="radio" data-ng-model="js.access" ng-value="'Open'" name="access" id="access_open" /> Open
 						</h2>
 					</label>
-					
+
 					<div class="list list-inset">
 						<div class="item item-icon-left"><i class="icon ion-ios-checkmark-empty balanced"></i> You can apply jobs</div>
 						<div class="item item-icon-left"><i class="icon ion-ios-checkmark-empty balanced"></i> Employers can search your resume</div>
@@ -23,7 +29,7 @@
 							<input type="radio" data-ng-model="js.access" ng-value="'Limited'" name="access" id="access_limited" /> Limited
 						</h2>
 					</label>
-					
+
 					<div class="list list-inset">
 						<div class="item item-icon-left"><i class="icon ion-ios-checkmark-empty balanced"></i> You still can apply jobs</div>
 						<div class="item item-icon-left"><i class="icon ion-ios-checkmark-empty balanced"></i> Employers can search your resume but cannot see your contact details</div>
@@ -38,7 +44,7 @@
 							<input type="radio" data-ng-model="js.access" ng-value="'Hidden'" name="access" id="access_hidden" /> Hidden
 						</h2>
 					</label>
-					
+
 					<div class="list list-inset">
 						<div class="item item-icon-left"><i class="icon ion-ios-checkmark-empty balanced"></i> You still can apply jobs</div>
 						<div class="item item-icon-left"><i class="icon ion-ios-close-empty assertive"></i> Employers cannot search for your resume</div>
@@ -46,7 +52,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<button class="button button-positive" type="submit">
 				<i class="ion-ion-checkmark-empty"></i> Save
 			</button>
