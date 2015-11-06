@@ -182,7 +182,7 @@ angular.module('jenjobs.db', [])
 		if (!_profile) {
 			return $q.when(_profile_db.get('profile')).then(function(docs){
 				_profile = docs;
-				_profile.dob = _profile.dob != null ? new Date(_profile.dob) : '';
+				_profile.dob = (_profile.dob != null && _profile.dob != '') ? new Date(_profile.dob) : '';
 
 				_profile_db.changes({
 					live: true,
@@ -250,16 +250,12 @@ angular.module('jenjobs.db', [])
 		});
 	}
 
-	function addEducation(dbItem, id, rev){
-		if( id && rev ){
-			return $q.when( _education_db.put( dbItem, id, rev ) );
-		}else{
-			return $q.when( _education_db.post( dbItem ) );
-		}
+	function addEducation(dbItem){
+		return $q.when( _education_db.post( dbItem ) );
 	};
 
 	function updateEducation(dbItem){
-		return $q.when( _education_db.put( dbItem ) );
+		return $q.when( _education_db.put( dbItem, dbItem._id, dbItem._rev ) );
 	};
 
 	function deleteEducation(dbItem){
@@ -449,6 +445,8 @@ angular.module('jenjobs.db', [])
 				}).on('change', onTokenDatabaseChange);
 
 				return _token;
+			}).catch(function(err){
+				return false;
 			});
 		} else {
 			return $q.when(_token);
