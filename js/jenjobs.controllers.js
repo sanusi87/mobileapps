@@ -1,26 +1,42 @@
 angular.module('jenjobs.controllers', ['ionic'])
 
+.controller('CheckProfileCtrl', function($scope, $location, $ionicHistory, JsDatabase){
+	console.log('checking login status...');
+	JsDatabase.getToken().then(function(token){
+		console.log('access token ontained.');
+		console.log(token);
+
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+
+		if( token.length > 0 ){
+			// $scope.access_token = token[0].access_token;
+			$location.path('/tab/profile');
+		}else{
+			$location.path('/login');
+		}
+	}).catch(function(err){
+		console.log('failed to get token...');
+		console.log(err);
+	});
+})
+
 .controller('ProfileCtrl', function($scope, $location, JsDatabase){
 	$scope.js = {};
-	$scope.access_token = null;
+	$scope.isLoading = true;
+	// $scope.access_token = null;
 
-	JsDatabase.getProfile().then(function(profile){
-		$scope.js = profile;
-		console.log(profile);
+	$scope.$on('$ionicView.enter', function(scopes, states) {
+		JsDatabase.getProfile().then(function(profile){
+			$scope.js = profile;
+			$scope.isLoading = false;
+		});
 	});
 
 	$scope.go = function(path){
 		$location.path(path);
 	}
-
-	// JsDatabase.getToken().then(function(token){
-	// 	console.log(token);
-	// 	if( token.length > 0 ){
-	//
-	// 	}else{
-	// 		$location.path('/login');
-	// 	}
-	// });
 })
 
 .controller('ProfileUpdateCtrl', function($scope, $http, $filter, $ionicPopup, $ionicModal, $ionicLoading, JsDatabase){
@@ -78,8 +94,6 @@ angular.module('jenjobs.controllers', ['ionic'])
 		});
 
 		return;
-	}).then(function(){
-
 	});
 
 	// country onChange
@@ -87,7 +101,6 @@ angular.module('jenjobs.controllers', ['ionic'])
 		$scope.selectedCountry = this.selectedCountry; // update scope
 		$scope.js.country = $scope.selectedCountry.name;
 		$scope.js.country_id = $scope.selectedCountry.id;
-
 		$scope.js.mobile_no = '(+'+$scope.selectedCountry.dial_code+')';
 	}
 	// countries
@@ -141,23 +154,6 @@ angular.module('jenjobs.controllers', ['ionic'])
 			});
 		}
 	};
-
-	/*
-	$ionicModal.fromTemplateUrl('templates/modal/country-dial-code.html', {
-		scope: $scope,
-		animation: 'slide-in-up'
-	}).then(function(modal) {
-		$scope.dialCodeModal = modal;
-	});
-
-	$scope.openCountryDialCode = function(){
-		$scope.dialCodeModal.show();
-	}
-
-	$scope.closeCountryDialCode = function(){
-		$scope.dialCodeModal.hide();
-	}
-	*/
 
 	// update profile submit
 	$scope.updateForm = function(){
@@ -229,7 +225,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 	}
 })
 
-.controller('LoginCtrl', function($scope, $state, $location, $http, $ionicPopup, $ionicHistory, JsDatabase, JobSearch, JobseekerLogin){
+.controller('LoginCtrl', function($scope, $state, $location, $http, $ionicPopup, $ionicHistory, JsDatabase, JobSearch, JobseekerLogin, $ionicPlatform){
 	$scope.disableButton = false;
 
 	$scope.user = {
@@ -266,18 +262,18 @@ angular.module('jenjobs.controllers', ['ionic'])
 					$scope.button.text = 'Downloading data...';
 
 					JobseekerLogin.setAccessToken( response.data.access_token, function(){
+						$scope.button.text = 'Downloading profile...';
 						JobseekerLogin.downloadProfile(function(response){
 							if( response.error ){
-								// $scope.log += "failed to download profile..."+angular.toJson(response.error);
+								$scope.button.text = 'Downloading profile...error';
 							}else{
-								// $scope.log += "profile downloaded...";
+								$scope.button.text = 'Downloading profile...done';
 								delete(response.data._links);
 								response.data.no_work_exp = response.data.no_work_exp == 0 ? false : true;
-
 								var completedItems = [];
 
+								$scope.button.text = 'Downloading profile...saved';
 								JsDatabase.addProfile(response.data).then(function(){
-									// $scope.log += "profile saved...";
 									if( response.data.mobile_no && response.data.dob ){
 										completedItems.push('profile');
 									}
@@ -290,15 +286,14 @@ angular.module('jenjobs.controllers', ['ionic'])
 										completedItems.push('jobseek');
 									}
 
+									$scope.button.text = 'Downloading application...';
 									JobseekerLogin.downloadApplication(function(response){
 										if( response.error ){
-											// got error
-											// $scope.log += "failed to download application..."+angular.toJson(response.error);
+											$scope.button.text = 'Downloading application...error';
 										}else{
-											// $scope.log += "application downloaded...";
+											$scope.button.text = 'Downloading application...done';
 											if( response.data.length > 0 ){
 												angular.forEach(response.data, function(value, i){
-													// console.log(value);
 													value._id = String(value.post_id);
 
 													JobSearch.apply(value).then(function(doc){
@@ -309,13 +304,12 @@ angular.module('jenjobs.controllers', ['ionic'])
 												});
 											}
 
-											// $scope.log += "download work exp...";
+											$scope.button.text = 'Downloading work exp...';
 											JobseekerLogin.downloadWorkExperience(function(response){
 												if( response.error ){
-													// got error
-													// $scope.log += "failed to download work exp..."+angular.toJson(response.error);
+													$scope.button.text = 'Downloading work exp...error';
 												}else{
-													// $scope.log += "work exp downloaded...";
+													$scope.button.text = 'Downloading work exp...done';
 													if( response.data.length > 0 ){
 														angular.forEach(response.data, function(value, i){
 															JsDatabase.addWork(value);
@@ -323,13 +317,12 @@ angular.module('jenjobs.controllers', ['ionic'])
 														completedItems.push('workExp');
 													}
 
-													// $scope.log += "downloading qualification...";
+													$scope.button.text = 'Downloading edu...';
 													JobseekerLogin.downloadQualification(function(response){
 														if( response.error ){
-															// got error
-															// $scope.log += "failed to download qualification"+angular.toJson(response.error);
+															$scope.button.text = 'Downloading edu...error';
 														}else{
-															// $scope.log += "qualification downloaded.";
+															$scope.button.text = 'Downloading edu...done';
 															if( response.data.length > 0 ){
 																angular.forEach(response.data, function(value, i){
 																	JsDatabase.addEducation(value);
@@ -337,38 +330,35 @@ angular.module('jenjobs.controllers', ['ionic'])
 																completedItems.push('education');
 															}
 
-															// $scope.log += "downloading job preference...";
+															$scope.button.text = 'Downloading job pref...';
 															JobseekerLogin.downloadJobPreference(function(response){
 																if( response.error ){
-																	// got error
-																	// $scope.log += "failed to download job preferences"+angular.toJson(response.error);
+																	$scope.button.text = 'Downloading job pref...error';
 																}else{
-																	// $scope.log += "job preference downloaded...";
+																	$scope.button.text = 'Downloading job pref...done';
 																	JsDatabase.addSettings(response.data, 'jobPref');
 																	if( response.data.salary && response.data.job_type_id.length > 0 ){
 																		completedItems.push('jobPref');
 																	}
 
-																	// $scope.log += "downloading skills...";
+																	$scope.button.text = 'Downloading skill...';
 																	JobseekerLogin.downloadSkill(function(response){
 																		if( response.error ){
-																			// got error
-																			// $scope.log += "failed to download skill..."+angular.toJson(response.error);
+																			$scope.button.text = 'Downloading skill...error';
 																		}else{
-																			// $scope.log += "skills downloaded...";
+																			$scope.button.text = 'Downloading skill...done';
 																			if( response.data.length > 0 ){
 																				angular.forEach(response.data, function(skill, i){
 																					JsDatabase.addSkill(skill);
 																				});
 																			}
 
-																			// $scope.log += "downloading language...";
+																			$scope.button.text = 'Downloading language...';
 																			JobseekerLogin.downloadLanguage(function(response){
 																				if( response.error ){
-																					// got error
-																					// $scope.log += "failed to download language..."+angular.toJson(response.error);
+																					$scope.button.text = 'Downloading language...error';
 																				}else{
-																					// $scope.log += "language downloaded...";
+																					$scope.button.text = 'Downloading language...done';
 																					if( response.data.length > 0 ){
 																						angular.forEach(response.data, function(lang, i){
 																							JsDatabase.addLanguage(lang);
@@ -376,15 +366,15 @@ angular.module('jenjobs.controllers', ['ionic'])
 																						completedItems.push('language');
 																					}
 
-																					// $scope.log += "downloading bookmarks...";
+																					$scope.button.text = 'Downloading bookmark...';
 																					JobseekerLogin.downloadBookmark(function(response){
 																						if( response.error ){
-																							// got error
-																							// $scope.log += "failed to download bookmark..."+angular.toJson(response.error);
+																							$scope.button.text = 'Downloading bookmark...error';
 																						}else{
-																							// download subscription
+																							$scope.button.text = 'Downloading bookmark...done';
+																							$scope.button.text = 'Downloading subscription...';
 																							JobseekerLogin.downloadSubscription(function(response){
-																								console.log(response);
+																								$scope.button.text = 'Downloading subscription...done';
 																								angular.forEach(response.data, function(subscr,i){
 																									var settingName = '';
 																									if( subscr.subscription_id == 1 ){
@@ -426,10 +416,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 																										updateCompleteness(completedItems[0]);
 																									}else{
 																										$scope.disableButton = false;
-																										$scope.button.text = 'Login';
-
-																										console.log('redirecting...');
-																										// $state.go('tab.profile', {}, {reload: false});
+																										$scope.button.text = 'Redirecting...';
 																										$location.path('/tab/profile');
 																									}
 																								}
@@ -445,10 +432,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 																								}
 																							}else{
 																								$scope.disableButton = false;
-																								$scope.button.text = 'Login';
-
-																								console.log('redirecting...');
-																								// $state.go('tab.profile', {}, {reload: false});
+																								$scope.button.text = 'Redirecting...';
 																								$location.path('/tab/profile');
 																							}
 																						}
@@ -506,10 +490,14 @@ angular.module('jenjobs.controllers', ['ionic'])
 	}
 
 	var enterEventFired = false;
-	$scope.$on('$ionicView.enter', function(scopes, states) {
+	// $scope.$on('$ionicView.enter', function(scopes, states) {
 		// $scope.log = "ionicView.enter="+typeof(JsDatabase.getToken())+"...";
+		// runEnterEvent();
+    // });
+
+	$ionicPlatform.ready(function(){
 		runEnterEvent();
-    });
+	});
 
 	// setTimeout(function(){
 	// 	console.log('time outted!');
@@ -518,8 +506,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 
 	// trying to trigger enter event if not yet executed
 	function runEnterEvent(){
-		JsDatabase.getToken()
-		.then(function(token){
+		JsDatabase.getToken().then(function(token){
 			// $scope.log += "found token? "+token
 			// if already got token, then redirect to profile
 			if( token.length > 0 ){
@@ -907,4 +894,9 @@ angular.module('jenjobs.controllers', ['ionic'])
 	$scope.go = function(path){
 		$location.path(path);
 	}
+})
+
+.controller('TestCtrl', function($scope, $filter){
+	// how to format a date using $filter
+	$scope.date = $filter('date')(new Date(), 'yyyy-MM-dd');
 });
