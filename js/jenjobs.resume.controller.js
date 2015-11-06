@@ -1,5 +1,5 @@
 ﻿angular.module('jenjobs.resume', [])
-.controller('ResumeCtrl', function($scope, $http, $state, $ionicPopup, $ionicLoading, $ionicModal, JsDatabase){
+.controller('ResumeCtrl', function($scope, $http, $state, $location, $ionicPopup, $ionicLoading, $ionicModal, $ionicHistory, JsDatabase){
 	$scope.countries = [];
 	$scope.states = [];
 	$scope.info = {value: ''};
@@ -15,39 +15,34 @@
 		}
 	});
 
-	JsDatabase.getProfile().then(function(profile){
-		$scope.js = profile;
-		$scope.jsJobseekingStatus = profile.js_jobseek_status_id;
-		$scope.availability = profile.availability;
-		$scope.selectedavailabilityUnit = {};
+	JsDatabase.getParameter('jobseekingStatus').then(function(statuses){
+		delete(statuses._id);
+		delete(statuses._rev);
+		$scope.jobseekingStatus = statuses;
+	});
 
-		if(profile.availability_unit == 'D'){
-			$scope.selectedavailabilityUnit.name = 'Day(s)';
-		}else if(profile.availability_unit == 'W'){
-			$scope.selectedavailabilityUnit.name = 'Week(s)';
-		}else if(profile.availability_unit == 'M'){
-			$scope.selectedavailabilityUnit.name = 'Month(s)';
-		}
-	}).then(function(){
-		JsDatabase.getParameter('countries').then(function(countries){
-			delete(countries._id);
-			delete(countries._rev);
+	$scope.$on('$ionicView.enter', function(scopes, states) {
+		// job seeking status
+		JsDatabase.getProfile().then(function(profile){
+			$scope.js = profile;
+			$scope.jsJobseekingStatus = profile.js_jobseek_status_id;
+			$scope.availability = profile.availability;
+			$scope.selectedavailabilityUnit = {};
 
-			angular.forEach(countries, function(name, id){
-				$scope.countries.push({
-					name: name.name,
-					id: id
-				});
-			});
-
-			return;
+			if(profile.availability_unit == 'D'){
+				$scope.selectedavailabilityUnit.name = 'Day(s)';
+			}else if(profile.availability_unit == 'W'){
+				$scope.selectedavailabilityUnit.name = 'Week(s)';
+			}else if(profile.availability_unit == 'M'){
+				$scope.selectedavailabilityUnit.name = 'Month(s)';
+			}
 		}).then(function(){
-			JsDatabase.getParameter('states').then(function(states){
-				delete(states._id);
-				delete(states._rev);
+			JsDatabase.getParameter('countries').then(function(countries){
+				delete(countries._id);
+				delete(countries._rev);
 
-				angular.forEach(states, function(name, id){
-					$scope.states.push({
+				angular.forEach(countries, function(name, id){
+					$scope.countries.push({
 						name: name.name,
 						id: id
 					});
@@ -55,45 +50,104 @@
 
 				return;
 			}).then(function(){
-				// mapping
-				var currentlyStayIn = '';
-				if( $scope.js.address ){
-					var cn = {};
-					$scope.countries.map(function(c){
-						cn[c.id] = c.name;
+				JsDatabase.getParameter('states').then(function(states){
+					delete(states._id);
+					delete(states._rev);
+
+					angular.forEach(states, function(name, id){
+						$scope.states.push({
+							name: name.name,
+							id: id
+						});
 					});
 
-					if( $scope.js.address.country_id ){
-						currentlyStayIn += cn[$scope.js.address.country_id];
-					}
-
-					if( $scope.js.address.state_id ){
-						var st = {};
-						$scope.states.map(function(s){
-							st[s.id] = s.name;
+					return;
+				}).then(function(){
+					// mapping
+					var currentlyStayIn = '';
+					if( $scope.js.address ){
+						var cn = {};
+						$scope.countries.map(function(c){
+							cn[c.id] = c.name;
 						});
-						currentlyStayIn += ' > '+st[$scope.js.address.state_id];
-					}else{
-						if( $scope.js.address.state_name ){
-							currentlyStayIn += ' > '+$scope.js.address.state_name;
+
+						if( $scope.js.address.country_id ){
+							currentlyStayIn += cn[$scope.js.address.country_id];
+						}
+
+						if( $scope.js.address.state_id ){
+							var st = {};
+							$scope.states.map(function(s){
+								st[s.id] = s.name;
+							});
+							currentlyStayIn += ' > '+st[$scope.js.address.state_id];
+						}else{
+							if( $scope.js.address.state_name ){
+								currentlyStayIn += ' > '+$scope.js.address.state_name;
+							}
+						}
+
+						if( $scope.city_name ){
+							currentlyStayIn += ' > '+$scope.js.address.city_name;
 						}
 					}
-
-					if( $scope.city_name ){
-						currentlyStayIn += ' > '+$scope.js.address.city_name;
-					}
-				}
-				$scope.currentlyStayIn = currentlyStayIn;
-				// mapping
+					$scope.currentlyStayIn = currentlyStayIn;
+					// mapping
+				});
 			});
 		});
-	});
+		// job seeking status
 
-	JsDatabase.getParameter('jobseekingStatus').then(function(statuses){
-		delete(statuses._id)
-		delete(statuses._rev)
+		// job preference
+		JsDatabase.getParameter('currency').then(function(currencies){
+			delete(currencies._id);
+			delete(currencies._rev);
+			JsDatabase.getSettings('jobPref').then(function(jobPref){
+				$scope.jobPref = jobPref;
+				$scope.currency = currencies[jobPref.currency_id];
 
-		$scope.jobseekingStatus = statuses;
+				if( jobPref.state_id && jobPref.state_id.length > 0 ){
+					JsDatabase.getParameter('states').then(function(states){
+						var prefStates = [];
+						angular.forEach(jobPref.state_id, function(e,i){
+							prefStates.push(states[e].name);
+						});
+						return prefStates;
+					}).then(function(prefStates){
+						$scope.prefStates = prefStates.join(', ');
+					});
+				}
+
+				if( jobPref.country_id && jobPref.country_id.length > 0 ){
+					JsDatabase.getParameter('countries').then(function(countries){
+						delete(countries._id);
+						delete(countries._rev);
+						delete(countries[127]);
+
+						var prefCountries = [];
+						angular.forEach(jobPref.country_id, function(e,i){
+							prefCountries.push( countries[e] );
+						});
+						return prefCountries;
+					}).then(function(prefCountries){
+						$scope.prefCountries = prefCountries.join(', ');
+					});
+				}
+
+				if( jobPref.job_type_id && jobPref.job_type_id.length > 0 ){
+					JsDatabase.getParameter('jobType').then(function(jobTypes){
+						var prefJobTypes = [];
+						angular.forEach(jobPref.job_type_id, function(e,i){
+							prefJobTypes.push( jobTypes[e] );
+						});
+						return prefJobTypes;
+					}).then(function(prefJobTypes){
+						$scope.prefJobTypes = prefJobTypes.join(', ');
+					});
+				}
+			});
+		});
+		// job preference
 	});
 
 	// work
@@ -125,8 +179,13 @@
 								noBackdrop: true,
 								duration: 1000
 							});
+
+							setTimeout(function(){
+								if( $scope.works.length == 0 ){
+									JsDatabase.updateCompleteness('workExp', false);
+								}
+							}, 1600);
 						}).catch(function(e){
-							console.log(e);
 							$ionicLoading.show({
 								template: 'Data synchronization failed!',
 								noBackdrop: true,
@@ -139,6 +198,12 @@
 							noBackdrop: true,
 							duration: 1000
 						});
+
+						setTimeout(function(){
+							if( $scope.works.length == 0 ){
+								JsDatabase.updateCompleteness('workExp', false);
+							}
+						}, 1600);
 					}
 				});
 			}
@@ -152,7 +217,20 @@
 			// work exp is complete
 			JsDatabase.updateCompleteness('workExp', true);
 			$scope.js.no_work_exp = true;
-			JsDatabase.updateProfile($scope.js);
+			JsDatabase.updateProfile($scope.js).then(function(){
+				$http({
+					method: 'POST',
+					url: 'http://api.jenjobs.com/jobseeker/do-you-have-work-exp',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					params: {'access-token': $scope.access_token},
+					data: {status:1}
+				}).then(function(response){
+					console.log(response);
+				});
+			});
 		}else{ //yes
 			//navigate to add work exp
 			$state.go('tab.resume-update-selected-work-experience', {}, {
@@ -167,7 +245,6 @@
 	// education
 	JsDatabase.getEducation().then(function(educations){
 		$scope.educations = educations;
-		// console.log(educations);
 	}).then(function(){
 		JsDatabase.getParameter('educationLevel').then(function(educationLevel){
 			$scope.educationLevel = educationLevel;
@@ -189,9 +266,6 @@
 			if(res){
 				var status = JsDatabase.deleteEducation( school )
 				.then(function(stat){
-					// console.log(stat);
-					//Object {ok: true, id: "BE672A6F-5D6C-F49A-978E-0EAD04755813", rev: "2-ef3a3735b6fe48adf416b2a40476493f"}
-
 					if( school.id ){
 						$http({
 							method: 'DELETE',
@@ -207,8 +281,13 @@
 								noBackdrop: true,
 								duration: 1500
 							});
+
+							setTimeout(function(){
+								if( $scope.educations.length == 0 ){
+									JsDatabase.updateCompleteness('education', false);
+								}
+							}, 1600);
 						}).catch(function(e){
-							console.log(e);
 							$ionicLoading.show({
 								template: 'Data synchronization failed!',
 								noBackdrop: true,
@@ -221,6 +300,12 @@
 							noBackdrop: true,
 							duration: 1500
 						});
+
+						setTimeout(function(){
+							if( $scope.educations.length == 0 ){
+								JsDatabase.updateCompleteness('education', false);
+							}
+						}, 1600);
 					}
 				});
 			}
@@ -335,7 +420,6 @@
 	// });
 
 	JsDatabase.getLanguage().then(function(languages){
-		console.log(languages);
 		angular.forEach(languages, function(e,i){
 			$scope.savedLanguage[e.language_id] = e;
 		});
@@ -379,7 +463,10 @@
 	// update which written level is selected
 	$scope.updateSelectedWrittenLevel = function(){ $scope.selectedWrittenLevel = this.selectedWrittenLevel; }
 	// update is native
-	$scope.updateSelectedNative = function(){ $scope.selectedNative = this.selectedNative; console.log($scope.selectedNative);}
+	$scope.updateSelectedNative = function(){
+		$scope.selectedNative = this.selectedNative;
+		console.log($scope.selectedNative);
+	}
 
 	$scope.saveLanguage = function(){
 		var error = [];
@@ -633,60 +720,15 @@
 	}
 	// additional info
 
-	// job preference
-	JsDatabase.getParameter('currency').then(function(currencies){
-		delete(currencies._id);
-		delete(currencies._rev);
-
-		JsDatabase.getSettings('jobPref').then(function(jobPref){
-			$scope.jobPref = jobPref;
-			$scope.currency = currencies[jobPref.currency_id];
-
-			if( jobPref.state_id && jobPref.state_id.length > 0 ){
-				JsDatabase.getParameter('states').then(function(states){
-					var prefStates = [];
-					angular.forEach(jobPref.state_id, function(e,i){
-						prefStates.push(states[e].name);
-					});
-					return prefStates;
-				}).then(function(prefStates){
-					$scope.prefStates = prefStates.join(', ');
-				});
-			}
-
-			if( jobPref.country_id && jobPref.country_id.length > 0 ){
-				JsDatabase.getParameter('countries').then(function(countries){
-					delete(countries._id);
-					delete(countries._rev);
-					delete(countries[127]);
-
-					var prefCountries = [];
-					angular.forEach(jobPref.country_id, function(e,i){
-						prefCountries.push( countries[e] );
-					});
-					return prefCountries;
-				}).then(function(prefCountries){
-					$scope.prefCountries = prefCountries.join(', ');
-				});
-			}
-
-			if( jobPref.job_type_id && jobPref.job_type_id.length > 0 ){
-				JsDatabase.getParameter('jobType').then(function(jobTypes){
-					var prefJobTypes = [];
-					angular.forEach(jobPref.job_type_id, function(e,i){
-						prefJobTypes.push( jobTypes[e] );
-					});
-					return prefJobTypes;
-				}).then(function(prefJobTypes){
-					$scope.prefJobTypes = prefJobTypes.join(', ');
-				});
-			}
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
 		});
-	});
-	// job preference
+		$location.path(path);
+	}
 })
 
-.controller('JobPrefCtrl', function($scope, $http, $ionicModal, $ionicLoading, JsDatabase){
+.controller('JobPrefCtrl', function($scope, $http, $location, $ionicModal, $ionicHistory, $ionicLoading, JsDatabase){
 	$scope.access_token = null;
 	$scope.tempPref = {};
 
@@ -700,38 +742,6 @@
 	$scope.selectedCountry = [];
 	$scope.countries = [];
 
-	JsDatabase.getSettings('jobPref').then(function(jp){
-		if( jp.salary ){
-			$scope.expectedSalary = jp.salary;
-		}
-
-		if( jp.currency_id ){
-			$scope.selectedCurrency = {
-				id: jp.currency_id
-			};
-		}
-
-		if( jp.job_type_id && jp.job_type_id.length > 0 ){
-			angular.forEach(jp.job_type_id, function(e, i){
-				$scope.selectedJobType[e] = e;
-				$scope.tmpSelectedJobType.push(e);
-			});
-		}
-
-		if( jp.state_id && jp.state_id.length > 0 ){
-			angular.forEach(jp.state_id, function(e, i){
-				$scope.selectedState[e] = true;
-				$scope.checkedState.push(e);
-			});
-		}
-
-		if( jp.country_id && jp.country_id.length > 0 ){
-			angular.forEach(jp.country_id, function(e, i){
-				$scope.selectedCountry[e] = true;
-			});
-		}
-	});
-
 	JsDatabase.getToken().then(function(token){
 		if( token.length > 0 ){
 			$scope.access_token = token[0].access_token;
@@ -741,34 +751,6 @@
 				template: 'Failed to get access token!'
 			});
 		}
-	});
-
-	JsDatabase.getSettings('jobPref').then(function(jobPref){
-		$scope.tempPref = jobPref;
-	}).catch(function(e){
-		JsDatabase.addSettings($scope.tempPref, 'jobPref').then(function(a){
-			$scope.tempPref._id = a.id;
-			$scope.tempPref._rev = a.rev;
-		});
-	});
-
-	JsDatabase.getParameter('jobType').then(function(jobTypes){
-		delete(jobTypes._id);
-		delete(jobTypes._rev);
-		$scope.jobTypes = jobTypes;
-	});
-
-	JsDatabase.getParameter('currency').then(function(currencies){
-		delete(currencies._id);
-		delete(currencies._rev);
-
-		$scope.currencies = [];
-		angular.forEach(currencies, function(e,i){
-			$scope.currencies.push({
-				id: i,
-				name: e
-			});
-		});
 	});
 
 	JsDatabase.getParameter('countries').then(function(countries){
@@ -800,14 +782,71 @@
 			$scope.tempStates = states;
 			angular.forEach(states, function(name, id){
 				// the we set the updated object({name:johor,id:4}...) to states
-				$scope.states.push({
-					name: name.name,
-					id: id
-				});
+				$scope.states.push({name: name.name, id: id});
 			});
 			return;
 		})
 	});
+
+	$scope.$on('$ionicView.enter', function(scopes, states){
+		JsDatabase.getSettings('jobPref').then(function(jp){
+			if( jp.salary ){
+				$scope.expectedSalary = jp.salary;
+			}
+
+			if( jp.currency_id ){
+				$scope.selectedCurrency = {
+					id: jp.currency_id
+				};
+			}
+
+			if( jp.job_type_id && jp.job_type_id.length > 0 ){
+				angular.forEach(jp.job_type_id, function(e, i){
+					$scope.selectedJobType[e] = e;
+					$scope.tmpSelectedJobType.push(e);
+				});
+			}
+
+			if( jp.state_id && jp.state_id.length > 0 ){
+				angular.forEach(jp.state_id, function(e, i){
+					$scope.selectedState[e] = true;
+					$scope.checkedState.push(e);
+				});
+			}
+
+			if( jp.country_id && jp.country_id.length > 0 ){
+				angular.forEach(jp.country_id, function(e, i){
+					$scope.selectedCountry[e] = true;
+				});
+			}
+		});
+
+		JsDatabase.getSettings('jobPref').then(function(jobPref){
+			$scope.tempPref = jobPref;
+		}).catch(function(e){
+			JsDatabase.addSettings($scope.tempPref, 'jobPref').then(function(a){
+				$scope.tempPref._id = a.id;
+				$scope.tempPref._rev = a.rev;
+			});
+		});
+
+		JsDatabase.getParameter('jobType').then(function(jobTypes){
+			delete(jobTypes._id);
+			delete(jobTypes._rev);
+			$scope.jobTypes = jobTypes;
+		});
+		
+		JsDatabase.getParameter('currency').then(function(currencies){
+			delete(currencies._id);
+			delete(currencies._rev);
+
+			$scope.currencies = [];
+			angular.forEach(currencies, function(e,i){
+				$scope.currencies.push({id: i,name: e});
+			});
+		});
+	});
+
 
 	$ionicModal.fromTemplateUrl('templates/modal/states.html', {
 		scope: $scope,
@@ -822,6 +861,14 @@
 
 	$scope.openCountryModal = function(){
 		$scope.countryModal.show();
+	}
+
+	$scope.closeCountryModal = function(){
+		$scope.countryModal.hide();
+	}
+
+	$scope.closeStateModal = function(){
+		$scope.stateModal.hide();
 	}
 
 	$scope.checkTotalStateSelected = function(){
@@ -911,9 +958,16 @@
 			$scope.tmpSelectedJobType.push(this.id);
 		}
 	}
+
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
+	}
 })
 
-.controller('AccessLevelCtrl', function($scope, $http, $ionicLoading, JsDatabase){
+.controller('AccessLevelCtrl', function($scope, $http, $location, $ionicLoading, $ionicHistory, JsDatabase){
 	$scope.access_token = null;
 	JsDatabase.getToken().then(function(token){
 		if( token.length > 0 ){
@@ -967,9 +1021,16 @@
 			});
 		}
 	}
+
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
+	}
 })
 
-.controller('JobseekStatusCtrl', function($scope, $http, $ionicLoading, JsDatabase){
+.controller('JobseekStatusCtrl', function($scope, $http, $ionicHistory, $location, $ionicLoading, JsDatabase){
 	$scope.access_token = null;
 	$scope.city = null;
 
@@ -1103,6 +1164,9 @@
 		$scope.js.transport = $scope.ownTransport;
 		param.transport = $scope.js.transport;
 
+		if( !$scope.js.address ){
+			$scope.js.address = {};
+		}
 		$scope.js.address.country_id = $scope.selectedCountry.id;
 		$scope.js.address.state_id = $scope.selectedState.id;
 		$scope.js.address.state_name = $scope.insertedState;
@@ -1119,7 +1183,6 @@
 		JsDatabase.updateProfile( $scope.js ).then(function(a){
 			// if this two field is updated, then mark this section as completed
 			if( param.js_jobseek_status_id && param.availability ){
-				console.log(JsDatabase);
 				JsDatabase.updateCompleteness('jobseek', true);
 			}else{
 				JsDatabase.updateCompleteness('jobseek', false);
@@ -1139,55 +1202,127 @@
 			params: {'access-token':$scope.access_token}
 		}).then(function(response){
 			console.log(response);
+			$ionicLoading.show({
+				template: response.data.status_text,
+				noBackdrop: true,
+				duration: 1000
+			});
+		}).catch(function(){
+
 		});
 
 		return false;
 	}
+
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
+	}
 })
 
-.controller('WorkExpCtrl', function($scope, $stateParams, $filter, $http, $location, $ionicLoading, JsDatabase){
+.controller('WorkExpCtrl', function($scope, $stateParams, $filter, $http, $location, $ionicLoading, $ionicHistory, JsDatabase){
 
 	var rev = null;
 	var id = 0;
 	var workId = 0;
 
-	$scope.go = function(path){
-		$location.path(path);
-	}
+	$scope.$on('$ionicView.enter', function(scopes, states){
+		if( $stateParams.workid ){
+			JsDatabase.getWorkById($stateParams.workid).then(function(work){
+				$scope.positionTitle = work.position;
+				$scope.companyName = work.company;
+				$scope.selectedEmploymentType = { id: work.job_type_id };
+				$scope.selectedJobLevel = { id: work.job_level_id }
+				$scope.monthlySalary = work.salary;
+				$scope.selectedCurrency = { id: work.currency_id }
+				$scope.selectedJobSpecialisation = { id: work.job_spec_id };
+				$scope.selectedJobRole = { id: work.job_role_id }
+				$scope.selectedIndustry = { id: work.industry_id };
+				$scope.experience = work.experience;
 
-	if( $stateParams.workid ){
-		JsDatabase.getWorkById($stateParams.workid).then(function(work){
-			$scope.positionTitle = work.position;
-			$scope.companyName = work.company;
-			$scope.selectedEmploymentType = { id: work.job_type_id };
-			$scope.selectedJobLevel = { id: work.job_level_id }
-			$scope.monthlySalary = work.salary;
-			$scope.selectedCurrency = { id: work.currency_id }
-			$scope.selectedJobSpecialisation = { id: work.job_spec_id };
-			$scope.selectedJobRole = { id: work.job_role_id }
-			$scope.selectedIndustry = { id: work.industry_id };
-			$scope.experience = work.experience;
+				$scope.startMonth = new Date(work.date_from);
+				if( work.date_to ){
+					$scope.endMonth = new Date(work.date_to);
+				}
+				rev = work._rev;
+				id = work.id;
+				workId = work._id;
 
-			$scope.startMonth = new Date(work.date_from);
-			if( work.date_to ){
-				$scope.endMonth = new Date(work.date_to);
-			}
-			rev = work._rev;
-			id = work.id;
-			workId = work._id;
+				setTimeout(function(){
+					$scope.updateJobRole();
+				}, 500);
+			});
+		}
 
-			setTimeout(function(){
-				$scope.updateJobRole();
-			}, 500);
+		JsDatabase.getParameter('jobType').then(function(jobTypes){
+			delete(jobTypes._id);
+			delete(jobTypes._rev);
+
+			$scope.jobTypes = [];
+			angular.forEach(jobTypes, function(e,i){
+				$scope.jobTypes.push({
+					id: i,
+					name: e
+				});
+			});
 		});
-	}
+
+		JsDatabase.getParameter('jobLevel').then(function(jobLevels){
+			delete(jobLevels._id);
+			delete(jobLevels._rev);
+
+			$scope.jobLevels = [];
+			angular.forEach(jobLevels, function(e,i){
+				$scope.jobLevels.push({id: i,name: e});
+			});
+		});
+
+		JsDatabase.getParameter('currency').then(function(currencies){
+			delete(currencies._id);
+			delete(currencies._rev);
+
+			$scope.currencies = [];
+			angular.forEach(currencies, function(e,i){
+				$scope.currencies.push({id: i,name: e});
+			});
+		});
+
+		JsDatabase.getParameter('jobSpec').then(function(jobSpecs){
+			delete(jobSpecs._id);
+			delete(jobSpecs._rev);
+
+			$scope.jobSpecialisations = []; // for input selection
+			$scope.tempSpec = jobSpecs; // for searcing by index
+
+			angular.forEach(jobSpecs, function(e,i){
+				$scope.jobSpecialisations.push({id: i,name: e.name});
+			});
+		});
+
+		JsDatabase.getParameter('industry').then(function(industries){
+			delete(industries._id);
+			delete(industries._rev);
+
+			$scope.industries = []; // for input selection
+			angular.forEach(industries, function(e,i){
+				$scope.industries.push({id: i,name: e});
+			});
+		});
+	});
+
 
 	$scope.access_token = null;
-	// $scope.works;
+	$scope.js = null;
+
 	JsDatabase.getToken().then(function(token){
 		if( token.length > 0 ){
-			// console.log(token[0].access_token);
 			$scope.access_token = token[0].access_token;
+
+			JsDatabase.getProfile().then(function(profile){
+				$scope.js = profile;
+			});
 		}else{
 			var alertPopup = $ionicPopup.alert({
 				title: 'Notification',
@@ -1196,84 +1331,16 @@
 		}
 	});
 
-	JsDatabase.getParameter('jobType').then(function(jobTypes){
-		delete(jobTypes._id);
-		delete(jobTypes._rev);
-
-		$scope.jobTypes = [];
-		angular.forEach(jobTypes, function(e,i){
-			$scope.jobTypes.push({
-				id: i,
-				name: e
-			});
-		});
-	});
-
-	JsDatabase.getParameter('jobLevel').then(function(jobLevels){
-		delete(jobLevels._id);
-		delete(jobLevels._rev);
-
-		$scope.jobLevels = [];
-		angular.forEach(jobLevels, function(e,i){
-			$scope.jobLevels.push({
-				id: i,
-				name: e
-			});
-		});
-	});
-
-	JsDatabase.getParameter('currency').then(function(currencies){
-		delete(currencies._id);
-		delete(currencies._rev);
-
-		$scope.currencies = [];
-		angular.forEach(currencies, function(e,i){
-			$scope.currencies.push({
-				id: i,
-				name: e
-			});
-		});
-	});
-
-	JsDatabase.getParameter('jobSpec').then(function(jobSpecs){
-		delete(jobSpecs._id);
-		delete(jobSpecs._rev);
-
-		$scope.jobSpecialisations = []; // for input selection
-		$scope.tempSpec = jobSpecs; // for searcing by index
-
-		angular.forEach(jobSpecs, function(e,i){
-			$scope.jobSpecialisations.push({
-				id: i,
-				name: e.name
-			});
-		});
-	});
-
 	$scope.updateJobRole = function(){
 		$scope.selectedJobSpecialisation = this.selectedJobSpecialisation;
-		var jobRoles = $scope.tempSpec[$scope.selectedJobSpecialisation.id].roles;
-		$scope.jobRoles = [];
-		angular.forEach(jobRoles, function(e,i){
-			$scope.jobRoles.push({
-				id: i,
-				name: e
+		if($scope.selectedJobSpecialisation.id){
+			var jobRoles = $scope.tempSpec[$scope.selectedJobSpecialisation.id].roles;
+			$scope.jobRoles = [];
+			angular.forEach(jobRoles, function(e,i){
+				$scope.jobRoles.push({id: i, name: e});
 			});
-		});
+		}
 	}
-
-	JsDatabase.getParameter('industry').then(function(industries){
-		delete(industries._id);
-		delete(industries._rev);
-
-		$scope.industries = []; // for input selection
-		angular.forEach(industries, function(e,i){
-			$scope.industries.push({
-				id: i,
-				name: e
-			});
-		});
-	});
 
 	$scope.saveWorkExp = function(form){
 		if( form.$valid ){
@@ -1304,6 +1371,15 @@
 					param._id = a.id;
 					param._rev = a.rev;
 					rev = a.rev;
+
+					// set no work exp as false
+					JsDatabase.updateCompleteness('workExp', true);
+					if( $scope.js.no_work_exp ){
+						$scope.js.no_work_exp = false;
+						JsDatabase.updateProfile($scope.js);
+					}
+
+					postWorkExp( param );
 				});
 			}else{
 				JsDatabase.addWork(param).then(function(a){
@@ -1311,34 +1387,17 @@
 					param._rev = a.rev;
 					workId = a.id;
 					rev = a.rev;
+
+					// set no work exp as 0
+					JsDatabase.updateCompleteness('workExp', true);
+					if( $scope.js.no_work_exp ){
+						$scope.js.no_work_exp = false;
+						JsDatabase.updateProfile($scope.js);
+					}
+
+					postWorkExp( param );
 				});
 			}
-
-			var url = 'http://api.jenjobs.com/jobseeker/work-experience';
-			if( id ){ url += '/'+id; }
-			url += '?access-token='+$scope.access_token;
-
-			$http({
-				method: 'POST',
-				url: url,
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				data: param
-			}).then(function(response){
-				$ionicLoading.show({
-					template: response.data.status_text,
-					noBackdrop: true,
-					duration: 1500
-				});
-
-				id = response.data.id;
-				param.id = response.data.id;
-				JsDatabase.updateWork(param);
-			}).catch(function(e){
-				console.log(e);
-			});
 			/////////////////////
 		}else{
 			$ionicLoading.show({
@@ -1349,16 +1408,53 @@
 		}
 		return false;
 	}
+
+	function postWorkExp( param ){
+		var url = 'http://api.jenjobs.com/jobseeker/work-experience';
+		if( id ){ url += '/'+id; }
+		url += '?access-token='+$scope.access_token;
+
+		$http({
+			method: 'POST',
+			url: url,
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			data: param
+		}).then(function(response){
+			$ionicLoading.show({
+				template: response.data.status_text,
+				noBackdrop: true,
+				duration: 1500
+			});
+
+			id = response.data.id;
+			param.id = response.data.id;
+
+			JsDatabase.updateWork(param).then(function(stat){
+				console.log(stat);
+			}).catch(function(err){
+				console.log(err);
+			});
+		}).catch(function(e){
+			console.log(e);
+		});
+	}
+
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
+	}
+
 })
 
-.controller('EduCtrl', function($scope, $stateParams, $filter, $http, $location, $ionicLoading, JsDatabase){
+.controller('EduCtrl', function($scope, $stateParams, $filter, $http, $location, $ionicHistory, $ionicLoading, JsDatabase){
 	var rev = null;
 	var id = 0;
 	var eduId = 0;
-
-	$scope.go = function(path){
-		$location.path(path);
-	}
 
 	$scope.access_token = null;
 	JsDatabase.getToken().then(function(token){
@@ -1372,60 +1468,52 @@
 		}
 	});
 
-	if( $stateParams.eduid ){
-		JsDatabase.getEducationById($stateParams.eduid).then(function(edu){
-			rev = edu._rev;
-			id = edu._id;
+	$scope.$on('$ionicView.enter', function(scopes, states){
+		if( $stateParams.eduid ){
+			JsDatabase.getEducationById($stateParams.eduid).then(function(edu){
+				rev = edu._rev;
+				id = edu._id;
 
-			$scope.school = edu.school;
-			$scope.selectedEducationLevel = {id:edu.edu_level_id};
-			$scope.selectedEducationField = {id:edu.edu_field_id};
-			$scope.yearGraduated = {id:edu.date_graduated};
-			$scope.educationMajor = edu.major;
-			$scope.grade = edu.grade;
-			$scope.educationInfo = edu.info;
-			eduId = edu.id;
-		});
-	}
+				$scope.school = edu.school;
+				$scope.selectedEducationLevel = {id:edu.edu_level_id};
+				$scope.selectedEducationField = {id:edu.edu_field_id};
+				$scope.yearGraduated = {id:edu.date_graduated};
+				$scope.educationMajor = edu.major;
+				$scope.grade = edu.grade;
+				$scope.educationInfo = edu.info;
+				eduId = edu.id;
+			});
+		}
 
-	JsDatabase.getParameter('educationLevel').then(function(educationLevel){
-		delete(educationLevel._id);
-		delete(educationLevel._rev);
+		JsDatabase.getParameter('educationLevel').then(function(educationLevel){
+			delete(educationLevel._id);
+			delete(educationLevel._rev);
 
-		$scope.EducationLevel = [];
-		angular.forEach(educationLevel, function(e,i){
-			$scope.EducationLevel.push({
-				id: i,
-				name: e
+			$scope.EducationLevel = [];
+			angular.forEach(educationLevel, function(e,i){
+				$scope.EducationLevel.push({id: i, name: e});
 			});
 		});
-	});
 
-	JsDatabase.getParameter('educationField').then(function(educationField){
-		delete(educationField._id);
-		delete(educationField._rev);
+		JsDatabase.getParameter('educationField').then(function(educationField){
+			delete(educationField._id);
+			delete(educationField._rev);
 
-		$scope.EducationField = [];
-		angular.forEach(educationField, function(e,i){
-			$scope.EducationField.push({
-				id: i,
-				name: e
+			$scope.EducationField = [];
+			angular.forEach(educationField, function(e,i){
+				$scope.EducationField.push({id: i, name: e});
 			});
 		});
-	});
 
-	$scope.years = [];
-	var startYear = Number($filter('date')(new Date(), 'yyyy'));
-	for(var i=startYear;i>startYear-50;i--){
-		$scope.years.push({
-			id: i,
-			name: i
-		});
-	}
+		$scope.years = [];
+		var startYear = Number($filter('date')(new Date(), 'yyyy'));
+		for(var i=startYear;i>startYear-50;i--){
+			$scope.years.push({id: i,name: i});
+		}
+	});
 
 	$scope.saveEducation = function(form){
 		if( form.$valid ){
-
 			var param = {};
 
 			param.edu_level_id = $scope.selectedEducationLevel.id;
@@ -1440,48 +1528,23 @@
 			param.id = eduId;
 
 			if( id && rev ){
-				JsDatabase.addEducation( param, id, rev );
+				param._id = id;
+				param._rev = rev;
+				JsDatabase.addEducation( param, id, rev ).then(function(){
+					JsDatabase.updateCompleteness('education', true);
+
+					postEducation( param );
+				});
 			}else{
 				JsDatabase.addEducation( param ).then(function(a){
-					id = a.id;
-					rev = a.rev;
-
+					console.log(a);
 					param._id = a.id;
 					param._rev = a.rev;
+					JsDatabase.updateCompleteness('education', true);
 
-					JsDatabase.addEducation(param, a.id, a.rev);
+					postEducation( param );
 				});
 			}
-
-			var url = 'http://api.jenjobs.com/jobseeker/qualification';
-			if( Number(eduId) ){ url += '/'+eduId; }
-			url += '?access-token='+$scope.access_token;
-
-			$http({
-				method: 'POST',
-				url: url,
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				data: param
-			}).then(function(response){
-				$ionicLoading.show({
-					template: response.data.status_text,
-					noBackdrop: true,
-					duration: 1500
-				});
-
-				if( response.data.status_code == 1 ){
-					eduId = response.data.id;
-					param.id = eduId;
-					JsDatabase.addEducation(param, param._id, param._rev).then(function(){
-						setTimeout(function(){
-							$location.path('/tab/resume');
-						}, 1500);
-					});
-				}
-			});
 
 		}else{
 			$ionicLoading.show({
@@ -1494,5 +1557,48 @@
 				$location.path('/tab/resume');
 			}, 1500);
 		}
+	}
+
+	// function to post education to server
+	function postEducation( param ){
+		var url = 'http://api.jenjobs.com/jobseeker/qualification';
+		if( Number(eduId) ){ url += '/'+eduId; }
+		url += '?access-token='+$scope.access_token;
+
+		$http({
+			method: 'POST',
+			url: url,
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			data: param
+		}).then(function(response){
+			$ionicLoading.show({
+				template: response.data.status_text,
+				noBackdrop: true,
+				duration: 1500
+			});
+
+			if( response.data.status_code == 1 ){
+				eduId = response.data.id;
+				param.id = eduId;
+				console.log(param);
+				JsDatabase.updateEducation(param).then(function(a){
+					console.log(a);
+					setTimeout(function(){
+						$location.path('/tab/resume');
+					}, 1500);
+				});
+			}
+		});
+	}
+	// end post education
+
+	$scope.go = function(path){
+		$ionicHistory.nextViewOptions({
+			disableBack: true
+		});
+		$location.path(path);
 	}
 });
