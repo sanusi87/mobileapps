@@ -1,10 +1,13 @@
 <ion-modal-view>
 	<ion-header-bar>
 		<h4 class="title">States</h4>
+		<button type="button" class="button button-right button-light button-icon" ng-click="closeStateModal()">
+			<i class="ion-ios-close-empty"></i>
+		</button>
 	</ion-header-bar>
 	<ion-content>
 		<div class="list list-inset">
-			<ion-toggle ng-repeat="state in states track by state.id" ng-model="selectedState[state.id]" ng-value="{{state.id}}" ng-change="checkTotalStateSelected()">{{state.name}}</ion-toggle>
+			<ion-toggle ng-repeat="state in states track by state.id" ng-model="selectedState[state.id]" ng-value="{{state.id}}" ng-change="checkTotalStateSelected()" class="pt-15 pb-15">{{state.name}}</ion-toggle>
 		</div>
 	</ion-content>
 </ion-modal-view>
