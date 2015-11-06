@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job', 'jenjobs.login', 'textAngular'])
+angular.module('starter', ['ionic','ionic.service.core', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job', 'jenjobs.login', 'textAngular'])
 .run(function($ionicPlatform, JsDatabase, JobSearch) {
 	$ionicPlatform.ready(function(){
 		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -24,7 +24,7 @@ angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'je
 		JobSearch.initDB();
 	});
 })
-.config(function($stateProvider, $urlRouterProvider, $httpProvider, $compileProvider) {
+.config(function($stateProvider, $urlRouterProvider, $httpProvider, $compileProvider, $ionicConfigProvider) {
 	$stateProvider
 
 	.state('tab', {
@@ -37,6 +37,12 @@ angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'je
 		url: '/login',
 		templateUrl: 'templates/login.html',
 		controller: 'LoginCtrl'
+	})
+
+	.state('logincheck', {
+		url: '/logincheck',
+		templateUrl: 'templates/progress.html',
+		controller: 'CheckProfileCtrl'
 	})
 
 	.state('register', {
@@ -234,17 +240,20 @@ angular.module('starter', ['ionic', 'jenjobs.controllers', 'jenjobs.resume', 'je
 	.state('test', {
 		url: '/test',
 		templateUrl: 'templates/test.html',
-		controller: 'WorkCtrl'
+		controller: 'TestCtrl'
 	});
 
 	// if none of the above states are matched, use this as the fallback
-	$urlRouterProvider.otherwise('/profile');
+	$urlRouterProvider.otherwise('/login');
 
 	// configing ajax request
 	$httpProvider.defaults.useXDomain = true;
 	$httpProvider.defaults.headers = {
 		'Content-Type': 'application/json;charset=utf-8'
 	};
+
+	// disable javascript scroll to improve performace
+	$ionicConfigProvider.scrolling.jsScrolling(false);
 
 	$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|geo):/);
 });
