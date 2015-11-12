@@ -1,12 +1,6 @@
-// Ionic Starter App
+angular.module('starter', ['ionic','ionic.service.core', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job', 'jenjobs.login', 'jenjobs.sync', 'textAngular', 'jenjobs.background.services'])
 
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
-// 'starter.services' is found in services.js
-// 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic','ionic.service.core', 'jenjobs.controllers', 'jenjobs.resume', 'jenjobs.db', 'jenjobs.services', 'jenjobs.job', 'jenjobs.login', 'textAngular'])
-.run(function($ionicPlatform, JsDatabase, JobSearch) {
+.run(function($ionicPlatform, JsDatabase, JobSearch, BackgroundService) {
 	$ionicPlatform.ready(function(){
 		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
 		// for form inputs)
@@ -22,6 +16,9 @@ angular.module('starter', ['ionic','ionic.service.core', 'jenjobs.controllers', 
 
 		JsDatabase.initDB();
 		JobSearch.initDB();
+		JsDatabase.periodicallyCheckNetworkConnection();
+		// JsDatabase.updateAll();
+		BackgroundService.init();
 	});
 })
 .config(function($stateProvider, $urlRouterProvider, $httpProvider, $compileProvider, $ionicConfigProvider) {
@@ -254,6 +251,8 @@ angular.module('starter', ['ionic','ionic.service.core', 'jenjobs.controllers', 
 
 	// disable javascript scroll to improve performace
 	$ionicConfigProvider.scrolling.jsScrolling(false);
+	// disable page transition delay
+	$ionicConfigProvider.views.transition('none');
 
 	$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|geo):/);
 });
