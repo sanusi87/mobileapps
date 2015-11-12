@@ -22,6 +22,9 @@
 	});
 
 	$scope.$on('$ionicView.enter', function(scopes, states) {
+		// check connection
+		$scope.connection = JsDatabase.getConnectionType();
+
 		// job seeking status
 		JsDatabase.getProfile().then(function(profile){
 			$scope.js = profile;
@@ -126,7 +129,7 @@
 
 						var prefCountries = [];
 						angular.forEach(jobPref.country_id, function(e,i){
-							prefCountries.push( countries[e] );
+							prefCountries.push( countries[e].name );
 						});
 						return prefCountries;
 					}).then(function(prefCountries){
@@ -228,7 +231,7 @@
 					params: {'access-token': $scope.access_token},
 					data: {status:1}
 				}).then(function(response){
-					console.log(response);
+					// console.log(response);
 				});
 			});
 		}else{ //yes
@@ -473,7 +476,7 @@
 	// update is native
 	$scope.updateSelectedNative = function(){
 		$scope.selectedNative = this.selectedNative;
-		console.log($scope.selectedNative);
+		// console.log($scope.selectedNative);
 	}
 
 	$scope.saveLanguage = function(){
@@ -521,12 +524,13 @@
 				// then try to post to web server
 				$http({
 					method: 'POST',
-					url: 'http://api.jenjobs.com/jobseeker/language?access-token='+$scope.access_token,
+					url: 'http://api.jenjobs.com/jobseeker/language',
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
 					},
-					data: param
+					data: param,
+					params: {'access-token': $scope.access_token}
 				}).then(function(response){
 					if( response.data.status_code == 1 ){
 						$ionicLoading.show({
@@ -542,8 +546,8 @@
 						});
 					}
 				}).catch(function(e){
-					console.log('error');
-					console.log(e)
+					// console.log('error');
+					// console.log(e)
 				});
 				$scope.closeModal();
 			}).catch(function(e){
@@ -578,7 +582,7 @@
 				data: {},
 				params: param
 			}).then(function(response){
-				console.log(response);
+				// console.log(response);
 			});
 
 			// remove from the list
@@ -599,7 +603,7 @@
 	// language
 
 	// attached resume
-	$scope.tmpResumeAttachment;
+	$scope.tmpResumeAttachment = null;
 	$ionicModal.fromTemplateUrl('templates/modal/attach-resume-input.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
@@ -628,36 +632,42 @@
 	});
 
 	$scope.saveAndCloseResumeModal = function(){
-		// $scope.closeResumeModal();
-		console.log( $scope.tmpResumeAttachment );
+		if( $scope.tmpResumeAttachment && $scope.attachedResume ){
+			var param = {
+				'attachment': $scope.tmpResumeAttachment,
+				'name': $scope.attachedResume
+			};
+			$http({
+				method: 'POST',
+				url: 'http://api.jenjobs.com/jobseeker/attachment',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				data: param,
+				params: {'access-token': $scope.access_token}
+			}).then(function(response){
+				$scope.attachedResume = response.data.resume;
+				tempResume.value = response.data.resume;
+				JsDatabase.updateSettings(tempResume);
 
-		var param = {
-			'attachment': $scope.tmpResumeAttachment,
-			'name': $scope.attachedResume
-		};
-		$http({
-			method: 'POST',
-			url: 'http://api.jenjobs.com/jobseeker/attachment?access-token='+$scope.access_token,
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			data: param
-		}).then(function(response){
-			$scope.attachedResume = response.data.resume;
-			tempResume.value = response.data.resume;
-			JsDatabase.updateSettings(tempResume);
+				$ionicLoading.show({
+					template: response.data.status_text,
+					noBackdrop: true,
+					duration: 1500
+				});
 
+				setTimeout(function(){
+					$scope.closeResumeModal();
+				}, 2000);
+			});
+		}else{
 			$ionicLoading.show({
-				template: response.data.status_text,
+				template: 'Please select a file and ensure that the file is of these types (doc, docx, pdf, odt, rtf)',
 				noBackdrop: true,
 				duration: 1500
 			});
-
-			setTimeout(function(){
-				$scope.closeResumeModal();
-			}, 2000);
-		});
+		}
 	}
 
 	$scope.file_changed = function(element) {
@@ -666,7 +676,14 @@
 
 		$scope.attachedResume = resumefile.name;
 		reader.onloadend = function(e) {
-			$scope.tmpResumeAttachment = e.target.result;
+			var resumeType = resumefile.name.split(/\./g);
+			resumeType = resumeType[resumeType.length - 1];
+
+			if( ['doc','docx','pdf','odt','rtf'].indexOf(resumeType) != -1 ){
+				$scope.tmpResumeAttachment = e.target.result;
+			}else{
+				$scope.tmpResumeAttachment = null;
+			}
 		};
 		reader.readAsDataURL(resumefile);
 	}
@@ -690,12 +707,13 @@
 
 			$http({
 				method: 'POST',
-				url: 'http://api.jenjobs.com/jobseeker/additional-info?access-token='+$scope.access_token,
+				url: 'http://api.jenjobs.com/jobseeker/additional-info',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
-				data: param
+				data: param,
+				params: {'access-token': $scope.access_token}
 			}).then(function(response){
 				$ionicLoading.show({
 					template: response.data.status_text,
@@ -797,6 +815,8 @@
 	});
 
 	$scope.$on('$ionicView.enter', function(scopes, states){
+		$scope.connection = JsDatabase.getConnectionType();
+
 		JsDatabase.getSettings('jobPref').then(function(jp){
 			if( jp.salary ){
 				$scope.expectedSalary = jp.salary;
@@ -929,7 +949,7 @@
 			});
 		}
 
-		console.log(param);
+		// console.log(param);
 
 		param._id = $scope.tempPref._id;
 		param._rev = $scope.tempPref._rev;
@@ -948,7 +968,7 @@
 				data: param,
 				params: {'access-token': $scope.access_token}
 			}).then(function(response){
-				console.log(response);
+				// console.log(response);
 				$ionicLoading.show({
 					template: response.data.status_text,
 					noBackdrop: true,
@@ -993,9 +1013,13 @@
 		});
 	});
 
+	$scope.$on('$ionicView.enter', function(scopes, states) {
+		$scope.connection = JsDatabase.getConnectionType();
+	});
+
 	$scope.saveAccessLevel = function(form){
 		if( form.$valid ){
-			console.log($scope.js.access);
+			// console.log($scope.js.access);
 			var stat = JsDatabase.updateProfile($scope.js)
 			.then(function(){
 				var url = 'http://api.jenjobs.com/jobseeker/access-level?access-token='+$scope.access_token;
@@ -1011,7 +1035,7 @@
 					},
 					data: param
 				}).then(function(response){
-					console.log(response);
+					// console.log(response);
 
 					$ionicLoading.show({
 						template: 'Resume access level updated.',
@@ -1020,7 +1044,7 @@
 					});
 				});
 			}).catch(function(e){
-				console.log(e);
+				// console.log(e);
 				$ionicLoading.show({
 					template: e.message,
 					noBackdrop: true,
@@ -1067,7 +1091,7 @@
 			$scope.js = profile;
 
 			$scope.jsJobseekingStatus = profile.js_jobseek_status_id;
-			console.log(profile.js_jobseek_status_id);
+			// console.log(profile.js_jobseek_status_id);
 			$scope.availability = profile.availability == -1 ? 0 : profile.availability;
 			$scope.selectedavailabilityUnit = {
 				id: profile.availability_unit
@@ -1128,10 +1152,14 @@
 		$scope.jobseekingStatus = statuses;
 	});
 
+	$scope.$on('$ionicView.enter', function(scopes, states) {
+		$scope.connection = JsDatabase.getConnectionType();
+	});
+
 	// country onChange
 	$scope.countryChanged = function(){
 		$scope.selectedCountry = this.selectedCountry; // update scope
-		console.log($scope.selectedCountry.id);
+		// console.log($scope.selectedCountry.id);
 	}
 	// end countries
 
@@ -1209,7 +1237,7 @@
 			data: param,
 			params: {'access-token':$scope.access_token}
 		}).then(function(response){
-			console.log(response);
+			// console.log(response);
 			$ionicLoading.show({
 				template: response.data.status_text,
 				noBackdrop: true,
@@ -1237,6 +1265,8 @@
 	var workId = 0;
 
 	$scope.$on('$ionicView.enter', function(scopes, states){
+		$scope.connection = JsDatabase.getConnectionType();
+
 		if( $stateParams.workid ){
 			JsDatabase.getWorkById($stateParams.workid).then(function(work){
 				$scope.positionTitle = work.position;
@@ -1441,12 +1471,12 @@
 			param.id = response.data.id;
 
 			JsDatabase.updateWork(param).then(function(stat){
-				console.log(stat);
+				// console.log(stat);
 			}).catch(function(err){
-				console.log(err);
+				// console.log(err);
 			});
 		}).catch(function(e){
-			console.log(e);
+			// console.log(e);
 		});
 	}
 
@@ -1477,6 +1507,8 @@
 	});
 
 	$scope.$on('$ionicView.enter', function(scopes, states){
+		$scope.connection = JsDatabase.getConnectionType();
+
 		if( $stateParams.eduid ){
 			JsDatabase.getEducationById($stateParams.eduid).then(function(edu){
 				rev = edu._rev;
@@ -1545,7 +1577,7 @@
 				});
 			}else{
 				JsDatabase.addEducation( param ).then(function(a){
-					console.log(a);
+					// console.log(a);
 					param._id = a.id;
 					param._rev = a.rev;
 					JsDatabase.updateCompleteness('education', true);
@@ -1591,9 +1623,9 @@
 			if( response.data.status_code == 1 ){
 				eduId = response.data.id;
 				param.id = eduId;
-				console.log(param);
+				// console.log(param);
 				JsDatabase.updateEducation(param).then(function(a){
-					console.log(a);
+					// console.log(a);
 					setTimeout(function(){
 						$location.path('/tab/resume');
 					}, 1500);

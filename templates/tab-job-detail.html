@@ -1,4 +1,4 @@
-<ion-view view-title="{{jobTitle}}">
+<ion-view view-title="{{jobTitle}}" animation="none">
 
 	<ion-nav-buttons side="left">
 		<button ng-show="currentState!='job-details'" type="button" class="button button-clear button-positive" ng-click="go('/tab/job')">
@@ -11,7 +11,7 @@
 			<div class="row" ng-show="currentState!='job-details'">
 				<div class="col col-50">
 					<div class="button-bar">
-						<!-- not bookmark -->
+						<!-- not yet bookmark -->
 						<button type="button" data-ng-show="!bookmarked" class="button button-positive" ng-click="bookmark(job.post_id)">
 							<i class="ion-ios-bookmarks"></i> Bookmark
 						</button>
@@ -161,7 +161,7 @@
 			</div>
 			<div class="card" ng-show="!isLoading">
 				<div class="item item-text-wrap text-center">
-					Sorry, we were unable to find this job.
+					Sorry, we were unable to find/load this job details.
 					<br />
 					<button class="button button-full button-positive" ng-click="searchJob()">
 						Search Jobs

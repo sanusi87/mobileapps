@@ -1,13 +1,21 @@
 <ion-view view-title="Profile">
 	<ion-content class="padding">
+
+		<!-- test section --
+		<div class="mb-10" ng-show="isConnected">
+			<i class="ion-android-warning"></i> {{isConnected}}
+		</div>
+
+		<button type="button" class="button button-light button-small" ng-click="go('/test')">
+			Navigator
+		</button>
+
+		<div class="mb-10 mt-10">
+			Service: {{serviceStatus}}
+		</div>
+		-- end test -->
+
 		<div class="list card" ng-show="!isLoading">
-
-			<div class="item">
-				<button type="button" name="button" class="button button-positive button-block" ng-click="go('/tab/resume')">
-					<i class="ion-ios-list-outline"></i> Online Resume
-				</button>
-			</div>
-
 			<div class="item item-divider">
 				<div class="row">
 					<div class="col col-75">{{js.name}}</div>
@@ -35,6 +43,12 @@
 			</div>
 
 			<div class="item"><div>Country :<b>{{js.country}}</b></div></div>
+
+			<div class="item">
+				<button type="button" name="button" class="button button-positive button-block" ng-click="go('/tab/resume')">
+					<i class="ion-ios-list-outline"></i> Online Resume
+				</button>
+			</div>
 		</div>
 
 		<div class="card" ng-show="isLoading">

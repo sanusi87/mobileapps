@@ -4,7 +4,7 @@
 			<i class="ion-ios-arrow-left"></i> Resume
 		</button>
 	</ion-nav-buttons>
-	
+
 	<ion-content class="padding">
 		<form name="jobPreferences" ng-submit="saveJobPref(jobPreferences)" novalidate>
 			<div class="list list-inset">
@@ -43,14 +43,19 @@
 					<button class="button button-small button-light button-icon" ng-click="openCountryModal()" type="button">
 						<i class="ion-android-open"></i>
 					</button>
-
 					<div class="list list-inset" ng-show="selectedCountry.length > 0">
 						<div class="item" ng-repeat="(id, status) in selectedCountry track by id" ng-show="status == true">{{tempCountries[id].name}}</div>
 					</div>
 				</div>
 
 				<div class="item">
-					<button class="button button-positive" type="submit" ng-disabled="!((expectedSalary && selectedCurrency) && tmpSelectedJobType.length > 0 && checkedState.length > 0)">
+					<div ng-show="connection=='none'" class="mt-20 mb-20 text-center assertive">
+						<small>
+							<i class="ion-android-warning"></i> Internet connection is required!
+						</small>
+					</div>
+
+					<button class="button button-positive" type="submit" ng-disabled="!((expectedSalary && selectedCurrency) && tmpSelectedJobType.length > 0 && checkedState.length > 0) || connection=='none'">
 						<i class="ion-ion-checkmark-empty"></i> Save
 					</button>
 				</div>

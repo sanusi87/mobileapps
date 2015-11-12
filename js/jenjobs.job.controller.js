@@ -2,7 +2,7 @@
 .controller('JobCtrl', function($scope, $state, $location, $http, $filter, $ionicModal, $ionicHistory, JobSearch, JsDatabase){
 	$scope.jobs = [];
 	$scope.tmp = {search_by: {id:1}};
-
+	var isLoading = false;
 	$scope.params = {
 		page: 1,
 		keyword: null,
@@ -227,9 +227,11 @@
 		$location.path(path);
 	}
 
+	$scope.gotMoreData = true;
 	$scope.filterJobs = function(){
 		$scope.jobs = [];
 		$scope.params.page = 1;
+		$scope.gotMoreData = true; // reset this variable for each time this function is executed
 
 		if( $scope.tmp.search_by ){
 			$scope.params.search_by = $scope.tmp.search_by.id;
@@ -283,9 +285,12 @@
 		$scope.specString = '';
 	}
 
-	var isLoading = false;
-	$scope.gotMoreData = true;
+	// this function is used to load jobs, check tab-job.html for <ion-infinite-scroll>
 	$scope.loadMore = function(){
+		if( $scope.jobs.length == 0 ){
+			$scope.isLoading = true;
+		}
+
 		if( $scope.gotMoreData ){
 			if( !isLoading ){
 				isLoading = true;
@@ -307,7 +312,7 @@
 					});
 					isLoading = false;
 				}).catch(function(err){
-					console.log(err);
+					// console.log(err);
 					isLoading = false;
 					$scope.gotMoreData = false;
 				});
@@ -409,6 +414,7 @@
 	}
 
 	$scope.$on('$ionicView.enter', function(scopes, states) {
+		$scope.connection = JsDatabase.getConnectionType();
 		JobSearch.get(urlParam).then(function(job){
 			$scope.job = job;
 			$scope.jobTitle = job.title;
@@ -425,7 +431,7 @@
 
 			// get application status
 			JobSearch.checkApplication($stateParams.jid).then(function(application){
-				console.log(application);
+				// console.log(application);
 				if(application){
 					$scope.applied = true; // has applied for the job
 				}
@@ -454,20 +460,20 @@
 	});
 
 	$scope.bookmark = function( jid ){
-		console.log('bookmarking 1 '+jid);
+		// console.log('bookmarking 1 '+jid);
 		JobSearch.bookmarkJob({
 			post_id: jid,
 			title: $scope.job.title,
 			date_closed: $scope.job.date_closed
 		}, $scope.access_token).then(function(status){
-			console.log('bookmarked!');
+			// console.log('bookmarked!');
 			$scope.bookmarked = true;
 			$scope.bookmark._rev = status.rev; // update revision to update the object reference
 
 			$scope.job._id = jid;
 			JobSearch.saveJob($scope.job);
 		}).catch(function(err){
-			console.log(err);
+			// console.log(err);
 		});
 	}
 
@@ -478,7 +484,7 @@
 
 			JobSearch.deleteJob($scope.job);
 		}).catch(function(err){
-			console.log(err);
+			//console.log(err);
 		});
 	}
 
@@ -486,7 +492,7 @@
 		JsDatabase.getProfile().then(function(profile){
 			JsDatabase.getSettings('completeness')
 			.then(function(completeness){
-				console.log(completeness);
+				// console.log(completeness);
 
 				/**
 				check resume completeness
@@ -540,8 +546,8 @@
 					}
 				}
 
-				console.log(canApply);
-				console.log(alerts);
+				// console.log(canApply);
+				// console.log(alerts);
 
 				if( canApply ){
 					JobSearch.apply({
@@ -553,14 +559,14 @@
 						title: $scope.job.title,
 						//_id: $stateParams.jid
 					}, $scope.access_token).then(function(doc){
-						console.log(doc);
+						// console.log(doc);
 						$ionicLoading.show({
 							template: 'Application submitted',
 							noBackdrop: true,
 							duration: 1000
 						});
 					}).catch(function(e){
-						console.log(e);
+						// console.log(e);
 					});
 				}else{
 					$ionicLoading.show({
@@ -606,10 +612,10 @@
 
 	$scope.$on('$ionicView.enter', function(){
 		JobSearch.getApplication().then(function(application){
-			console.log(application);
+			// console.log(application);
 			if( application.length > 0 ){
 				angular.forEach(application, function(app, i){
-					console.log(app);
+					// console.log(app);
 					app.status_desc = JobSearch.applicationStatus[app.status];
 				});
 			}
@@ -645,7 +651,7 @@
 				$scope.bookmarks = bookmarks;
 			}
 		}).catch(function(e){
-			console.log(e);
+			// console.log(e);
 		});
 	})
 
@@ -666,7 +672,7 @@
 						$scope.bookmarks.splice( $scope.bookmarks.indexOf( bookmark ) ,1);
 					});
 				}).catch(function(err){
-					console.log(err);
+					// console.log(err);
 				});
 			}
 		});

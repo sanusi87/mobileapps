@@ -1,5 +1,5 @@
 ﻿angular.module('jenjobs.services', [])
-.factory('JobSearch', function($q, $http, JsDatabase, $ionicLoading){
+.factory('JobSearch', function($q, $http, $ionicLoading){
 	var _jobs = {},
 	//_job,
 	_job_db,
@@ -160,7 +160,7 @@
 		}).catch(function(e){
 			// display alert if ajax failed
 			$ionicLoading.show({
-				template: 'Data synchronization failed!',
+				template: 'Sorry, we failed to fetch the jobs listing!',
 				noBackdrop: true,
 				duration: 1500
 			});
@@ -186,7 +186,7 @@
 				'Content-Type': 'application/json'
 			}
 		}).then(function(response){
-			console.log(response);
+			// console.log(response);
 			if( response.status == 200 ){
 				response.data.date_closed = new Date(response.data.date_closed);
 				response.data.date_posted = new Date(response.data.date_posted);
@@ -204,8 +204,8 @@
 
 	// bookmark
 	function bookmarkJob( items, accessToken ){
-		console.log('bookmarking...');
-		console.log(items);
+		// console.log('bookmarking...');
+		// console.log(items);
 		return $q.when( _bookmark_db.put({
 			_id: String(items.post_id),
 			on: items.on ? items.on : new Date(),
@@ -229,17 +229,17 @@
 					params: param,
 					data: data
 				}).then(function(response){
-					console.log(response);
+					// console.log(response);
 				}).catch(function(err){
-					console.log('http error');
-					console.log(err);
+					// console.log('http error');
+					// console.log(err);
 				});
 			}
 
 			return doc;
 		}).catch(function(e){
-			console.log('local save error');
-			console.log(e);
+			// console.log('local save error');
+			// console.log(e);
 			return {};
 		});
 	}
@@ -258,9 +258,9 @@
 					},
 					params: param
 				}).then(function(response){
-					console.log(response);
+					// console.log(response);
 				}).catch(function(err){
-					console.log(err);
+					// console.log(err);
 				});
 			}
 			return doc;
@@ -298,7 +298,7 @@
 	}
 	*/
 	function apply( application, accessToken ){
-		console.log(application);
+		// console.log(application);
 		return $q.when( _application_db.put( application, application.post_id ) )
 		.then(function(doc){
 			if( accessToken ){
@@ -314,13 +314,13 @@
 						'access-token': accessToken
 					}
 				}).then(function(response){
-					console.log(response);
+					// console.log(response);
 					return response;
 				});
 			}
 			return {};
 		}).catch(function(e){
-			console.log(e);
+			// console.log(e);
 		});
 	}
 
@@ -426,7 +426,7 @@
 					$q.when(_application_db.remove(e.doc._id, e.doc._rev)).then(function(a){
 						return a;
 					}).catch(function(e){
-						console.log(e);
+						// console.log(e);
 					});
 				});
 			}

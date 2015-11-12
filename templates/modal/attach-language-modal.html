@@ -30,9 +30,16 @@
 			</div>
 
 			<div class="item">
-				<button type="button" ng-click="saveLanguage()" class="button button-positive" ng-disabled="!((selectedLanguage ? true : false) && (selectedSpokenLevel ? true : false) && (selectedWrittenLevel ? true : false))">
+				<div ng-show="connection=='none'" class="mt-10 mb-10 text-center assertive">
+					<small>
+						<i class="ion-android-warning"></i> Internet connection is required!
+					</small>
+				</div>
+
+				<button type="button" ng-click="saveLanguage()" class="button button-positive" ng-disabled="!((selectedLanguage ? true : false) && (selectedSpokenLevel ? true : false) && (selectedWrittenLevel ? true : false)) || connection=='none'">
 					Save
 				</button>
+
 				<button type="button" ng-click="closeLanguageModal()" class="button button-light">
 					Cancel
 				</button>

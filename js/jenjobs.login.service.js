@@ -1,5 +1,5 @@
 angular.module('jenjobs.login', [])
-.factory('JobseekerLogin', function($http, JsDatabase, $ionicLoading){
+.factory('JobseekerLogin', function($http, $ionicLoading){
     var username = '',
     password = '',
     grant_type = 'password',
@@ -48,7 +48,7 @@ angular.module('jenjobs.login', [])
 
 	function setAccessToken(at, cb){
 		accessToken = at;
-		console.log(accessToken);
+		// console.log(accessToken);
 		// setTimeout(function(){
 			cb();
 		// }, 1000);
@@ -76,7 +76,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb( response ); // run callback
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'Wrong username or password!'});
 			});
 		}
@@ -90,7 +90,7 @@ angular.module('jenjobs.login', [])
 		}).then(function(response){
 			cb( response );
 		}).catch(function(error){
-			console.log(error);
+			// console.log(error);
 			cb({error: 'A problem occur.[code 2]'});
 		});
 	};
@@ -102,14 +102,14 @@ angular.module('jenjobs.login', [])
 		}).then(function(response){
 			cb( response );
 		}).catch(function(error){
-			console.log(error);
+			// console.log(error);
 			cb({error: 'A problem occur.[code 3]'});
 		});
 	};
 
 	function downloadProfile( cb ){
-		console.log(this);
-		console.log(accessToken);
+		// console.log(this);
+		// console.log(accessToken);
 		if( accessToken && accessToken.length > 0 ){
 			$http({
 				method: 'GET',
@@ -132,7 +132,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb( response );
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 4]'});
 			});
 		}else{
@@ -149,7 +149,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb(response);
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 5]'});
 			});
 		}else{
@@ -166,7 +166,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb(response);
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 6]'});
 			});
 		}else{
@@ -183,7 +183,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb(response);
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 7]'});
 			});
 		}else{
@@ -200,7 +200,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb(response);
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 8]'});
 			});
 		}else{
@@ -217,7 +217,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb(response);
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 9]'});
 			});
 		}else{
@@ -234,7 +234,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb(response);
 			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 10]'});
 			});
 		}else{
@@ -251,70 +251,7 @@ angular.module('jenjobs.login', [])
 			}).then(function(response){
 				cb(response);
 			}).catch(function(error){
-				console.log(error);
-				cb({error: 'A problem occur.[code 10]'});
-			});
-		}else{
-			cb({error: 'Access token is required.'});
-		}
-    }
-})
-
-// this service is used to sync the data to the server
-.factory('Sync', function($http, JsDatabase){
-    var _token;
-
-	return {
-        setToken: function(token){ _token = token; },
-        updateSubscription: updateSubscription
-    };
-
-    setTimeout(function(){
-        console.log(_token);
-    }, 2000);
-
-    function updateSubscription(subscription_id, status, cb){
-        if( _token && _token.length > 0 ){
-            var data = {
-                subscription_id: subscription_id,
-                status: status
-            };
-
-			return $http({
-				method: 'POST',
-				url: 'http://api.jenjobs.com/jobseeker/subscription',
-				params: {'access-token':_token},
-                headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-                data: data
-			}).then(function(response){
-				cb(response);
-			}).catch(function(error){
-				console.log(error);
-				cb({error: 'A problem occur.[code 10]'});
-			});
-		}else{
-			cb({error: 'Access token is required.'});
-		}
-    }
-
-
-    function updateAlert(alert_id, status, cb){
-        if( _token && _token.length > 0 ){
-			return $http({
-				method: 'POST',
-				url: 'http://api.jenjobs.com/jobseeker/alert',
-				params: {'access-token':_token},
-                data: {
-                    subscription_id: subscription_id,
-                    status: status
-                }
-			}).then(function(response){
-				cb(response);
-			}).catch(function(error){
-				console.log(error);
+				// console.log(error);
 				cb({error: 'A problem occur.[code 10]'});
 			});
 		}else{

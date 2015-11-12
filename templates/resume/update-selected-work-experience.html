@@ -99,7 +99,14 @@
 				</div>
 
 				<div class="item">
-					<button class="button button-positive" type="submit" ng-disabled="!positionTitle && !companyName && !selectedEmploymentType && !selectedJobLevel && !monthlySalary && !selectedJobSpecialisation && !selectedJobRole && !selectedIndustry && !startMonth">
+
+					<div ng-show="connection=='none'" class="mt-10 mb-10 text-center assertive">
+						<small>
+							<i class="ion-android-warning"></i> Internet connection is required!
+						</small>
+					</div>
+
+					<button class="button button-positive" type="submit" ng-disabled="(!positionTitle && !companyName && !selectedEmploymentType && !selectedJobLevel && !monthlySalary && !selectedJobSpecialisation && !selectedJobRole && !selectedIndustry && !startMonth) || connection=='none'">
 						<i class="ion-ion-checkmark-empty"></i> Save
 					</button>
 				</div>

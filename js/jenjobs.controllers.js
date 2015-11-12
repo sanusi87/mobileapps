@@ -1,11 +1,7 @@
 angular.module('jenjobs.controllers', ['ionic'])
 
 .controller('CheckProfileCtrl', function($scope, $location, $ionicHistory, JsDatabase){
-	console.log('checking login status...');
 	JsDatabase.getToken().then(function(token){
-		console.log('access token ontained.');
-		console.log(token);
-
 		$ionicHistory.nextViewOptions({
 			disableBack: true
 		});
@@ -17,12 +13,11 @@ angular.module('jenjobs.controllers', ['ionic'])
 			$location.path('/login');
 		}
 	}).catch(function(err){
-		console.log('failed to get token...');
-		console.log(err);
+		
 	});
 })
 
-.controller('ProfileCtrl', function($scope, $location, JsDatabase){
+.controller('ProfileCtrl', function($scope, $location, JsDatabase, BackgroundService){
 	$scope.js = {};
 	$scope.isLoading = true;
 	// $scope.access_token = null;
@@ -37,6 +32,10 @@ angular.module('jenjobs.controllers', ['ionic'])
 	$scope.go = function(path){
 		$location.path(path);
 	}
+
+	$scope.isConnected = JsDatabase.getConnectionType();
+	$scope.serviceStatus = 'None yet';
+
 })
 
 .controller('ProfileUpdateCtrl', function($scope, $http, $filter, $ionicPopup, $ionicModal, $ionicLoading, JsDatabase){
@@ -49,6 +48,12 @@ angular.module('jenjobs.controllers', ['ionic'])
 		}
 	});
 
+	$scope.$on('$ionicView.enter', function(scopes, states) {
+		// get network connection status
+		$scope.connection = JsDatabase.getConnectionType();
+	});
+	
+	// get profile
 	JsDatabase.getProfile().then(function(profile){
 		$scope.js = profile;
 	}).then(function(){
@@ -196,7 +201,6 @@ angular.module('jenjobs.controllers', ['ionic'])
 					data: param,
 					params: {'access-token': $scope.access_token}
 				}).then(function(response){
-					console.log(response);
 					$ionicLoading.show({
 						template: 'Your profile have successfully updated.',
 						noBackdrop: true,
@@ -205,7 +209,6 @@ angular.module('jenjobs.controllers', ['ionic'])
 
 					JsDatabase.updateCompleteness('profile', true);
 				}).catch(function(e){
-					console.log(e);
 					$ionicLoading.show({
 						template: 'Failed to update your profile.',
 						noBackdrop: true,
@@ -213,7 +216,6 @@ angular.module('jenjobs.controllers', ['ionic'])
 					});
 				});
 			}).catch(function(e){
-				console.log(e);
 				$ionicLoading.show({
 					template: 'Failed to update your profile.',
 					noBackdrop: true,
@@ -390,12 +392,12 @@ angular.module('jenjobs.controllers', ['ionic'])
 																										settingValue.value = subscr.subscription_id ? 1 : 0;
 																										JsDatabase.updateSettings(settingValue)
 																										.then(function(updateStatus){
-																											console.log(updateStatus);
+																											// console.log(updateStatus);
 																										}).catch(function(err){
-																											console.log(err);
+																											// console.log(err);
 																										});
 																									}).catch(function(err){
-																										console.log(err);
+																										// console.log(err);
 																									});
 																								});
 																							});
@@ -427,7 +429,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 																										completedItems.splice(0,1);
 																										loopItem();
 																									}).catch(function(e){
-																										console.log(e);
+																										// console.log(e);
 																									});
 																								}
 																							}else{
@@ -467,7 +469,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 							});
 
 							JobseekerLogin.downloadLocation(function(response){
-								console.log(response);
+								// console.log(response);
 								if( response.error ){
 									// got error
 								}else{
@@ -547,7 +549,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 			},
 			data: $scope.js
 		}).then(function(response){
-			console.log(response);
+			// console.log(response);
 
 			if( response.data.status_code == 1 ){
 				$scope.button.text = 'Registration success.';
@@ -557,7 +559,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 				JobseekerLogin.setAccessToken( response.data.token.access_token, function(){
 					// then we use that access token to login the jobseeker into app.
 					JobseekerLogin.downloadProfile(function(response){
-						console.log(response);
+						// console.log(response);
 						if( response.error ){
 							// got error
 						}else{
@@ -578,7 +580,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 											$scope.disableButton = false;
 											$scope.button.text = 'Register';
 
-											console.log(response);
+											// console.log(response);
 											if( response.error ){
 												// got error
 											}else{
@@ -591,7 +593,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 									}
 								});
 							}).catch(function(err){
-								console.log(err);
+								// console.log(err);
 							});
 						}
 					});
@@ -661,14 +663,14 @@ angular.module('jenjobs.controllers', ['ionic'])
 
 		angular.forEach($scope.access_token, function(t, i){
 			JsDatabase.deleteToken(t).then(function(){
-				console.log('token removed');
+				// console.log('token removed');
 				// remove profile
 				JsDatabase.getProfile().then(function(profile){
 					if( profile ){
 						JsDatabase.deleteProfile(profile);
 					}
 				}).catch(function(e){
-					console.log(e);
+					// console.log(e);
 				});
 
 				// remove work
@@ -679,7 +681,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 						});
 					}
 				}).catch(function(e){
-					console.log(e);
+					// console.log(e);
 				});
 
 				// remove education
@@ -690,7 +692,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 						});
 					}
 				}).catch(function(e){
-					console.log(e);
+					// console.log(e);
 				});
 
 				// remove skill
@@ -701,7 +703,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 						});
 					}
 				}).catch(function(e){
-					console.log(e);
+					// console.log(e);
 				});
 
 				// remove language
@@ -712,7 +714,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 						});
 					}
 				}).catch(function(e){
-					console.log(e);
+					// console.log(e);
 				});
 
 				JobSearch.getBookmarks().then(function(bookmarks){
@@ -720,32 +722,32 @@ angular.module('jenjobs.controllers', ['ionic'])
 						JobSearch.deleteBookmark(i, b._rev, t);
 					});
 				}).catch(function(e){
-					console.log(e);
+					// console.log(e);
 				});
 
 				JsDatabase.deleteSettings().then(function(){
-					console.log('settings deleted.');
+					// console.log('settings deleted.');
 					JobSearch.deleteAllJob().then(function(){
-						console.log('jobs deleted');
+						// console.log('jobs deleted');
 						JobSearch.deleteAllBookmark().then(function(){
-							console.log('bookmark deleted');
+							// console.log('bookmark deleted');
 							JobSearch.deleteAllApplication().then(function(){
-								console.log('application deleted.');
+								// console.log('application deleted.');
 								$location.path('/login');
 							}).catch(function(e){
-								console.log(e);
+								// console.log(e);
 							});
 						}).catch(function(e){
-							console.log(e);
+							// console.log(e);
 						});
 					}).catch(function(e){
-						console.log(e);
+						// console.log(e);
 					});
 				}).catch(function(e){
-					console.log(e);
+					// console.log(e);
 				});
 			}).catch(function(e){
-				console.log(e);
+				// console.log(e);
 			});
 		});
 
@@ -753,10 +755,10 @@ angular.module('jenjobs.controllers', ['ionic'])
 	}
 
 	$scope.toggleNotification = function(){
-		//console.log($scope.parameter.notification);
+		// console.log($scope.parameter.notification);
 		tmp_notification.value = $scope.parameter.notification ? 1 : 0;
 		JsDatabase.updateSettings(tmp_notification).then(function(updateStatus){
-			console.log(updateStatus);
+			// console.log(updateStatus);
 			tmp_notification._rev = updateStatus.rev;
 
 			// update server
@@ -793,7 +795,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 		// console.log($scope.parameter.newsletterSubscription);
 		tmp_newsletter_alert.value = $scope.parameter.newsletterSubscription ? 1 : 0;
 		JsDatabase.updateSettings(tmp_newsletter_alert).then(function(updateStatus){
-			console.log(updateStatus);
+			// console.log(updateStatus);
 			tmp_newsletter_alert._rev = updateStatus.rev;
 
 			// update server
@@ -819,7 +821,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 		// console.log($scope.parameter.promotionSubscription);
 		tmp_promotion_alert.value = $scope.parameter.promotionSubscription ? 1 : 0;
 		JsDatabase.updateSettings(tmp_promotion_alert).then(function(updateStatus){
-			console.log(updateStatus);
+			// console.log(updateStatus);
 			tmp_promotion_alert._rev = updateStatus.rev;
 
 			// update server
@@ -878,7 +880,7 @@ angular.module('jenjobs.controllers', ['ionic'])
 			},
 			data: $scope.js
 		}).then(function(response){
-			console.log(response);
+			// console.log(response);
 			// reset form
 			$scope.button.disabled = false;
 			$scope.button.text = 'Request Password Reset';
@@ -898,5 +900,13 @@ angular.module('jenjobs.controllers', ['ionic'])
 
 .controller('TestCtrl', function($scope, $filter){
 	// how to format a date using $filter
-	$scope.date = $filter('date')(new Date(), 'yyyy-MM-dd');
+	// $scope.date = $filter('date')(new Date(), 'yyyy-MM-dd');
+	$scope.logs = {};
+
+	setTimeout(function(){
+		for( var i in navigator ){
+			$scope.logs[i] = navigator[i];
+		}
+		// console.log($scope.logs);
+	}, 1000);
 });

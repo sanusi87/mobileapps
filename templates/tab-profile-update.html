@@ -43,9 +43,14 @@
 					<input type="text" placeholder="Passport" data-ng-model="js.passport_no" />
 				</div>
 
-				<button type="submit" id="submit" class="button button-block button-positive" ng-disabled="!js.dob || !selectedCountry.name || !js.mobile_no || ((!js.ic_no && selectedCountry.id==127) || (!js.passport_no && selectedCountry.id!=127))">
+				<div ng-show="connection=='none'" class="mt-20 mb-20 text-center assertive">
+					<i class="ion-android-warning"></i> Internet connection is required!
+				</div>
+
+				<button type="submit" id="submit" class="button button-block button-positive" ng-disabled="!js.dob || !selectedCountry.name || !js.mobile_no || ((!js.ic_no && selectedCountry.id==127) || (!js.passport_no && selectedCountry.id!=127)) || connection=='none'">
 					<i class="ion-edit"></i> Save
 				</button>
+
 			</div>
 		</form>
 	</ion-content>

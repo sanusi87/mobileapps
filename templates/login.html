@@ -1,5 +1,10 @@
 <ion-view view-title="Login">
 	<ion-content class="padding">
+		
+		<div class="mb-10" ng-show="isConnected">
+			<i class="ion-android-warning"></i> {{isConnected}}
+		</div>
+
 		<form name="loginForm" ng-submit="submit()" novalidate>
 			<div>
 				<br />

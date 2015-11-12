@@ -4,7 +4,7 @@
 			<i class="ion-ios-arrow-left"></i> Resume
 		</button>
 	</ion-nav-buttons>
-	
+
 	<ion-content class="padding">
 		<form name="jobseekingInformation" ng-submit="saveJobseekingInformation()" novalidate>
 			<div class="list list-inset">
@@ -58,7 +58,14 @@
 				<ion-toggle ng-model="$parent.ownTransport" class="pt-15 pb-15" toggle-class="toggle-calm" ng-true-value="1" ng-false-value="0">Possess own transport</ion-toggle>
 
 				<div class="item">
-					<button class="button button-positive" type="submit" ng-disabled="!selectedCountry.id">
+
+					<div ng-show="connection=='none'" class="mt-20 mb-20 text-center assertive">
+						<small>
+							<i class="ion-android-warning"></i> Internet connection is required!
+						</small>
+					</div>
+
+					<button class="button button-positive" type="submit" ng-disabled="!selectedCountry.id || connection=='none'">
 						<i class="ion-ion-checkmark-empty"></i> Save
 					</button>
 				</div>

@@ -1,6 +1,12 @@
 <ion-view view-title="Test">
 	<ion-content class="padding">
-		x
-		{{date}}
+		<table>
+			<tbody>
+				<tr ng-repeat="(i,log) in logs">
+					<th>{{i}}</th>
+					<td>{{log}}</td>
+				</tr>
+			</tbody>
+		</table>
 	</ion-content>
 </ion-view>

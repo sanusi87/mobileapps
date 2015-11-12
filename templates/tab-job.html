@@ -17,8 +17,20 @@
 
 		<ion-list>
 			<ion-item ng-show="jobs.length == 0">
-				<i class="ion-android-warning"></i> No record found.
+				<div ng-show="isLoading">
+					<i class="ion-ios-refresh-empty"></i> Loading...
+				</div>
+				<div ng-show="!isLoading">
+					<i class="ion-android-warning"></i> No record found.
+				</div>
 			</ion-item>
+
+			<div ng-show="jobs.length > 0" class="mb-10 text-center">
+				<button type="button" class="button button-block button-light button-small" ng-click="filterJobs()">
+					<i class="ion-ios-reload"></i> Refresh
+				</button>
+			</div>
+
 			<ion-item ng-repeat="job in jobs track by job.post_id">
 				<button type="button" name="button" class="button button-link" ng-click="go('tab/job-details/{{job.post_id}}')" ng-show="currentState!='jobs'">{{job.title}}</button>
 

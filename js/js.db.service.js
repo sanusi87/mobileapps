@@ -1,5 +1,5 @@
 angular.module('jenjobs.db', [])
-.factory('JsDatabase', ['$q', function($q){
+.factory('JsDatabase', ['$q', '$filter', 'JobseekerLogin', 'JobSearch', function($q, $filter, JobseekerLogin, JobSearch){
 	var _work_db, // js work
 	_profile_db, // js profile
 	_education_db, // js education
@@ -19,6 +19,8 @@ angular.module('jenjobs.db', [])
 	_token,
 	//_application,
 	_settings;
+
+	var connectionType = 'UNDEFINED';
 
 	return {
 		initDB: initDB,
@@ -66,7 +68,15 @@ angular.module('jenjobs.db', [])
 		addSettings: addSettings,
 		deleteSettings: deleteSettings,
 
-		updateCompleteness: updateCompleteness
+		updateCompleteness: updateCompleteness,
+		//updateAll: updateAll,
+
+		setConnectionType: setConnectionType,
+		getConnectionType: getConnectionType,
+		connectionType: connectionType,
+		checkNetworkConnection: checkNetworkConnection,
+		periodicallyCheckNetworkConnection: periodicallyCheckNetworkConnection,
+		vibrateDevice: vibrateDevice
 	};
 
 	function initDB(){
@@ -101,6 +111,65 @@ angular.module('jenjobs.db', [])
 			}
 		]) );
 	};
+
+	// checking for network connection
+	function setConnectionType( _connectionType ){
+		connectionType = _connectionType;
+	}
+
+	function getConnectionType(){
+		return connectionType;
+	}
+
+	// https://cordova.apache.org/docs/en/3.1.0/cordova/connection/connection.html
+	function checkNetworkConnection(){
+		if( navigator ){
+			if( navigator.connection ){
+				setConnectionType(navigator.connection.type);
+			}else{
+				setConnectionType('none');
+				var i=0;
+				var intv = setInterval(function(){
+					if( navigator.connection && navigator.connection.type ){
+						setConnectionType(navigator.connection.type);
+						clearInterval(intv);
+					}else{
+						// try for 10 seconds, then stop
+						if( i >= 10 ){
+							clearInterval(intv);
+						}
+					}
+					i++;
+				}, 1000);
+			}
+		}
+	}
+
+	function periodicallyCheckNetworkConnection(){
+		setInterval(function(){
+			// console.log('checking network...');
+			var _connectionType = 'none';
+			if( navigator ){
+				if( navigator.connection ){
+					_connectionType = navigator.connection.type;
+				}
+			}
+			setConnectionType( _connectionType );
+			// connectionType = _connectionType;
+			// console.log(connectionType);
+		}, 5000);
+	}
+	// end checking
+
+	// vibrate the device
+	function vibrateDevice(){
+		// https://cordova.apache.org/docs/en/3.0.0/cordova/notification/notification.html#link-1
+		// vibrate the device
+		if( navigator.vibrate ){
+			navigator.vibrate(2000);
+		}
+	}
+	// vibrate the device
 
 	// Binary search, the array is by default sorted by _id.
 	function findIndex(array, id) {
@@ -204,6 +273,9 @@ angular.module('jenjobs.db', [])
 	function updateProfile(dbItem){
 		var rev = dbItem._rev;
 		var id = dbItem._id;
+
+		// add date updated for sync
+		dbItem.date_updated = $filter('date')(new Date(), 'yyyy-MM-dd HH:mm:ss');
 
 		return $q.when(_profile_db.put( dbItem, id, rev ))
 		.then(function(){
@@ -543,4 +615,137 @@ angular.module('jenjobs.db', [])
 	}
 	/** end settings */
 
+	// use for data synchronisation
+	/*
+	function updateAll(){
+		getToken().then(function(token){
+			JobseekerLogin.setAccessToken(token[0].access_token, function(){
+				JobseekerLogin.downloadProfile(function(response){
+					if( !response.error ){
+						delete(response.data._links);
+						response.data.no_work_exp = response.data.no_work_exp == 0 ? false : true;
+						var completedItems = [];
+
+						getProfile().then(function(profile){
+							deleteProfile(profile).then(function(){
+								addProfile(response.data).then(function(){
+									if( response.data.mobile_no && response.data.dob ){
+										completedItems.push('profile');
+									}
+
+									if( response.data.resume_file && response.data.resume_file.length > 5 ){
+										completedItems.push('attachment');
+									}
+
+									if( response.data.availability ){
+										completedItems.push('jobseek');
+									}
+
+									JobseekerLogin.downloadApplication(function(response){
+										if( !response.error ){
+											// delete prev application before adding new
+											JobSearch.deleteAllApplication().then(function(){
+												// deleted
+												if( response.data.length > 0 ){
+													angular.forEach(response.data, function(value, i){
+														value._id = String(value.post_id);
+														JobSearch.apply(value).then(function(doc){
+															// console.log(doc);
+														}).catch(function(err){
+															// console.log(err);
+														});
+													});
+												}
+
+												JobseekerLogin.downloadWorkExperience(function(response){
+													if( !response.error ){
+														// delete existing work exp
+														var works = [];
+														JsDatabase.getWork().then(function(_works){
+															works = _works;
+															deleteWorkExp();
+														}).catch(function(e){
+															console.log(e);
+															saveNewWorkExp();
+														});
+
+														// using loop to delete to make sure that all data has been deleted before adding new data
+														function deleteWorkExp(){
+															if( works.length > 0 ){
+																JsDatabase.deleteWork(works[0]).then(function(){
+																	works.splice(0,1);
+																	deleteWorkExp();
+																});
+															}else{
+																saveNewWorkExp();
+															}
+														}
+
+														function saveNewWorkExp(){
+															if( response.data.length > 0 ){
+																angular.forEach(response.data, function(value, i){
+																	JsDatabase.addWork(value);
+																});
+																completedItems.push('workExp');
+															}
+
+															JobseekerLogin.downloadQualification(function(response){
+																if( !response.error ){
+																	function deleteEdu(){
+
+																	}
+
+																	function saveNewEdu(){
+
+																	}
+
+																	if( response.data.length > 0 ){
+																		angular.forEach(response.data, function(value, i){
+																			JsDatabase.addEducation(value);
+																		});
+																		completedItems.push('education');
+																	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+																}
+															});
+														}
+													}
+												});
+											}).catch(function(err){
+												console.log(err);
+											});
+										}
+									})
+								});
+							}).catch(function(err){
+								console.log(err);
+							});
+						}).catch(function(err){
+							console.log(err);
+						});
+					}
+				});
+			});
+		}).catch(function(err){
+			console.log(err);
+		});
+	}
+	*/
 }]);
